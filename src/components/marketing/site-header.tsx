@@ -36,7 +36,7 @@ export function SiteHeader() {
   return (
     <header className="border-border/70 sticky top-0 z-40 border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between gap-6 px-4 sm:px-6">
-        <Logo tagline className="shrink-0" />
+        <Logo size="lg" priority />
 
         <nav aria-label="Navigation du site" className="hidden items-center gap-8 lg:flex">
           {NAV_LINKS.map((link, index) => (

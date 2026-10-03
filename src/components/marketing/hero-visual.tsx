@@ -95,7 +95,7 @@ export function PassCard({ className }: { className?: string }) {
       className={cn("shadow-lift rounded-2xl bg-white p-4", className)}
     >
       <div className="text-navy flex items-center gap-2">
-        <LogoMark className="size-6" />
+        <LogoMark className="h-7" />
         <span className="font-bold">
           Skill<span className="text-brand">Pass</span>
         </span>

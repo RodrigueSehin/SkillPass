@@ -7,7 +7,7 @@ export function SiteFooter() {
     <footer className="border-border bg-navy border-t text-blue-100">
       <div className="mx-auto grid max-w-[1400px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <Logo tone="light" tagline />
+          <Logo tone="light" size="lg" />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-blue-200">
             Le passeport numérique des compétences : prouvez ce que vous savez faire, ouvrez-vous des
             opportunités.
