@@ -1,0 +1,227 @@
+import Link from "next/link";
+import {
+  ArrowRight,
+  Building2,
+  Check,
+  FileCheck2,
+  GraduationCap,
+  IdCard,
+  QrCode,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  UserRound,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils/cn";
+
+function Section({
+  id,
+  title,
+  subtitle,
+  children,
+  className,
+}: {
+  id?: string;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section id={id} className={cn("scroll-mt-20 py-16 sm:py-20", className)}>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-navy sm:text-4xl">{title}</h2>
+          {subtitle && <p className="mt-4 text-lg text-muted">{subtitle}</p>}
+        </div>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+const WHY = [
+  { icon: FileCheck2, title: "Des preuves, pas des promesses", text: "Chaque compétence est reliée à des projets, certifications et évaluations concrets." },
+  { icon: ShieldCheck, title: "Une confiance mesurable", text: "Un SkillPass Score transparent, détaillé critère par critère." },
+  { icon: Target, title: "Des opportunités pertinentes", text: "Le matching s'appuie sur ce que vous savez réellement faire." },
+];
+
+export function WhySection() {
+  return (
+    <Section title="Pourquoi SkillPass" subtitle="La couche de confiance entre vos compétences et les opportunités professionnelles.">
+      <div className="grid gap-6 md:grid-cols-3">
+        {WHY.map(({ icon: Icon, title, text }) => (
+          <Card key={title} className="p-6">
+            <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-blue-50 text-brand">
+              <Icon className="size-5" aria-hidden />
+            </div>
+            <h3 className="font-semibold">{title}</h3>
+            <p className="mt-2 text-sm text-muted">{text}</p>
+          </Card>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+const FEATURES = [
+  { icon: Sparkles, title: "Compétences & niveaux", text: "Déclarez, évaluez et faites vérifier vos compétences." },
+  { icon: FileCheck2, title: "Preuves", text: "Projets, certificats, dépôts, recommandations." },
+  { icon: IdCard, title: "Passeport numérique", text: "Un profil public optimisé, prêt à partager." },
+  { icon: QrCode, title: "QR & vérification", text: "Chaque credential se vérifie en un scan." },
+  { icon: Search, title: "Talent search", text: "Les recruteurs trouvent par compétences prouvées." },
+  { icon: Target, title: "Matching IA", text: "Score, forces et écarts pour chaque offre." },
+];
+
+export function FeaturesSection() {
+  return (
+    <Section id="fonctionnalites" title="Tout ce qu'il faut pour prouver" className="bg-surface">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {FEATURES.map(({ icon: Icon, title, text }) => (
+          <div key={title} className="rounded-2xl border border-border p-6 transition-shadow hover:shadow-soft">
+            <Icon className="size-6 text-brand" aria-hidden />
+            <h3 className="mt-4 font-semibold">{title}</h3>
+            <p className="mt-1 text-sm text-muted">{text}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+const STEPS = [
+  "Créez votre profil",
+  "Ajoutez vos compétences",
+  "Reliez des preuves",
+  "Passez des évaluations",
+  "Obtenez vos badges",
+  "Partagez votre SkillPass",
+];
+
+export function HowItWorksSection() {
+  return (
+    <Section id="comment" title="Comment ça marche">
+      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {STEPS.map((step, i) => (
+          <li key={step} className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-5 shadow-soft">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-navy font-bold text-accent">{i + 1}</span>
+            <span className="font-medium">{step}</span>
+          </li>
+        ))}
+      </ol>
+    </Section>
+  );
+}
+
+const AUDIENCES = [
+  {
+    id: "talents",
+    icon: UserRound,
+    title: "Pour les talents",
+    points: ["Passeport public partageable", "Badges et credentials vérifiables", "Opportunités qui vous correspondent"],
+  },
+  {
+    id: "entreprises",
+    icon: Building2,
+    title: "Pour les entreprises",
+    points: ["Recherche par compétences prouvées", "Matching et analyse des écarts", "Vérification instantanée des credentials"],
+  },
+  {
+    id: "academies",
+    icon: GraduationCap,
+    title: "Pour les académies",
+    points: ["Émission de badges et certifications", "Suivi des cohortes", "Insertion professionnelle mesurable"],
+  },
+];
+
+export function AudiencesSection() {
+  return (
+    <Section id="entreprises" title="Un produit, trois publics" className="bg-surface">
+      <div className="grid gap-6 md:grid-cols-3">
+        {AUDIENCES.map(({ id, icon: Icon, title, points }) => (
+          <Card key={id} id={id} className="p-6">
+            <Icon className="size-7 text-accent" aria-hidden />
+            <h3 className="mt-4 text-lg font-semibold">{title}</h3>
+            <ul className="mt-4 space-y-2">
+              {points.map((p) => (
+                <li key={p} className="flex items-start gap-2 text-sm text-muted">
+                  <Check className="mt-0.5 size-4 shrink-0 text-success" aria-hidden /> {p}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function TrustSection() {
+  return (
+    <Section title="Vérifiable en un scan" subtitle="Chaque credential SkillPass possède un identifiant unique et une page de vérification publique.">
+      <Card className="mx-auto max-w-xl p-6 text-center">
+        <Badge tone="success" className="px-3 py-1 text-sm">
+          <ShieldCheck className="size-4" aria-hidden /> Credential vérifié
+        </Badge>
+        <p className="mt-4 text-xl font-bold">Power Apps Advanced</p>
+        <p className="text-muted">Sehin G. Rodrigue · SP-9F82A1</p>
+        <p className="mt-2 text-sm text-muted">Émis en juin 2026 · Statut : valide</p>
+      </Card>
+    </Section>
+  );
+}
+
+const PLANS = [
+  { name: "Free", price: "0 FCFA", note: "Pour démarrer", features: ["Profil public", "5 compétences", "3 projets", "QR Code", "CV numérique"], featured: false },
+  { name: "Pro", price: "3 000 – 5 000 FCFA", note: "par mois", features: ["Compétences illimitées", "Portfolio & badges", "Évaluations", "Assistant IA", "Analytics"], featured: true },
+  { name: "Business", price: "dès 100 000 FCFA", note: "par mois", features: ["Recherche de talents", "Matching IA", "Skill gap d'équipe", "API", "HR analytics"], featured: false },
+];
+
+export function PricingSection() {
+  return (
+    <Section id="tarifs" title="Tarifs simples" className="bg-surface">
+      <div className="grid gap-6 lg:grid-cols-3">
+        {PLANS.map((plan) => (
+          <Card key={plan.name} className={cn("flex flex-col p-6", plan.featured && "border-brand shadow-lift")}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">{plan.name}</h3>
+              {plan.featured && <Badge tone="brand">Populaire</Badge>}
+            </div>
+            <p className="mt-4 text-3xl font-bold text-navy">{plan.price}</p>
+            <p className="text-sm text-muted">{plan.note}</p>
+            <ul className="my-6 flex-1 space-y-2">
+              {plan.features.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-sm">
+                  <Check className="size-4 text-success" aria-hidden /> {f}
+                </li>
+              ))}
+            </ul>
+            <Button asChild variant={plan.featured ? "primary" : "outline"}>
+              <Link href="/register">Choisir {plan.name}</Link>
+            </Button>
+          </Card>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+export function FinalCta() {
+  return (
+    <section className="px-4 py-16 sm:px-6">
+      <div className="mx-auto max-w-5xl rounded-3xl bg-navy px-6 py-14 text-center text-white sm:px-12">
+        <h2 className="text-3xl font-bold sm:text-4xl">Prove your skills. Own your future.</h2>
+        <p className="mx-auto mt-4 max-w-xl text-blue-100">Créez votre SkillPass gratuitement et transformez vos compétences en preuves.</p>
+        <Button asChild size="lg" variant="accent" className="mt-8">
+          <Link href="/register">
+            Créer mon SkillPass <ArrowRight />
+          </Link>
+        </Button>
+      </div>
+    </section>
+  );
+}

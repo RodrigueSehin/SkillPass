@@ -1,0 +1,187 @@
+// SkillPass — Phase 1 data model.
+// Profile.id mirrors Supabase auth.users.id so RLS policies can use auth.uid().
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  TALENT
+  RECRUITER
+  MANAGER
+  EVALUATOR
+  TRAINER
+  COMPANY_ADMIN
+  ACADEMY_ADMIN
+  SKILLPASS_ADMIN
+  VERIFIER
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum SkillVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  EXPIRED
+}
+
+enum CertificationVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  EXPIRED
+}
+
+enum Availability {
+  IMMEDIATE
+  ONE_MONTH
+  THREE_MONTHS
+  NOT_AVAILABLE
+}
+
+model Profile {
+  id                String       @id @db.Uuid
+  email             String       @unique
+  username          String       @unique
+  fullName          String       @map("full_name")
+  headline          String?
+  bio               String?
+  location          String?
+  avatarUrl         String?      @map("avatar_url")
+  profession        String?
+  yearsOfExperience Int          @default(0) @map("years_of_experience")
+  careerGoal        String?      @map("career_goal")
+  availability      Availability @default(IMMEDIATE)
+  role              UserRole     @default(TALENT)
+  isPublic          Boolean      @default(true) @map("is_public")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  talentSkills   TalentSkill[]
+  projects       Project[]
+  experiences    Experience[]
+  certifications Certification[]
+
+  @@map("profiles")
+}
+
+model SkillCategory {
+  id     String  @id @default(uuid()) @db.Uuid
+  name   String  @unique
+  slug   String  @unique
+  skills Skill[]
+
+  @@map("skill_categories")
+}
+
+model Skill {
+  id         String  @id @default(uuid()) @db.Uuid
+  name       String  @unique
+  slug       String  @unique
+  categoryId String? @map("category_id") @db.Uuid
+
+  category      SkillCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  talentSkills  TalentSkill[]
+  projectSkills ProjectSkill[]
+
+  @@index([categoryId])
+  @@map("skills")
+}
+
+model TalentSkill {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  profileId          String                  @map("profile_id") @db.Uuid
+  skillId            String                  @map("skill_id") @db.Uuid
+  level              SkillLevel              @default(BEGINNER)
+  score              Int                     @default(0)
+  yearsOfExperience  Int                     @default(0) @map("years_of_experience")
+  verificationStatus SkillVerificationStatus @default(UNVERIFIED) @map("verification_status")
+  createdAt          DateTime                @default(now()) @map("created_at")
+  updatedAt          DateTime                @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Restrict)
+
+  @@unique([profileId, skillId])
+  @@index([skillId])
+  @@map("talent_skills")
+}
+
+model Project {
+  id            String    @id @default(uuid()) @db.Uuid
+  profileId     String    @map("profile_id") @db.Uuid
+  name          String
+  description   String?
+  organization  String?
+  role          String?
+  startDate     DateTime? @map("start_date")
+  endDate       DateTime? @map("end_date")
+  repositoryUrl String?   @map("repository_url")
+  url           String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  profile Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skills  ProjectSkill[]
+
+  @@index([profileId])
+  @@map("projects")
+}
+
+model ProjectSkill {
+  projectId String @map("project_id") @db.Uuid
+  skillId   String @map("skill_id") @db.Uuid
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, skillId])
+  @@map("project_skills")
+}
+
+model Experience {
+  id          String    @id @default(uuid()) @db.Uuid
+  profileId   String    @map("profile_id") @db.Uuid
+  title       String
+  company     String
+  location    String?
+  description String?
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("experiences")
+}
+
+model Certification {
+  id                 String                          @id @default(uuid()) @db.Uuid
+  profileId          String                          @map("profile_id") @db.Uuid
+  name               String
+  issuer             String
+  issueDate          DateTime                        @map("issue_date")
+  expirationDate     DateTime?                       @map("expiration_date")
+  credentialId       String?                         @map("credential_id")
+  credentialUrl      String?                         @map("credential_url")
+  documentPath       String?                         @map("document_path")
+  verificationStatus CertificationVerificationStatus @default(UNVERIFIED) @map("verification_status")
+  createdAt          DateTime                        @default(now()) @map("created_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("certifications")
+}
