@@ -9,6 +9,7 @@
                     "lint":  "eslint",
                     "test:watch":  "vitest",
                     "db:seed":  "prisma db seed",
+    "demo:seed": "tsx prisma/demo-seed.ts",
                     "db:generate":  "prisma generate",
                     "format":  "prettier --write .",
                     "typecheck":  "tsc --noEmit",
