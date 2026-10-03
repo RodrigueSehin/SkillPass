@@ -72,6 +72,7 @@ model Profile {
   projects       Project[]
   experiences    Experience[]
   certifications Certification[]
+  evidence       SkillEvidence[]
 
   @@map("profiles")
 }
@@ -100,6 +101,7 @@ model Skill {
 }
 
 model TalentSkill {
+  evidence           SkillEvidence[]
   id                 String                  @id @default(uuid()) @db.Uuid
   profileId          String                  @map("profile_id") @db.Uuid
   skillId            String                  @map("skill_id") @db.Uuid
@@ -119,18 +121,19 @@ model TalentSkill {
 }
 
 model Project {
-  id            String    @id @default(uuid()) @db.Uuid
-  profileId     String    @map("profile_id") @db.Uuid
+  evidence      SkillEvidence[]
+  id            String          @id @default(uuid()) @db.Uuid
+  profileId     String          @map("profile_id") @db.Uuid
   name          String
   description   String?
   organization  String?
   role          String?
-  startDate     DateTime? @map("start_date")
-  endDate       DateTime? @map("end_date")
-  repositoryUrl String?   @map("repository_url")
+  startDate     DateTime?       @map("start_date")
+  endDate       DateTime?       @map("end_date")
+  repositoryUrl String?         @map("repository_url")
   url           String?
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
 
   profile Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
   skills  ProjectSkill[]
@@ -184,4 +187,49 @@ model Certification {
 
   @@index([profileId])
   @@map("certifications")
+}
+
+enum EvidenceType {
+  PROJECT
+  CERTIFICATION
+  DOCUMENT
+  SCREENSHOT
+  LINK
+  REPOSITORY
+  PORTFOLIO
+  ASSESSMENT
+  RECOMMENDATION
+  EXPERIENCE
+}
+
+enum EvidenceVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+}
+
+model SkillEvidence {
+  id            String                     @id @default(uuid()) @db.Uuid
+  profileId     String                     @map("profile_id") @db.Uuid
+  talentSkillId String                     @map("talent_skill_id") @db.Uuid
+  projectId     String?                    @map("project_id") @db.Uuid
+  type          EvidenceType
+  title         String
+  description   String?
+  url           String?
+  // Storage object key (never a user-supplied name): "<profileId>/<uuid>.<ext>"
+  filePath      String?                    @map("file_path")
+  fileName      String?                    @map("file_name")
+  mimeType      String?                    @map("mime_type")
+  sizeBytes     Int?                       @map("size_bytes")
+  status        EvidenceVerificationStatus @default(UNVERIFIED)
+  createdAt     DateTime                   @default(now()) @map("created_at")
+
+  profile     Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  talentSkill TalentSkill @relation(fields: [talentSkillId], references: [id], onDelete: Cascade)
+  project     Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([profileId])
+  @@index([talentSkillId])
+  @@map("skill_evidence")
 }

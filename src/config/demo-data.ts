@@ -1,40 +1,51 @@
-/**
- * Static showcase data for Phase 1 UI. Replaced by service calls in Phase 2.
- * Mirrors the seed in prisma/seed.ts.
- */
-export const DEMO_STATS = { skills: 18, badges: 12, projects: 7, certifications: 5 };
+/** Demo data backing the in-memory repositories used when no database is configured. */
+/** Deterministic ids for the in-memory demo skills, so seeded evidence can reference them. */
+export const demoSkillId = (name: string) =>
+  `demo-skill-${name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")}`;
 
-export const DEMO_PROFILE_COMPLETION = 86;
-
-export const DEMO_TOP_SKILLS = [
-  { name: "Power Apps", score: 95 },
-  { name: "Power Automate", score: 82 },
-  { name: "Dataverse", score: 80 },
-  { name: "Power BI", score: 78 },
-  { name: "AI & Automation", score: 65 },
-];
-
-export const DEMO_PROJECTS = [
+export const DEMO_EVIDENCE = [
   {
-    name: "A' Quotation",
-    role: "Power Platform Developer",
-    tech: ["Power Apps", "Dataverse", "Power Automate"],
+    skill: "Power Apps",
+    type: "PROJECT",
+    title: "A' Quotation",
+    description: "Application de devis déployée en production.",
+    status: "VERIFIED",
   },
-  { name: "MODOCK", role: "Solution Architect", tech: ["Power Apps", "Power BI"] },
-  { name: "K@PELE", role: "Power Platform Developer", tech: ["Power Apps", "Dataverse"] },
-  { name: "CRUISE", role: "Digital Transformation Lead", tech: ["Power Automate", "AI"] },
-];
-
-export const DEMO_ASSESSMENTS = [
-  { title: "Power Apps — Niveau Avancé", meta: "25 questions · 25 minutes" },
-  { title: "Dataverse — Niveau Avancé", meta: "20 questions · 20 minutes" },
-];
-
-export const DEMO_JOBS = [
-  { title: "Power Platform Developer", company: "AGL", match: 92 },
-  { title: "Digital Transformation Specialist", company: "Orange CI", match: 78 },
-  { title: "Business Applications Consultant", company: "SIFCA", match: 75 },
-];
+  {
+    skill: "Power Apps",
+    type: "PROJECT",
+    title: "MODOCK",
+    description: "Pilotage logistique multi-sites.",
+    status: "VERIFIED",
+  },
+  { skill: "Power Apps", type: "CERTIFICATION", title: "PL-200", description: null, status: "VERIFIED" },
+  {
+    skill: "Power Automate",
+    type: "PROJECT",
+    title: "CRUISE",
+    description: "Automatisation de bout en bout.",
+    status: "VERIFIED",
+  },
+  {
+    skill: "Dataverse",
+    type: "PROJECT",
+    title: "K@PELE",
+    description: "Modèle de données et sécurité par rôles.",
+    status: "VERIFIED",
+  },
+  { skill: "Power BI", type: "CERTIFICATION", title: "PL-300", description: null, status: "VERIFIED" },
+  {
+    skill: "AI & Automation",
+    type: "LINK",
+    title: "Démo d'un assistant interne",
+    description: null,
+    status: "PENDING",
+    url: "https://example.com/demo",
+  },
+] as const;
 
 export const DEMO_SKILL_ROWS = [
   {

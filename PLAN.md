@@ -11,19 +11,19 @@ Méthode par fonctionnalité : besoin → modèle → schéma Zod → repository
 - [x] Tests Vitest + Playwright (6 E2E verts)
 - [x] Dépôt GitHub poussé
 
-## Phase 2 — Talent (en cours)
+## Phase 2 — Talent ✅ (code complet, repositories Prisma non validés sur une vraie base)
 Décisions : pas de base disponible localement → repositories derrière une interface ; implémentation Prisma en production, **implémentation mémoire** (données de démo) en dev sans `DATABASE_URL`. Toutes les requêtes sont filtrées par `profileId` dans le repository. Le score et le statut de vérification ne sont jamais modifiables par l'utilisateur.
 
 1. [x] **Compétences** — `/dashboard/skills` (liste, recherche, filtre, tri, ajout, modification, suppression) ; API `/api/skills`, `/api/talent-skills`
-2. [ ] Détail compétence — `/dashboard/skills/[skillId]`
+2. [x] Détail compétence — `/dashboard/skills/[skillId]`
 3. [x] Projets — `/dashboard/projects` (+ liens projet → compétences)
 4. [x] Expériences — `/dashboard/experiences`
 5. [x] Certifications — `/dashboard/certifications`
-6. [ ] Preuves (evidence) + upload sécurisé Supabase Storage — `/dashboard/evidence`
+6. [x] Preuves (evidence) + upload sécurisé Supabase Storage — `/dashboard/evidence`
 7. [x] Profil (édition) + `/api/profile`
 8. [x] Mon SkillPass — `/dashboard/skillpass` (score explicable ; « Télécharger CV » reporté)
 9. [x] Profil public SEO — `/[username]` (metadata, OpenGraph, JSON-LD)
-10. [ ] Dashboard branché sur les services (fin des données de démo)
+10. [x] Dashboard branché sur les services (fin des données de démo)
 
 ## Phase 3 — Verification
 Évaluations, credentials `SP-xxxxxx`, badges, QR `/verify/[credentialId]`, moteur de score SkillPass explicable (30/20/20/15/10/5).
@@ -41,6 +41,7 @@ Plans Free/Pro/Business, `PaymentService` (Stripe), limites d'usage.
 Academy, API publique, PWA, Enterprise, White label.
 
 ## Prérequis ouverts
+- Appliquer `prisma/migrations/0001_init` (SQL généré, jamais exécuté) puis `supabase/policies.sql` (RLS + bucket `evidence`).
 - Les repositories Prisma (compétences, projets, expériences, certifications) ne sont pas testés contre une vraie base.
 - Projet Supabase + `DATABASE_URL`/`DIRECT_URL` pour valider les repositories Prisma, RLS et uploads.
 - Docker Desktop (non démarré) permettrait une base Postgres locale.

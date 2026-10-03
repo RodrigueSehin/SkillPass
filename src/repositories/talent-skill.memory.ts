@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { DEMO_SKILL_ROWS } from "@/config/demo-data";
+import { DEMO_SKILL_ROWS, demoSkillId } from "@/config/demo-data";
 import type {
   NewTalentSkill,
   TalentSkillDTO,
@@ -18,7 +18,7 @@ export class InMemoryTalentSkillRepository implements TalentSkillRepository {
     if (!list) {
       list =
         profileId === this.seedProfileId
-          ? DEMO_SKILL_ROWS.map((r) => ({ ...r, id: randomUUID(), skillId: randomUUID(), profileId }))
+          ? DEMO_SKILL_ROWS.map((r) => ({ ...r, id: demoSkillId(r.name), skillId: randomUUID(), profileId }))
           : [];
       this.rows.set(profileId, list);
     }

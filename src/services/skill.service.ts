@@ -12,10 +12,22 @@ export const DECLARED_SCORE: Record<SkillLevel, number> = {
 };
 
 export class SkillService {
-  constructor(private readonly repo: TalentSkillRepository) {}
+  constructor(
+    private readonly repo: TalentSkillRepository,
+    /** When provided, evidence counts come from the evidence store (single source of truth). */
+    private readonly evidence?: {
+      countBySkill(profileId: string): Promise<Record<string, { total: number }>>;
+    },
+  ) {}
+
+  private async withEvidence(profileId: string, skills: TalentSkillDTO[]) {
+    if (!this.evidence) return skills;
+    const counts = await this.evidence.countBySkill(profileId);
+    return skills.map((s) => ({ ...s, evidenceCount: counts[s.id]?.total ?? 0 }));
+  }
 
   async list(profileId: string, query: Partial<ListTalentSkillsQuery> = {}) {
-    const all = await this.repo.list(profileId);
+    const all = await this.withEvidence(profileId, await this.repo.list(profileId));
     const q = query.q?.toLowerCase();
     const filtered = all.filter(
       (s) =>
@@ -34,7 +46,7 @@ export class SkillService {
   async get(profileId: string, id: string) {
     const skill = await this.repo.findById(profileId, id);
     if (!skill) throw new NotFoundError("Compétence introuvable");
-    return skill;
+    return (await this.withEvidence(profileId, [skill]))[0];
   }
 
   async add(profileId: string, input: CreateTalentSkillInput) {

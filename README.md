@@ -4,7 +4,7 @@
 
 Passeport numérique des compétences : profil → compétences → preuves → évaluation → validation → badges → SkillPass → opportunités.
 
-**État : Phase 1 — Foundation** (landing, auth, dashboard shell, design system, Prisma, seed, tests).
+**État : Phase 2 — Talent terminée** (compétences, projets, expériences, certifications, preuves, profil, Mon SkillPass, profil public).
 
 ## Stack
 
@@ -42,4 +42,4 @@ Sans variables Supabase, hors production, l'application démarre en **mode aper�
 
 ## Documentation
 
-[ARCHITECTURE.md](ARCHITECTURE.md) · [DATABASE.md](DATABASE.md) · [SECURITY.md](SECURITY.md). `API.md` et `AI.md` seront ajoutés avec les phases correspondantes.
+[ARCHITECTURE.md](ARCHITECTURE.md) · [DATABASE.md](DATABASE.md) · [SECURITY.md](SECURITY.md) · [API.md](API.md) · [PLAN.md](PLAN.md). `AI.md` arrive avec la Phase 5.

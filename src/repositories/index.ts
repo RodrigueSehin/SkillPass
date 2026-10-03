@@ -1,6 +1,9 @@
 import { InMemoryTalentSkillRepository } from "./talent-skill.memory";
 import { PrismaTalentSkillRepository } from "./talent-skill.prisma";
 import type { TalentSkillRepository } from "./talent-skill.repository";
+import { InMemoryEvidenceRepository } from "./evidence.memory";
+import { PrismaEvidenceRepository } from "./evidence.prisma";
+import type { EvidenceRepository } from "./evidence.repository";
 import { InMemoryProfileRepository } from "./profile.memory";
 import { PrismaProfileRepository } from "./profile.prisma";
 import type { ProfileRepository } from "./profile.repository";
@@ -21,6 +24,7 @@ const g = globalThis as unknown as {
   memory?: {
     skills: InMemoryTalentSkillRepository;
     profiles: InMemoryProfileRepository;
+    evidence: InMemoryEvidenceRepository;
     projects: ReturnType<typeof createMemoryProjects>;
     experiences: ReturnType<typeof createMemoryExperiences>;
     certifications: ReturnType<typeof createMemoryCertifications>;
@@ -36,6 +40,7 @@ function memory() {
   return (g.memory ??= {
     skills: new InMemoryTalentSkillRepository(DEMO_PROFILE_ID),
     profiles: new InMemoryProfileRepository(true),
+    evidence: new InMemoryEvidenceRepository(DEMO_PROFILE_ID),
     projects: createMemoryProjects(DEMO_PROFILE_ID),
     experiences: createMemoryExperiences(DEMO_PROFILE_ID),
     certifications: createMemoryCertifications(DEMO_PROFILE_ID),
@@ -54,3 +59,6 @@ export const getCertificationRepository = () =>
 
 export const getProfileRepository = (): ProfileRepository =>
   hasDatabase() ? new PrismaProfileRepository() : memory().profiles;
+
+export const getEvidenceRepository = (): EvidenceRepository =>
+  hasDatabase() ? new PrismaEvidenceRepository() : memory().evidence;

@@ -1,0 +1,23 @@
+# API REST
+
+Toutes les routes exigent une session Supabase (cookie) et répondent en JSON. Les données sont toujours limitées à l'utilisateur connecté.
+
+Erreur : `{ "error": { "code": "VALIDATION | NOT_FOUND | CONFLICT | UNAUTHORIZED | INVALID_UPLOAD | RATE_LIMITED | INTERNAL", "message": "…" } }`
+(400, 404, 409, 401, 400, 429, 500). Jamais de détail technique.
+
+| Méthode | Route | Rôle |
+| --- | --- | --- |
+| GET / PATCH | `/api/profile` | Profil de l'utilisateur / mise à jour (nom d'utilisateur unique, visibilité) |
+| GET | `/api/skills?q=` | Autocomplétion du catalogue de compétences |
+| GET / POST | `/api/talent-skills` | Mes compétences (`q`, `level`, `status`, `category`, `sort`) / ajout |
+| GET / PATCH / DELETE | `/api/talent-skills/:id` | Détail / niveau et années / suppression |
+| GET / POST | `/api/projects` · `/api/experiences` · `/api/certifications` | Liste / création |
+| GET / PATCH / DELETE | `/api/{projects,experiences,certifications}/:id` | Détail / remplacement / suppression |
+| GET | `/api/evidence?skillId=` | Preuves (filtrables par compétence) |
+| POST | `/api/evidence` | `multipart/form-data` : `talentSkillId`, `type`, `title`, `description?`, `url?`, `projectId?`, `file?` |
+| DELETE | `/api/evidence/:id` | Supprime la preuve et son fichier |
+| GET | `/api/evidence/:id/file` | Télécharge le fichier (propriétaire uniquement) |
+
+Règles notables : le score et le statut de vérification ne sont jamais acceptés en entrée ; `PATCH /api/talent-skills/:id` refuse de changer le niveau d'une compétence vérifiée (409) ; une certification créée est toujours `UNVERIFIED`.
+
+À venir : `/api/assessments/*`, `/api/opportunities`, `/api/matches`, `/api/ai/*`.
