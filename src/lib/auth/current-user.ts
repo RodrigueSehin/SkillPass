@@ -8,13 +8,10 @@ export interface CurrentUser {
   name: string;
 }
 
-/**
- * Server-side authorization check used by layouts (defense in depth next to proxy.ts).
- * Without Supabase configured, non-production environments get a demo user so the UI is previewable.
- */
-export async function requireUser(): Promise<CurrentUser> {
+/** Returns the authenticated user, or null. Demo user outside production when Supabase is not configured. */
+export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!isSupabaseConfigured()) {
-    if (process.env.NODE_ENV === "production") redirect("/login");
+    if (process.env.NODE_ENV === "production") return null;
     return { id: "demo", email: "demo@skillpass.com", name: "Sehin G. Rodrigue" };
   }
 
@@ -22,11 +19,18 @@ export async function requireUser(): Promise<CurrentUser> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return null;
 
   return {
     id: user.id,
     email: user.email ?? "",
     name: (user.user_metadata?.full_name as string | undefined) ?? user.email ?? "Talent",
   };
+}
+
+/** Server-side authorization check for pages and layouts (defense in depth next to proxy.ts). */
+export async function requireUser(): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  return user;
 }

@@ -31,3 +31,13 @@ export const DEMO_JOBS = [
   { title: "Digital Transformation Specialist", company: "Orange CI", match: 78 },
   { title: "Business Applications Consultant", company: "SIFCA", match: 75 },
 ];
+
+export const DEMO_SKILL_ROWS = [
+  { name: "Power Apps", category: "Power Platform", level: "EXPERT", score: 95, yearsOfExperience: 5, verificationStatus: "VERIFIED", evidenceCount: 6, recommendationCount: 3 },
+  { name: "Power Automate", category: "Power Platform", level: "ADVANCED", score: 82, yearsOfExperience: 5, verificationStatus: "VERIFIED", evidenceCount: 4, recommendationCount: 2 },
+  { name: "Dataverse", category: "Power Platform", level: "ADVANCED", score: 80, yearsOfExperience: 4, verificationStatus: "VERIFIED", evidenceCount: 4, recommendationCount: 1 },
+  { name: "Power BI", category: "Data & Analytics", level: "ADVANCED", score: 78, yearsOfExperience: 3, verificationStatus: "VERIFIED", evidenceCount: 2, recommendationCount: 1 },
+  { name: "AI & Automation", category: "AI & Automation", level: "INTERMEDIATE", score: 65, yearsOfExperience: 2, verificationStatus: "PENDING", evidenceCount: 1, recommendationCount: 0 },
+  { name: "Digital Transformation", category: "Transformation & Design", level: "ADVANCED", score: 76, yearsOfExperience: 4, verificationStatus: "UNVERIFIED", evidenceCount: 1, recommendationCount: 1 },
+  { name: "UI/UX", category: "Transformation & Design", level: "INTERMEDIATE", score: 60, yearsOfExperience: 3, verificationStatus: "UNVERIFIED", evidenceCount: 0, recommendationCount: 0 },
+] as const;
