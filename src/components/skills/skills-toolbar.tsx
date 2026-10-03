@@ -43,17 +43,25 @@ export function SkillsToolbar({ categories }: { categories: string[] }) {
   return (
     <div role="search" className="mb-6 flex flex-wrap gap-3">
       <div className="relative min-w-[200px] flex-1">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
+        <Search
+          className="text-muted pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2"
+          aria-hidden
+        />
         <input
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           aria-label="Rechercher une compétence"
           placeholder="Rechercher une compétence…"
-          className="h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-4 text-sm"
+          className="border-border bg-surface h-11 w-full rounded-xl border pr-4 pl-10 text-sm"
         />
       </div>
-      <select aria-label="Niveau" className={selectClass} value={params.get("level") ?? ""} onChange={(e) => setParam("level", e.target.value)}>
+      <select
+        aria-label="Niveau"
+        className={selectClass}
+        value={params.get("level") ?? ""}
+        onChange={(e) => setParam("level", e.target.value)}
+      >
         <option value="">Tous niveaux</option>
         {SKILL_LEVELS.map((l) => (
           <option key={l} value={l}>
@@ -61,7 +69,12 @@ export function SkillsToolbar({ categories }: { categories: string[] }) {
           </option>
         ))}
       </select>
-      <select aria-label="Statut" className={selectClass} value={params.get("status") ?? ""} onChange={(e) => setParam("status", e.target.value)}>
+      <select
+        aria-label="Statut"
+        className={selectClass}
+        value={params.get("status") ?? ""}
+        onChange={(e) => setParam("status", e.target.value)}
+      >
         <option value="">Tous statuts</option>
         {SKILL_VERIFICATION_STATUSES.map((s) => (
           <option key={s} value={s}>
@@ -70,7 +83,12 @@ export function SkillsToolbar({ categories }: { categories: string[] }) {
         ))}
       </select>
       {categories.length > 0 && (
-        <select aria-label="Catégorie" className={selectClass} value={params.get("category") ?? ""} onChange={(e) => setParam("category", e.target.value)}>
+        <select
+          aria-label="Catégorie"
+          className={selectClass}
+          value={params.get("category") ?? ""}
+          onChange={(e) => setParam("category", e.target.value)}
+        >
           <option value="">Toutes catégories</option>
           {categories.map((c) => (
             <option key={c} value={c}>
@@ -79,7 +97,12 @@ export function SkillsToolbar({ categories }: { categories: string[] }) {
           ))}
         </select>
       )}
-      <select aria-label="Trier par" className={selectClass} value={params.get("sort") ?? "score"} onChange={(e) => setParam("sort", e.target.value)}>
+      <select
+        aria-label="Trier par"
+        className={selectClass}
+        value={params.get("sort") ?? "score"}
+        onChange={(e) => setParam("sort", e.target.value)}
+      >
         {SORTS.map(([value, label]) => (
           <option key={value} value={value}>
             Tri : {label}

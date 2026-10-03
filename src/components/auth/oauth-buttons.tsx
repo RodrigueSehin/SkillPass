@@ -39,7 +39,7 @@ export function OAuthButtons() {
         ))}
       </div>
       {error && (
-        <p role="alert" className="text-sm text-danger">
+        <p role="alert" className="text-danger text-sm">
           {error}
         </p>
       )}
@@ -49,9 +49,9 @@ export function OAuthButtons() {
 
 export function OrDivider() {
   return (
-    <div className="relative my-6 text-center text-xs uppercase tracking-wide text-muted">
-      <span className="relative z-10 bg-background px-3">ou avec e-mail</span>
-      <span aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-border" />
+    <div className="text-muted relative my-6 text-center text-xs tracking-wide uppercase">
+      <span className="bg-background relative z-10 px-3">ou avec e-mail</span>
+      <span aria-hidden className="bg-border absolute inset-x-0 top-1/2 h-px" />
     </div>
   );
 }

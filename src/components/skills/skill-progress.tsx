@@ -13,7 +13,7 @@ export function SkillProgress({ name, score }: SkillProgressProps) {
       <div className="flex items-baseline justify-between gap-3 text-sm">
         <span className="font-medium">{name}</span>
         <span className="text-muted">
-          <span className="font-semibold text-foreground">{score}%</span> · {level}
+          <span className="text-foreground font-semibold">{score}%</span> · {level}
         </span>
       </div>
       <Progress value={score} aria-label={`${name} : ${score}%`} />

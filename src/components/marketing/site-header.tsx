@@ -11,12 +11,16 @@ const LINKS = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+    <header className="border-border/60 bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Logo />
         <nav aria-label="Navigation du site" className="hidden items-center gap-8 md:flex">
           {LINKS.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm font-medium text-muted transition-colors hover:text-foreground">
+            <a
+              key={l.href}
+              href={l.href}
+              className="text-muted hover:text-foreground text-sm font-medium transition-colors"
+            >
               {l.label}
             </a>
           ))}

@@ -18,7 +18,7 @@ export function FormField({ label, error, id, ...inputProps }: FormFieldProps) {
         {...inputProps}
       />
       {error && (
-        <p id={`${fieldId}-error`} role="alert" className="text-sm text-danger">
+        <p id={`${fieldId}-error`} role="alert" className="text-danger text-sm">
           {error}
         </p>
       )}

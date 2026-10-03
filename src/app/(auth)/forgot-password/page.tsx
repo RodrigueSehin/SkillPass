@@ -8,11 +8,13 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <h1 className="text-3xl font-bold tracking-tight">Mot de passe oublié</h1>
-      <p className="mt-2 text-muted">Saisissez votre e-mail, nous vous envoyons un lien de réinitialisation.</p>
+      <p className="text-muted mt-2">
+        Saisissez votre e-mail, nous vous envoyons un lien de réinitialisation.
+      </p>
       <div className="mt-8">
         <ForgotPasswordForm />
       </div>
-      <Link href="/login" className="mt-6 inline-block text-sm font-semibold text-brand hover:underline">
+      <Link href="/login" className="text-brand mt-6 inline-block text-sm font-semibold hover:underline">
         ← Retour à la connexion
       </Link>
     </>

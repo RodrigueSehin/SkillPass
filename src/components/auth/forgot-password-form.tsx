@@ -12,12 +12,12 @@ export function ForgotPasswordForm() {
     <form action={action} className="space-y-4" noValidate>
       <FormField label="Adresse e-mail" name="email" type="email" autoComplete="email" required />
       {state.error && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-danger">
+        <p role="alert" className="text-danger rounded-lg bg-red-50 px-3 py-2 text-sm">
           {state.error}
         </p>
       )}
       {state.success && (
-        <p role="status" className="rounded-lg bg-green-50 px-3 py-2 text-sm text-success">
+        <p role="status" className="text-success rounded-lg bg-green-50 px-3 py-2 text-sm">
           {state.success}
         </p>
       )}

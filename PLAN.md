@@ -20,9 +20,9 @@ Décisions : pas de base disponible localement → repositories derrière une in
 4. [x] Expériences — `/dashboard/experiences`
 5. [x] Certifications — `/dashboard/certifications`
 6. [ ] Preuves (evidence) + upload sécurisé Supabase Storage — `/dashboard/evidence`
-7. [ ] Profil (édition) + `/api/profile`
-8. [ ] Mon SkillPass — `/dashboard/skillpass`
-9. [ ] Profil public SEO — `/[username]` (metadata, OpenGraph, JSON-LD)
+7. [x] Profil (édition) + `/api/profile`
+8. [x] Mon SkillPass — `/dashboard/skillpass` (score explicable ; « Télécharger CV » reporté)
+9. [x] Profil public SEO — `/[username]` (metadata, OpenGraph, JSON-LD)
 10. [ ] Dashboard branché sur les services (fin des données de démo)
 
 ## Phase 3 — Verification

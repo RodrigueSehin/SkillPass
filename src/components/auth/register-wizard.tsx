@@ -59,27 +59,44 @@ export function RegisterWizard() {
     <form onSubmit={onSubmit} noValidate className="space-y-6">
       <ol aria-label="Étapes d'inscription" className="flex items-center gap-2">
         {STEPS.map((s, index) => (
-          <li key={s.title} className="flex flex-1 items-center gap-2" aria-current={index === step ? "step" : undefined}>
+          <li
+            key={s.title}
+            className="flex flex-1 items-center gap-2"
+            aria-current={index === step ? "step" : undefined}
+          >
             <span
               className={cn(
                 "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
                 index < step && "bg-success text-white",
                 index === step && "bg-brand text-white",
-                index > step && "bg-slate-200 text-muted",
+                index > step && "text-muted bg-slate-200",
               )}
             >
               {index < step ? <Check className="size-4" aria-hidden /> : index + 1}
             </span>
-            <span className={cn("hidden text-sm font-medium sm:inline", index > step && "text-muted")}>{s.title}</span>
-            {index < STEPS.length - 1 && <span aria-hidden className="h-px flex-1 bg-border" />}
+            <span className={cn("hidden text-sm font-medium sm:inline", index > step && "text-muted")}>
+              {s.title}
+            </span>
+            {index < STEPS.length - 1 && <span aria-hidden className="bg-border h-px flex-1" />}
           </li>
         ))}
       </ol>
 
       {step === 0 && (
         <div className="space-y-4">
-          <FormField label="Nom complet" autoComplete="name" error={errors.fullName?.message} {...register("fullName")} />
-          <FormField label="Adresse e-mail" type="email" autoComplete="email" error={errors.email?.message} {...register("email")} />
+          <FormField
+            label="Nom complet"
+            autoComplete="name"
+            error={errors.fullName?.message}
+            {...register("fullName")}
+          />
+          <FormField
+            label="Adresse e-mail"
+            type="email"
+            autoComplete="email"
+            error={errors.email?.message}
+            {...register("email")}
+          />
           <FormField
             label="Mot de passe"
             type="password"
@@ -92,8 +109,18 @@ export function RegisterWizard() {
 
       {step === 1 && (
         <div className="space-y-4">
-          <FormField label="Profession" placeholder="Power Platform Developer" error={errors.profession?.message} {...register("profession")} />
-          <FormField label="Localisation" placeholder="Abidjan, Côte d'Ivoire" error={errors.location?.message} {...register("location")} />
+          <FormField
+            label="Profession"
+            placeholder="Power Platform Developer"
+            error={errors.profession?.message}
+            {...register("profession")}
+          />
+          <FormField
+            label="Localisation"
+            placeholder="Abidjan, Côte d'Ivoire"
+            error={errors.location?.message}
+            {...register("location")}
+          />
           <FormField
             label="Années d'expérience"
             type="number"
@@ -112,12 +139,16 @@ export function RegisterWizard() {
             error={errors.mainSkills?.message}
             {...register("mainSkills")}
           />
-          <FormField label="Objectif professionnel" error={errors.careerGoal?.message} {...register("careerGoal")} />
+          <FormField
+            label="Objectif professionnel"
+            error={errors.careerGoal?.message}
+            {...register("careerGoal")}
+          />
           <div className="space-y-2">
             <Label htmlFor="availability">Disponibilité</Label>
             <select
               id="availability"
-              className="h-11 w-full rounded-xl border border-border bg-surface px-4 text-sm"
+              className="border-border bg-surface h-11 w-full rounded-xl border px-4 text-sm"
               {...register("availability")}
             >
               {AVAILABILITY_OPTIONS.map((o) => (
@@ -131,7 +162,7 @@ export function RegisterWizard() {
       )}
 
       {serverError && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-danger">
+        <p role="alert" className="text-danger rounded-lg bg-red-50 px-3 py-2 text-sm">
           {serverError}
         </p>
       )}

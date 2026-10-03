@@ -17,17 +17,21 @@ const STATS = [
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[600px] bg-gradient-to-b from-blue-50 to-transparent" />
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 -z-10 h-[600px] bg-gradient-to-b from-blue-50 to-transparent"
+      />
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
         <div>
           <Badge tone="brand" className="px-3 py-1 text-sm">
             <ShieldCheck className="size-4" aria-hidden /> Le passeport numérique des compétences
           </Badge>
-          <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight text-navy sm:text-5xl lg:text-6xl">
+          <h1 className="text-navy mt-6 text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl lg:text-6xl">
             Prouvez vos compétences. Construisez votre avenir.
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted">
-            SkillPass transforme vos compétences, expériences et réalisations en un passeport professionnel vérifiable.
+          <p className="text-muted mt-6 max-w-xl text-lg">
+            SkillPass transforme vos compétences, expériences et réalisations en un passeport professionnel
+            vérifiable.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg">
@@ -42,20 +46,20 @@ export function Hero() {
           <dl className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-4">
             {STATS.map((s) => (
               <div key={s.label}>
-                <dt className="text-sm text-muted">{s.label}</dt>
-                <dd className="text-2xl font-bold text-navy">{s.value}</dd>
+                <dt className="text-muted text-sm">{s.label}</dt>
+                <dd className="text-navy text-2xl font-bold">{s.value}</dd>
               </div>
             ))}
           </dl>
         </div>
 
-        <Card className="relative p-6 shadow-lift sm:p-8" aria-label="Aperçu d'un SkillPass">
+        <Card className="shadow-lift relative p-6 sm:p-8" aria-label="Aperçu d'un SkillPass">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>
               <p className="flex items-center gap-1.5 text-xl font-bold">
-                Sehin G. Rodrigue <BadgeCheck className="size-5 text-brand" aria-label="Vérifié" />
+                Sehin G. Rodrigue <BadgeCheck className="text-brand size-5" aria-label="Vérifié" />
               </p>
-              <p className="text-sm text-muted">Power Platform Developer</p>
+              <p className="text-muted text-sm">Power Platform Developer</p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 <Badge tone="accent">Power Apps Advanced</Badge>
                 <Badge tone="success">PL-200</Badge>

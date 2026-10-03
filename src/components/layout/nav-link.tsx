@@ -18,7 +18,7 @@ export function SidebarLink({ item }: { item: NavItem }) {
       aria-current={active ? "page" : undefined}
       className={cn(
         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-        active ? "bg-brand text-white shadow-soft" : "text-blue-100/80 hover:bg-white/10 hover:text-white",
+        active ? "bg-brand shadow-soft text-white" : "text-blue-100/80 hover:bg-white/10 hover:text-white",
       )}
     >
       <item.icon className="size-5" aria-hidden />

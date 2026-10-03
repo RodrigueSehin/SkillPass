@@ -89,7 +89,9 @@ export async function forgotPasswordAction(_prev: ActionState, formData: FormDat
     redirectTo: `${await appOrigin()}/auth/callback?next=/dashboard/settings`,
   });
   // Same answer whether or not the account exists: avoids user enumeration.
-  return { success: "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé." };
+  return {
+    success: "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'être envoyé.",
+  };
 }
 
 export type OAuthProvider = "google" | "azure" | "linkedin_oidc";

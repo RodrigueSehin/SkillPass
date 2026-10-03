@@ -33,11 +33,15 @@ export function SkillRow({ skill }: { skill: TalentSkillDTO }) {
     <Card className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <Link href={`/dashboard/skills/${skill.id}`} className="font-semibold hover:text-brand hover:underline">
+          <Link
+            href={`/dashboard/skills/${skill.id}`}
+            className="hover:text-brand font-semibold hover:underline"
+          >
             {skill.name}
           </Link>
-          <p className="text-sm text-muted">
-            {skill.category ?? "Sans catégorie"} · {plural(skill.yearsOfExperience, "an")} · {SKILL_LEVEL_LABELS[skill.level]}
+          <p className="text-muted text-sm">
+            {skill.category ?? "Sans catégorie"} · {plural(skill.yearsOfExperience, "an")} ·{" "}
+            {SKILL_LEVEL_LABELS[skill.level]}
           </p>
         </div>
         <VerificationBadge status={skill.verificationStatus} />
@@ -46,25 +50,36 @@ export function SkillRow({ skill }: { skill: TalentSkillDTO }) {
         <SkillProgress name="Score" score={skill.score} />
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="flex items-center gap-4 text-xs text-muted">
+        <p className="text-muted flex items-center gap-4 text-xs">
           <span className="flex items-center gap-1">
             <FileCheck2 className="size-3.5" aria-hidden /> {plural(skill.evidenceCount, "preuve")}
           </span>
           <span className="flex items-center gap-1">
-            <MessageSquareQuote className="size-3.5" aria-hidden /> {plural(skill.recommendationCount, "recommandation")}
+            <MessageSquareQuote className="size-3.5" aria-hidden />{" "}
+            {plural(skill.recommendationCount, "recommandation")}
           </span>
         </p>
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon" aria-label={`Modifier ${skill.name}`} onClick={() => setEditing(true)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={`Modifier ${skill.name}`}
+            onClick={() => setEditing(true)}
+          >
             <Pencil />
           </Button>
-          <Button variant="ghost" size="icon" aria-label={`Supprimer ${skill.name}`} onClick={() => setConfirming(true)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={`Supprimer ${skill.name}`}
+            onClick={() => setConfirming(true)}
+          >
             <Trash2 />
           </Button>
         </div>
       </div>
       {error && (
-        <p role="alert" className="mt-3 text-sm text-danger">
+        <p role="alert" className="text-danger mt-3 text-sm">
           {error}
         </p>
       )}
@@ -74,12 +89,14 @@ export function SkillRow({ skill }: { skill: TalentSkillDTO }) {
           lockIdentity
           defaults={{ name: skill.name, level: skill.level, yearsOfExperience: skill.yearsOfExperience }}
           submitLabel="Enregistrer"
-          onSubmit={(v) => updateSkillAction(skill.id, { level: v.level, yearsOfExperience: v.yearsOfExperience })}
+          onSubmit={(v) =>
+            updateSkillAction(skill.id, { level: v.level, yearsOfExperience: v.yearsOfExperience })
+          }
           onDone={() => setEditing(false)}
         />
       </Modal>
       <Modal open={confirming} onClose={() => setConfirming(false)} title="Supprimer cette compétence ?">
-        <p className="text-sm text-muted">
+        <p className="text-muted text-sm">
           « {skill.name} » sera retirée de votre SkillPass. Les preuves associées ne seront plus rattachées.
         </p>
         <div className="mt-6 flex justify-end gap-3">

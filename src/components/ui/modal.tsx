@@ -28,7 +28,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
       aria-label={title}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-border bg-surface p-0 shadow-lift backdrop:bg-navy/40"
+      className="border-border bg-surface shadow-lift backdrop:bg-navy/40 m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border p-0"
     >
       {open && (
         <div className="p-6">

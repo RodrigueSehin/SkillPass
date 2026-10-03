@@ -17,7 +17,7 @@ export function Progress({
       {...props}
     >
       <ProgressPrimitive.Indicator
-        className={cn("h-full rounded-full bg-brand transition-all", indicatorClassName)}
+        className={cn("bg-brand h-full rounded-full transition-all", indicatorClassName)}
         style={{ width: `${value ?? 0}%` }}
       />
     </ProgressPrimitive.Root>

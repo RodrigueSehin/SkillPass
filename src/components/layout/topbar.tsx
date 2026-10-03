@@ -17,15 +17,18 @@ export function Topbar({ userName }: TopbarProps) {
     .toUpperCase();
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-surface/90 px-4 backdrop-blur sm:px-6">
+    <header className="border-border bg-surface/90 sticky top-0 z-20 flex h-16 items-center gap-3 border-b px-4 backdrop-blur sm:px-6">
       <Logo href="/dashboard" className="lg:hidden" />
       <form role="search" className="relative ml-auto hidden max-w-md flex-1 sm:ml-0 sm:block">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
+        <Search
+          className="text-muted pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2"
+          aria-hidden
+        />
         <input
           type="search"
           aria-label="Rechercher"
           placeholder="Rechercher une compétence, un projet…"
-          className="h-10 w-full rounded-xl border border-border bg-background pl-10 pr-4 text-sm"
+          className="border-border bg-background h-10 w-full rounded-xl border pr-4 pl-10 text-sm"
         />
       </form>
       <div className="ml-auto flex items-center gap-1">

@@ -1,9 +1,6 @@
 import { BadgeCheck, Clock, CircleDashed, TimerOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import {
-  VERIFICATION_STATUS_LABELS,
-  type SkillVerificationStatus,
-} from "@/types/skill";
+import { VERIFICATION_STATUS_LABELS, type SkillVerificationStatus } from "@/types/skill";
 
 const CONFIG = {
   VERIFIED: { tone: "success", Icon: BadgeCheck },

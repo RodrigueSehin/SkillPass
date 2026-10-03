@@ -9,15 +9,17 @@ export default function RegisterPage() {
   return (
     <>
       <h1 className="text-3xl font-bold tracking-tight">Créer mon SkillPass</h1>
-      <p className="mt-2 text-muted">Trois étapes pour construire votre identité professionnelle vérifiable.</p>
+      <p className="text-muted mt-2">
+        Trois étapes pour construire votre identité professionnelle vérifiable.
+      </p>
       <div className="mt-8">
         <OAuthButtons />
         <OrDivider />
         <RegisterWizard />
       </div>
-      <p className="mt-6 text-sm text-muted">
+      <p className="text-muted mt-6 text-sm">
         Déjà inscrit ?{" "}
-        <Link href="/login" className="font-semibold text-brand hover:underline">
+        <Link href="/login" className="text-brand font-semibold hover:underline">
           Se connecter
         </Link>
       </p>

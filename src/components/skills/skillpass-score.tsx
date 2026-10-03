@@ -51,12 +51,12 @@ export function SkillPassScore({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl font-bold tracking-tight text-navy">{score}</span>
-          <span className="text-xs font-medium text-muted">/{max}</span>
+          <span className="text-navy text-4xl font-bold tracking-tight">{score}</span>
+          <span className="text-muted text-xs font-medium">/{max}</span>
         </div>
       </div>
       {verified && (
-        <span className="inline-flex items-center gap-1 text-sm font-semibold text-success">
+        <span className="text-success inline-flex items-center gap-1 text-sm font-semibold">
           <BadgeCheck className="size-4" aria-hidden /> Vérifié
         </span>
       )}

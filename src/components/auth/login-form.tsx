@@ -12,9 +12,15 @@ export function LoginForm({ next }: { next?: string }) {
     <form action={action} className="space-y-4" noValidate>
       {next && <input type="hidden" name="next" value={next} />}
       <FormField label="Adresse e-mail" name="email" type="email" autoComplete="email" required />
-      <FormField label="Mot de passe" name="password" type="password" autoComplete="current-password" required />
+      <FormField
+        label="Mot de passe"
+        name="password"
+        type="password"
+        autoComplete="current-password"
+        required
+      />
       {state.error && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-danger">
+        <p role="alert" className="text-danger rounded-lg bg-red-50 px-3 py-2 text-sm">
           {state.error}
         </p>
       )}

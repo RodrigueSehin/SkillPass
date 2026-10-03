@@ -10,7 +10,7 @@ export function QRCodeCard({ url, label = "Scannez pour vérifier" }: QRCodeCard
   return (
     <Card className="inline-flex flex-col items-center gap-2 p-4">
       <QRCodeSVG value={url} size={96} fgColor="#172554" level="M" title={`QR code vers ${url}`} />
-      <p className="text-xs text-muted">{label}</p>
+      <p className="text-muted text-xs">{label}</p>
     </Card>
   );
 }
