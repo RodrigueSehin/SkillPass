@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Caveat, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const caveat = Caveat({
+  variable: "--font-script",
+  subsets: ["latin"],
+  weight: ["600"],
 });
 
 const geistMono = Geist_Mono({
@@ -37,7 +43,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      lang="fr"
+      data-scroll-behavior="smooth"
+      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );

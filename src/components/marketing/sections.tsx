@@ -20,23 +20,30 @@ import { cn } from "@/lib/utils/cn";
 
 function Section({
   id,
+  kicker,
   title,
   subtitle,
   children,
   className,
 }: {
   id?: string;
+  kicker?: string;
   title: string;
   subtitle?: string;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
-    <section id={id} className={cn("scroll-mt-20 py-16 sm:py-20", className)}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+    <section id={id} className={cn("scroll-mt-24 py-16 sm:py-20", className)}>
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6">
         <div className="mx-auto mb-12 max-w-2xl text-center">
-          <h2 className="text-navy text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
-          {subtitle && <p className="text-muted mt-4 text-lg">{subtitle}</p>}
+          {kicker && (
+            <p className="text-brand mb-3 flex items-center justify-center gap-2 text-sm font-semibold">
+              <span aria-hidden className="bg-accent h-0.5 w-6 rounded-full" /> {kicker}
+            </p>
+          )}
+          <h2 className="text-navy text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
+          {subtitle && <p className="mt-4 text-lg text-slate-600">{subtitle}</p>}
         </div>
         {children}
       </div>
@@ -65,8 +72,10 @@ const WHY = [
 export function WhySection() {
   return (
     <Section
-      title="Pourquoi SkillPass"
-      subtitle="La couche de confiance entre vos compétences et les opportunités professionnelles."
+      id="a-propos"
+      kicker="Pourquoi SkillPass"
+      title="La couche de confiance"
+      subtitle="Entre vos compétences et les opportunités professionnelles : des preuves, un score transparent, un matching pertinent."
     >
       <div className="grid gap-6 md:grid-cols-3">
         {WHY.map(({ icon: Icon, title, text }) => (
@@ -98,7 +107,12 @@ const FEATURES = [
 
 export function FeaturesSection() {
   return (
-    <Section id="fonctionnalites" title="Tout ce qu'il faut pour prouver" className="bg-surface">
+    <Section
+      id="fonctionnalites"
+      kicker="Fonctionnalités"
+      title="Tout ce qu'il faut pour prouver"
+      className="bg-surface"
+    >
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map(({ icon: Icon, title, text }) => (
           <div
@@ -111,35 +125,6 @@ export function FeaturesSection() {
           </div>
         ))}
       </div>
-    </Section>
-  );
-}
-
-const STEPS = [
-  "Créez votre profil",
-  "Ajoutez vos compétences",
-  "Reliez des preuves",
-  "Passez des évaluations",
-  "Obtenez vos badges",
-  "Partagez votre SkillPass",
-];
-
-export function HowItWorksSection() {
-  return (
-    <Section id="comment" title="Comment ça marche">
-      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {STEPS.map((step, i) => (
-          <li
-            key={step}
-            className="border-border bg-surface shadow-soft flex items-center gap-4 rounded-2xl border p-5"
-          >
-            <span className="bg-navy text-accent flex size-10 shrink-0 items-center justify-center rounded-full font-bold">
-              {i + 1}
-            </span>
-            <span className="font-medium">{step}</span>
-          </li>
-        ))}
-      </ol>
     </Section>
   );
 }
@@ -179,7 +164,7 @@ const AUDIENCES = [
 
 export function AudiencesSection() {
   return (
-    <Section id="entreprises" title="Un produit, trois publics" className="bg-surface">
+    <Section id="audiences" kicker="Pour tous" title="Un produit, trois publics" className="bg-surface">
       <div className="grid gap-6 md:grid-cols-3">
         {AUDIENCES.map(({ id, icon: Icon, title, points }) => (
           <Card key={id} id={id} className="p-6">
@@ -202,6 +187,8 @@ export function AudiencesSection() {
 export function TrustSection() {
   return (
     <Section
+      id="verification"
+      kicker="Confiance"
       title="Vérifiable en un scan"
       subtitle="Chaque credential SkillPass possède un identifiant unique et une page de vérification publique."
     >
@@ -243,7 +230,7 @@ const PLANS = [
 
 export function PricingSection() {
   return (
-    <Section id="tarifs" title="Tarifs simples" className="bg-surface">
+    <Section id="tarifs" kicker="Tarifs" title="Tarifs simples" className="bg-surface">
       <div className="grid gap-6 lg:grid-cols-3">
         {PLANS.map((plan) => (
           <Card

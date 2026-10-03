@@ -11,8 +11,8 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
       <aside className="bg-navy relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
-        <div className="[&_a]:text-white [&_span:first-child]:bg-white/10">
-          <Logo />
+        <div>
+          <Logo tone="light" />
         </div>
         <div className="relative z-10 max-w-md space-y-8">
           <h2 className="text-4xl leading-tight font-bold">Prove your skills. Own your future.</h2>
