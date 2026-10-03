@@ -1,4 +1,16 @@
 -- SkillPass — schéma complet (Phases 2 et 3). À exécuter UNE fois dans Supabase → SQL Editor, sur une base vierge.
+-- Déjà exécuté (même en partie) ? Lancez d'abord supabase/reset.sql.
+
+-- Garde : ce script crée le schéma depuis zéro. S'il est déjà (même partiellement) installé, on s'arrête
+-- avec un message clair au lieu d'échouer au milieu. Dans ce cas : exécuter supabase/reset.sql d'abord.
+do $$
+begin
+  if exists (select 1 from pg_type where typname = 'UserRole')
+     or to_regclass('public.profiles') is not null then
+    raise exception 'SkillPass est déjà (au moins partiellement) installé. Exécutez supabase/reset.sql, puis relancez ce script.';
+  end if;
+end $$;
+
 -- Partie 1 : tables, enums, index, clés étrangères (générée depuis prisma/schema.prisma).
 
 -- CreateSchema
@@ -381,6 +393,7 @@ create policy "project skills readable" on project_skills for select using (true
 
 -- Storage: private bucket "evidence"; objects live under "<profile_id>/...".
 insert into storage.buckets (id, name, public) values ('evidence', 'evidence', false) on conflict do nothing;
+drop policy if exists "owner reads own evidence files" on storage.objects;
 create policy "owner reads own evidence files" on storage.objects for select
   using (bucket_id = 'evidence' and (storage.foldername(name))[1] = auth.uid()::text);
 
