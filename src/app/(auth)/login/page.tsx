@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AuthCard, Wordmark } from "@/components/auth/auth-card";
 import { LoginForm } from "@/components/auth/login-form";
 import { OAuthButtons, OrDivider } from "@/components/auth/oauth-buttons";
 
@@ -11,27 +12,31 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const authError = params.error === "auth";
 
   return (
-    <>
-      <h1 className="text-3xl font-bold tracking-tight">Bon retour 👋</h1>
-      <p className="text-muted mt-2">Connectez-vous pour accéder à votre SkillPass.</p>
+    <AuthCard
+      tab="login"
+      title={
+        <>
+          Bienvenue sur <Wordmark />
+        </>
+      }
+      subtitle="Connectez-vous à votre espace pour continuer."
+    >
       {authError && (
-        <p role="alert" className="text-danger mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm">
+        <p role="alert" className="text-danger mb-5 rounded-lg bg-red-50 px-3 py-2 text-sm">
           La connexion a échoué. Veuillez réessayer.
         </p>
       )}
-      <div className="mt-8">
-        <OAuthButtons />
-        <OrDivider />
-        <LoginForm next={next} />
-      </div>
-      <div className="mt-6 flex justify-between text-sm">
-        <Link href="/forgot-password" className="text-brand hover:underline">
-          Mot de passe oublié ?
-        </Link>
+      <LoginForm next={next} />
+      <OrDivider />
+      <OAuthButtons mode="login" />
+
+      <p className="mt-6 rounded-xl bg-slate-50 px-4 py-4 text-center text-sm text-slate-600">
+        Vous n&apos;avez pas encore de compte ?
+        <br />
         <Link href="/register" className="text-brand font-semibold hover:underline">
-          Créer mon SkillPass
+          Créer un compte
         </Link>
-      </div>
-    </>
+      </p>
+    </AuthCard>
   );
 }

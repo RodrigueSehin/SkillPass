@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured, supabaseUrl } from "./env";
+import { isRemembered, REMEMBER_COOKIE, withRememberPolicy } from "./remember";
 
 const PROTECTED_PREFIXES = ["/dashboard", "/business", "/admin"];
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
@@ -19,6 +20,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   let response = NextResponse.next({ request });
+  const remember = isRemembered(request.cookies.get(REMEMBER_COOKIE)?.value);
 
   const supabase = createServerClient(supabaseUrl(), process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {
@@ -26,7 +28,9 @@ export async function updateSession(request: NextRequest) {
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, withRememberPolicy(name, value, options, remember)),
+        );
       },
     },
   });

@@ -1,9 +1,10 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/auth/supabase-server";
 import { isSupabaseConfigured } from "@/lib/auth/env";
+import { REMEMBER_COOKIE } from "@/lib/auth/remember";
 import { forgotPasswordSchema, loginSchema, registerSchema } from "@/schemas/auth";
 import { ensureProfile } from "@/services/profile.service";
 
@@ -32,7 +33,19 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
   const parsed = loginSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Données invalides" };
 
-  const supabase = await createSupabaseServerClient();
+  // Unticked box = session cookies only. The choice is kept in a cookie so token refreshes honour it.
+  const remember = formData.get("remember") === "on";
+  const cookieStore = await cookies();
+  if (remember) cookieStore.delete(REMEMBER_COOKIE);
+  else
+    cookieStore.set(REMEMBER_COOKIE, "0", {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+  const supabase = await createSupabaseServerClient({ remember });
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: "E-mail ou mot de passe incorrect." };
 
@@ -117,5 +130,6 @@ export async function logoutAction() {
     const supabase = await createSupabaseServerClient();
     await supabase.auth.signOut();
   }
+  (await cookies()).delete(REMEMBER_COOKIE);
   redirect("/login");
 }
