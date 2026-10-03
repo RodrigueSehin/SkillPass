@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { supabaseUrl } from "@/lib/auth/env";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -14,13 +15,9 @@ export interface StorageService {
 const BUCKET = "evidence";
 
 class SupabaseStorage implements StorageService {
-  private client = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: { persistSession: false },
-    },
-  );
+  private client = createClient(supabaseUrl(), process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { persistSession: false },
+  });
 
   async put(key: string, bytes: Uint8Array, contentType: string) {
     const { error } = await this.client.storage
