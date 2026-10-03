@@ -23,7 +23,10 @@ export function withUser<Args extends unknown[]>(
         return NextResponse.json({ error: { code: err.code, message: err.message } }, { status: err.status });
       }
       console.error("API error", err);
-      return NextResponse.json({ error: { code: "INTERNAL", message: "Une erreur est survenue" } }, { status: 500 });
+      return NextResponse.json(
+        { error: { code: "INTERNAL", message: "Une erreur est survenue" } },
+        { status: 500 },
+      );
     }
   };
 }

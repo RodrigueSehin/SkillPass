@@ -27,7 +27,7 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Bonjour {firstName} 👋</h1>
-        <p className="mt-1 text-muted">Voici l&apos;état de votre passeport de compétences.</p>
+        <p className="text-muted mt-1">Voici l&apos;état de votre passeport de compétences.</p>
       </div>
 
       <section aria-label="Indicateurs" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -59,14 +59,16 @@ export default async function DashboardPage() {
             <CardTitle>Complétion du profil</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-navy">{DEMO_PROFILE_COMPLETION}%</p>
+            <p className="text-navy text-4xl font-bold">{DEMO_PROFILE_COMPLETION}%</p>
             <Progress
               value={DEMO_PROFILE_COMPLETION}
               className="mt-3"
               indicatorClassName="bg-success"
               aria-label="Complétion du profil"
             />
-            <p className="mt-3 text-sm text-muted">Ajoutez une preuve à vos compétences pour atteindre 100 %.</p>
+            <p className="text-muted mt-3 text-sm">
+              Ajoutez une preuve à vos compétences pour atteindre 100 %.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -78,9 +80,9 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             {DEMO_PROJECTS.map((project) => (
-              <div key={project.name} className="rounded-xl border border-border p-4">
+              <div key={project.name} className="border-border rounded-xl border p-4">
                 <p className="font-semibold">{project.name}</p>
-                <p className="text-sm text-muted">{project.role}</p>
+                <p className="text-muted text-sm">{project.role}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {project.tech.map((t) => (
                     <Badge key={t} tone="brand">
@@ -101,10 +103,10 @@ export default async function DashboardPage() {
             <CardContent className="space-y-4">
               {DEMO_ASSESSMENTS.map((a) => (
                 <div key={a.title} className="flex items-start gap-3">
-                  <Clock className="mt-0.5 size-4 text-accent" aria-hidden />
+                  <Clock className="text-accent mt-0.5 size-4" aria-hidden />
                   <div>
                     <p className="text-sm font-medium">{a.title}</p>
-                    <p className="text-xs text-muted">{a.meta}</p>
+                    <p className="text-muted text-xs">{a.meta}</p>
                   </div>
                 </div>
               ))}
@@ -120,7 +122,7 @@ export default async function DashboardPage() {
                 <div key={job.title} className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{job.title}</p>
-                    <p className="flex items-center gap-1 text-xs text-muted">
+                    <p className="text-muted flex items-center gap-1 text-xs">
                       <MapPin className="size-3" aria-hidden /> {job.company}
                     </p>
                   </div>

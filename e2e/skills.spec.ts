@@ -31,7 +31,9 @@ test("skills: add, filter, edit and delete", async ({ page }, testInfo) => {
 });
 
 test("skills API requires a valid payload", async ({ request }) => {
-  const res = await request.post("/api/talent-skills", { data: { name: "x", level: "EXPERT", yearsOfExperience: 1 } });
+  const res = await request.post("/api/talent-skills", {
+    data: { name: "x", level: "EXPERT", yearsOfExperience: 1 },
+  });
   expect(res.status()).toBe(400);
   expect((await res.json()).error.code).toBe("VALIDATION");
 });

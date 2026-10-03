@@ -41,3 +41,21 @@ export const DEMO_SKILL_ROWS = [
   { name: "Digital Transformation", category: "Transformation & Design", level: "ADVANCED", score: 76, yearsOfExperience: 4, verificationStatus: "UNVERIFIED", evidenceCount: 1, recommendationCount: 1 },
   { name: "UI/UX", category: "Transformation & Design", level: "INTERMEDIATE", score: 60, yearsOfExperience: 3, verificationStatus: "UNVERIFIED", evidenceCount: 0, recommendationCount: 0 },
 ] as const;
+
+export const DEMO_PROJECT_ROWS = [
+  { name: "A' Quotation", description: "Application de devis et de suivi commercial.", organization: "AGL", role: "Power Platform Developer", startDate: "2024-01-15", endDate: "2024-06-30", repositoryUrl: null, url: null, skills: ["Power Apps", "Dataverse", "Power Automate"] },
+  { name: "MODOCK", description: "Pilotage logistique et tableaux de bord.", organization: "Port d'Abidjan", role: "Solution Architect", startDate: "2023-03-01", endDate: "2023-11-30", repositoryUrl: null, url: null, skills: ["Power Apps", "Power BI"] },
+  { name: "K@PELE", description: "Gestion des demandes internes.", organization: "Groupe KAP", role: "Power Platform Developer", startDate: "2022-09-01", endDate: "2023-02-28", repositoryUrl: null, url: null, skills: ["Power Apps", "Dataverse"] },
+  { name: "CRUISE", description: "Automatisation des processus de croisière.", organization: "CRUISE", role: "Digital Transformation Lead", startDate: "2025-01-10", endDate: null, repositoryUrl: null, url: null, skills: ["Power Automate", "AI & Automation"] },
+] as const;
+
+export const DEMO_EXPERIENCES = [
+  { title: "Power Platform Developer", company: "AGL", location: "Abidjan", description: "Conception de solutions métiers Power Apps et Dataverse.", startDate: "2021-02-01", endDate: null },
+  { title: "Digital Transformation Specialist", company: "Groupe KAP", location: "Abidjan", description: "Pilotage de la digitalisation des processus.", startDate: "2019-06-01", endDate: "2021-01-31" },
+] as const;
+
+export const DEMO_CERTIFICATIONS = [
+  { name: "PL-200: Power Platform Functional Consultant", issuer: "Microsoft", issueDate: "2025-06-01", expirationDate: "2026-06-01", credentialId: "PL-200", credentialUrl: null, verificationStatus: "VERIFIED" },
+  { name: "Power BI Data Analyst (PL-300)", issuer: "Microsoft", issueDate: "2025-03-12", expirationDate: null, credentialId: "PL-300", credentialUrl: null, verificationStatus: "VERIFIED" },
+  { name: "Azure AI Fundamentals (AI-900)", issuer: "Microsoft", issueDate: "2024-11-20", expirationDate: null, credentialId: "AI-900", credentialUrl: null, verificationStatus: "PENDING" },
+] as const;

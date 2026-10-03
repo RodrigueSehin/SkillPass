@@ -3,7 +3,10 @@ import { expect, test } from "@playwright/test";
 test("landing page exposes the main CTA", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Prouvez vos compétences");
-  await page.getByRole("link", { name: /Créer mon SkillPass/ }).first().click();
+  await page
+    .getByRole("link", { name: /Créer mon SkillPass/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/register/);
 });
 

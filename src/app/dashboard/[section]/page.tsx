@@ -19,7 +19,11 @@ export default async function SectionPlaceholderPage({ params }: PageProps<"/das
   return (
     <>
       <PageHeader title={item.label} />
-      <EmptyState icon={Hammer} title="Bientôt disponible" description="Cette section arrive dans une prochaine phase de SkillPass." />
+      <EmptyState
+        icon={Hammer}
+        title="Bientôt disponible"
+        description="Cette section arrive dans une prochaine phase de SkillPass."
+      />
     </>
   );
 }

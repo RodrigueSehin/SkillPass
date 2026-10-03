@@ -38,5 +38,8 @@ export interface TalentSkillRepository {
   create(profileId: string, input: NewTalentSkill): Promise<TalentSkillDTO | null>;
   update(profileId: string, id: string, patch: TalentSkillPatch): Promise<TalentSkillDTO | null>;
   remove(profileId: string, id: string): Promise<boolean>;
-  searchCatalog(query: string, limit?: number): Promise<{ id: string; name: string; category: string | null }[]>;
+  searchCatalog(
+    query: string,
+    limit?: number,
+  ): Promise<{ id: string; name: string; category: string | null }[]>;
 }

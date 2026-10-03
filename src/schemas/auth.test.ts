@@ -24,13 +24,19 @@ describe("registerAccountSchema", () => {
 
 describe("registerProfileSchema", () => {
   it("coerces years of experience from form strings", () => {
-    const result = registerProfileSchema.safeParse({ profession: "Dev", location: "Abidjan", yearsOfExperience: "5" });
+    const result = registerProfileSchema.safeParse({
+      profession: "Dev",
+      location: "Abidjan",
+      yearsOfExperience: "5",
+    });
     expect(result.success && result.data.yearsOfExperience).toBe(5);
   });
 });
 
 describe("registerGoalsSchema", () => {
   it("rejects an unknown availability", () => {
-    expect(registerGoalsSchema.safeParse({ mainSkills: "PA", careerGoal: "Lead", availability: "SOON" }).success).toBe(false);
+    expect(
+      registerGoalsSchema.safeParse({ mainSkills: "PA", careerGoal: "Lead", availability: "SOON" }).success,
+    ).toBe(false);
   });
 });

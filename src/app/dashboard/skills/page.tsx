@@ -34,7 +34,11 @@ export default async function SkillsPage({ searchParams }: PageProps<"/dashboard
           action={<AddSkillButton />}
         />
       ) : items.length === 0 ? (
-        <EmptyState icon={Sparkles} title="Aucun résultat" description="Modifiez vos filtres pour élargir la recherche." />
+        <EmptyState
+          icon={Sparkles}
+          title="Aucun résultat"
+          description="Modifiez vos filtres pour élargir la recherche."
+        />
       ) : (
         <ul className="grid gap-4 lg:grid-cols-2">
           {items.map((skill) => (

@@ -1,10 +1,6 @@
 import { ConflictError, NotFoundError } from "@/lib/errors";
 import type { TalentSkillDTO, TalentSkillRepository } from "@/repositories/talent-skill.repository";
-import type {
-  CreateTalentSkillInput,
-  ListTalentSkillsQuery,
-  UpdateTalentSkillInput,
-} from "@/schemas/skill";
+import type { CreateTalentSkillInput, ListTalentSkillsQuery, UpdateTalentSkillInput } from "@/schemas/skill";
 import { SKILL_LEVELS, type SkillLevel } from "@/types/skill";
 
 /** Declared score until an assessment sets a measured one. */
@@ -75,7 +71,9 @@ export function sortSkills(skills: TalentSkillDTO[], sort: ListTalentSkillsQuery
     case "name":
       return copy.sort((a, b) => a.name.localeCompare(b.name));
     case "level":
-      return copy.sort((a, b) => SKILL_LEVELS.indexOf(b.level) - SKILL_LEVELS.indexOf(a.level) || b.score - a.score);
+      return copy.sort(
+        (a, b) => SKILL_LEVELS.indexOf(b.level) - SKILL_LEVELS.indexOf(a.level) || b.score - a.score,
+      );
     case "experience":
       return copy.sort((a, b) => b.yearsOfExperience - a.yearsOfExperience);
     default:

@@ -19,7 +19,9 @@ describe("SkillService.list", () => {
 
     expect((await service.list(ME, { q: "power" })).items.every((s) => /power/i.test(s.name))).toBe(true);
     expect((await service.list(ME, { level: "EXPERT" })).items).toHaveLength(1);
-    expect((await service.list(ME, { status: "PENDING" })).items.map((s) => s.name)).toEqual(["AI & Automation"]);
+    expect((await service.list(ME, { status: "PENDING" })).items.map((s) => s.name)).toEqual([
+      "AI & Automation",
+    ]);
   });
 
   it("sorts by name", async () => {
@@ -35,9 +37,9 @@ describe("SkillService.add", () => {
   });
 
   it("rejects duplicates, case-insensitively", async () => {
-    await expect(service.add(ME, { name: "power apps", level: "BEGINNER", yearsOfExperience: 0 })).rejects.toBeInstanceOf(
-      ConflictError,
-    );
+    await expect(
+      service.add(ME, { name: "power apps", level: "BEGINNER", yearsOfExperience: 0 }),
+    ).rejects.toBeInstanceOf(ConflictError);
   });
 });
 
@@ -50,8 +52,12 @@ describe("SkillService.update", () => {
 
   it("refuses to hand-edit the level of a verified skill but allows years", async () => {
     const verified = (await service.list(ME)).items.find((s) => s.verificationStatus === "VERIFIED")!;
-    await expect(service.update(ME, verified.id, { level: "BEGINNER" })).rejects.toBeInstanceOf(ConflictError);
-    expect(await service.update(ME, verified.id, { yearsOfExperience: 9 })).toMatchObject({ yearsOfExperience: 9 });
+    await expect(service.update(ME, verified.id, { level: "BEGINNER" })).rejects.toBeInstanceOf(
+      ConflictError,
+    );
+    expect(await service.update(ME, verified.id, { yearsOfExperience: 9 })).toMatchObject({
+      yearsOfExperience: 9,
+    });
   });
 });
 
@@ -59,7 +65,9 @@ describe("ownership", () => {
   it("never exposes or mutates another user's skills", async () => {
     const mine = (await service.list(ME)).items[0];
     await expect(service.get(OTHER, mine.id)).rejects.toBeInstanceOf(NotFoundError);
-    await expect(service.update(OTHER, mine.id, { yearsOfExperience: 1 })).rejects.toBeInstanceOf(NotFoundError);
+    await expect(service.update(OTHER, mine.id, { yearsOfExperience: 1 })).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
     await expect(service.remove(OTHER, mine.id)).rejects.toBeInstanceOf(NotFoundError);
     expect((await service.list(ME)).total).toBe(7);
   });

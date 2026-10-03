@@ -16,9 +16,9 @@ Décisions : pas de base disponible localement → repositories derrière une in
 
 1. [x] **Compétences** — `/dashboard/skills` (liste, recherche, filtre, tri, ajout, modification, suppression) ; API `/api/skills`, `/api/talent-skills`
 2. [ ] Détail compétence — `/dashboard/skills/[skillId]`
-3. [ ] Projets — `/dashboard/projects` (+ liens projet → compétences)
-4. [ ] Expériences — `/dashboard/experiences`
-5. [ ] Certifications — `/dashboard/certifications`
+3. [x] Projets — `/dashboard/projects` (+ liens projet → compétences)
+4. [x] Expériences — `/dashboard/experiences`
+5. [x] Certifications — `/dashboard/certifications`
 6. [ ] Preuves (evidence) + upload sécurisé Supabase Storage — `/dashboard/evidence`
 7. [ ] Profil (édition) + `/api/profile`
 8. [ ] Mon SkillPass — `/dashboard/skillpass`
@@ -41,6 +41,6 @@ Plans Free/Pro/Business, `PaymentService` (Stripe), limites d'usage.
 Academy, API publique, PWA, Enterprise, White label.
 
 ## Prérequis ouverts
-- Les repositories Prisma (compétences) ne sont pas testés contre une vraie base.
+- Les repositories Prisma (compétences, projets, expériences, certifications) ne sont pas testés contre une vraie base.
 - Projet Supabase + `DATABASE_URL`/`DIRECT_URL` pour valider les repositories Prisma, RLS et uploads.
 - Docker Desktop (non démarré) permettrait une base Postgres locale.
