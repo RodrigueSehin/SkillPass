@@ -22,6 +22,8 @@ import { formatMonth, formatPeriod } from "@/lib/utils/format";
 import type { Passport } from "@/services/passport.service";
 import { AVAILABILITY_LABELS, type PublicProfileDTO } from "@/types/profile";
 import { VERIFICATION_STATUS_LABELS } from "@/types/skill";
+import { CredentialBadge } from "@/components/verification/credential-badge";
+import { appUrl } from "@/lib/utils/app-url";
 import { ScoreBreakdown } from "./score-breakdown";
 
 export const PASSPORT_TABS = [
@@ -156,6 +158,23 @@ function TabContent({
                   <CardTitle>À propos</CardTitle>
                 </CardHeader>
                 <CardContent className="text-muted pt-4 text-sm leading-relaxed">{profile.bio}</CardContent>
+              </Card>
+            )}
+            {passport.credentials.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Badges vérifiés</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-4 sm:grid-cols-2">
+                  {passport.credentials.slice(0, 4).map((c) => (
+                    <CredentialBadge
+                      key={c.credentialId}
+                      credential={c}
+                      verifyUrl={`${appUrl()}/verify/${c.credentialId}`}
+                      showQr={false}
+                    />
+                  ))}
+                </CardContent>
               </Card>
             )}
             <Card>
@@ -305,12 +324,27 @@ function TabContent({
       );
 
     case "recommendations":
-      return (
+      return passport.recommendations.length === 0 ? (
         <EmptyState
           icon={MessageSquareQuote}
           title="Aucune recommandation pour l'instant"
           description="Les recommandations de collègues et clients s'afficheront ici."
         />
+      ) : (
+        <ul className="space-y-4">
+          {passport.recommendations.map((r) => (
+            <li key={r.id}>
+              <Card className="p-5">
+                <blockquote className="text-sm leading-relaxed">{r.content}</blockquote>
+                <p className="mt-3 text-sm font-semibold">
+                  {r.authorName}
+                  {r.authorTitle && <span className="text-muted font-normal"> · {r.authorTitle}</span>}
+                </p>
+                {r.skillName && <p className="text-muted text-xs">À propos de {r.skillName}</p>}
+              </Card>
+            </li>
+          ))}
+        </ul>
       );
   }
 }

@@ -8,6 +8,20 @@ export const AVAILABILITY_LABELS: Record<Availability, string> = {
   NOT_AVAILABLE: "Non disponible",
 };
 
+export type UserRole =
+  | "TALENT"
+  | "RECRUITER"
+  | "MANAGER"
+  | "EVALUATOR"
+  | "TRAINER"
+  | "COMPANY_ADMIN"
+  | "ACADEMY_ADMIN"
+  | "SKILLPASS_ADMIN"
+  | "VERIFIER";
+
+/** Roles allowed to review critical assessments. */
+export const REVIEWER_ROLES: readonly UserRole[] = ["VERIFIER", "EVALUATOR", "SKILLPASS_ADMIN"];
+
 export interface ProfileDTO {
   id: string;
   username: string;
@@ -20,12 +34,13 @@ export interface ProfileDTO {
   careerGoal: string | null;
   availability: Availability;
   isPublic: boolean;
+  role: UserRole;
   /** ISO timestamp of the last profile update, used as the activity signal in the score. */
   updatedAt: string;
 }
 
 /** What anyone may see on /[username]. No id, e-mail, career goal or visibility flag. */
-export type PublicProfileDTO = Omit<ProfileDTO, "id" | "careerGoal" | "isPublic" | "updatedAt">;
+export type PublicProfileDTO = Omit<ProfileDTO, "id" | "careerGoal" | "isPublic" | "updatedAt" | "role">;
 
 export interface AccountIdentity {
   id: string;

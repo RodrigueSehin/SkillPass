@@ -5,6 +5,8 @@ export interface ExplainerInput {
   yearsOfExperience: number;
   evidence: { status: "UNVERIFIED" | "PENDING" | "VERIFIED" }[];
   projectCount: number;
+  /** A valid credential issued by a passed assessment exists for this skill. */
+  assessmentPassed: boolean;
 }
 
 export interface ExplainerCheck {
@@ -56,9 +58,8 @@ export function explainVerification(input: ExplainerInput): Explanation {
     {
       key: "assessment",
       label: "Évaluation réussie",
-      detail: "Les évaluations arrivent prochainement",
-      met: false,
-      upcoming: true,
+      detail: input.assessmentPassed ? "Un badge a été délivré" : "Passez l'évaluation correspondante",
+      met: input.assessmentPassed,
     },
   ];
 

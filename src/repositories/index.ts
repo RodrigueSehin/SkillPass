@@ -1,6 +1,15 @@
 import { InMemoryTalentSkillRepository } from "./talent-skill.memory";
 import { PrismaTalentSkillRepository } from "./talent-skill.prisma";
 import type { TalentSkillRepository } from "./talent-skill.repository";
+import { InMemoryAttemptRepository } from "./attempt.memory";
+import { PrismaAttemptRepository } from "./attempt.prisma";
+import type { AttemptRepository } from "./attempt.repository";
+import { InMemoryCredentialRepository } from "./credential.memory";
+import { PrismaCredentialRepository } from "./credential.prisma";
+import type { CredentialRepository } from "./credential.repository";
+import { InMemoryRecommendationRepository } from "./recommendation.memory";
+import { PrismaRecommendationRepository } from "./recommendation.prisma";
+import type { RecommendationRepository } from "./recommendation.repository";
 import { InMemoryEvidenceRepository } from "./evidence.memory";
 import { PrismaEvidenceRepository } from "./evidence.prisma";
 import type { EvidenceRepository } from "./evidence.repository";
@@ -25,6 +34,9 @@ const g = globalThis as unknown as {
     skills: InMemoryTalentSkillRepository;
     profiles: InMemoryProfileRepository;
     evidence: InMemoryEvidenceRepository;
+    attempts: InMemoryAttemptRepository;
+    credentials: InMemoryCredentialRepository;
+    recommendations: InMemoryRecommendationRepository;
     projects: ReturnType<typeof createMemoryProjects>;
     experiences: ReturnType<typeof createMemoryExperiences>;
     certifications: ReturnType<typeof createMemoryCertifications>;
@@ -41,6 +53,9 @@ function memory() {
     skills: new InMemoryTalentSkillRepository(DEMO_PROFILE_ID),
     profiles: new InMemoryProfileRepository(true),
     evidence: new InMemoryEvidenceRepository(DEMO_PROFILE_ID),
+    attempts: new InMemoryAttemptRepository(),
+    credentials: new InMemoryCredentialRepository(),
+    recommendations: new InMemoryRecommendationRepository(),
     projects: createMemoryProjects(DEMO_PROFILE_ID),
     experiences: createMemoryExperiences(DEMO_PROFILE_ID),
     certifications: createMemoryCertifications(DEMO_PROFILE_ID),
@@ -62,3 +77,10 @@ export const getProfileRepository = (): ProfileRepository =>
 
 export const getEvidenceRepository = (): EvidenceRepository =>
   hasDatabase() ? new PrismaEvidenceRepository() : memory().evidence;
+
+export const getAttemptRepository = (): AttemptRepository =>
+  hasDatabase() ? new PrismaAttemptRepository() : memory().attempts;
+export const getCredentialRepository = (): CredentialRepository =>
+  hasDatabase() ? new PrismaCredentialRepository() : memory().credentials;
+export const getRecommendationRepository = (): RecommendationRepository =>
+  hasDatabase() ? new PrismaRecommendationRepository() : memory().recommendations;

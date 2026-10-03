@@ -8,19 +8,19 @@ La logique métier vit dans `src/services`, jamais dans les composants. Les muta
 
 ## Structure
 
-| Dossier | Contenu |
-| --- | --- |
-| `src/app/(marketing)` | Landing publique |
-| `src/app/(auth)` | login, register (wizard 3 étapes), forgot-password, verify-email |
-| `src/app/auth/callback` | Échange du code OAuth / e-mail, création idempotente du profil |
-| `src/app/dashboard` | Espace talent (layout protégé, loading/error, sections à venir) |
-| `src/components/ui` | Primitives (style shadcn/ui, Radix + CVA) |
-| `src/components/{layout,skills,auth,marketing}` | Composants métier |
-| `src/lib/auth` | Clients Supabase, session, `requireUser` |
-| `src/lib/db` | Singleton Prisma (adapter `pg`) |
-| `src/services` | Logique métier (`profile.service.ts`) |
-| `src/config` | Navigation, données de démo |
-| `prisma/` | Schéma, seed |
+| Dossier                                         | Contenu                                                          |
+| ----------------------------------------------- | ---------------------------------------------------------------- |
+| `src/app/(marketing)`                           | Landing publique                                                 |
+| `src/app/(auth)`                                | login, register (wizard 3 étapes), forgot-password, verify-email |
+| `src/app/auth/callback`                         | Échange du code OAuth / e-mail, création idempotente du profil   |
+| `src/app/dashboard`                             | Espace talent (layout protégé, loading/error, sections à venir)  |
+| `src/components/ui`                             | Primitives (style shadcn/ui, Radix + CVA)                        |
+| `src/components/{layout,skills,auth,marketing}` | Composants métier                                                |
+| `src/lib/auth`                                  | Clients Supabase, session, `requireUser`                         |
+| `src/lib/db`                                    | Singleton Prisma (adapter `pg`)                                  |
+| `src/services`                                  | Logique métier (`profile.service.ts`)                            |
+| `src/config`                                    | Navigation, données de démo                                      |
+| `prisma/`                                       | Schéma, seed                                                     |
 
 ## Choix techniques
 
@@ -30,3 +30,7 @@ La logique métier vit dans `src/services`, jamais dans les composants. Les muta
 - **Tokens de design** dans `globals.css` (`@theme`) : navy `#172554`, brand `#2563EB`, accent `#F59E0B`, success `#16A34A`.
 - **Server Components par défaut** ; `"use client"` uniquement pour formulaires, navigation active, Radix.
 - **Mode aperçu** sans Supabase en dev uniquement (voir README).
+
+## Vérification (Phase 3)
+
+`AssessmentService` orchestre une tentative : démarrage (compétence requise, reprise, délai entre tentatives) → soumission (échéance serveur, correction pure dans `lib/assessment-scoring.ts`) → effets : `applyVerification` sur la compétence et émission idempotente du credential par `CredentialService`. Les évaluations critiques passent par `PENDING_REVIEW` puis `review()`. La finalisation est rejouable : un résultat `PASSED` dont l'émission du badge a échoué est complété à la lecture suivante.

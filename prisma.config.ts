@@ -1,4 +1,8 @@
-import "dotenv/config";
+import { config } from "dotenv";
+
+// Next.js reads .env.local; Prisma tooling and the seed must read the same file.
+config({ path: ".env.local" });
+config();
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({

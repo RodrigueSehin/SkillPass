@@ -11,7 +11,7 @@ test("skill detail explains verification and lists evidence", async ({ page }) =
   await expect(page.getByRole("heading", { level: 1, name: "Power Apps" })).toBeVisible();
   await expect(page.getByText("Pourquoi cette compétence est-elle vérifiée ?")).toBeVisible();
   await expect(page.getByText("Au moins une preuve vérifiée")).toBeVisible();
-  await expect(page.getByText("Les évaluations arrivent prochainement")).toBeVisible();
+  await expect(page.getByText("Passez l'évaluation correspondante")).toBeVisible();
   await expect(page.getByRole("heading", { name: "A' Quotation" })).toBeVisible();
 });
 

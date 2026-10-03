@@ -147,7 +147,12 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent className="text-muted flex items-start gap-3 text-sm">
               <BookOpenCheck className="text-accent mt-0.5 size-4 shrink-0" aria-hidden />
-              Les évaluations de compétences arrivent prochainement.
+              <span>
+                Faites vérifier une compétence en passant une évaluation.{" "}
+                <Link href="/dashboard/assessments" className="text-brand font-medium hover:underline">
+                  Voir les évaluations
+                </Link>
+              </span>
             </CardContent>
           </Card>
           <Card>

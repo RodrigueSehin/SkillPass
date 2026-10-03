@@ -19,12 +19,18 @@ const toDTO = (r: Row): ProfileDTO => ({
   careerGoal: r.careerGoal,
   availability: r.availability,
   isPublic: r.isPublic,
+  role: r.role,
   updatedAt: r.updatedAt.toISOString(),
 });
 
 export class PrismaProfileRepository implements ProfileRepository {
   async ensure(identity: AccountIdentity) {
     return toDTO(await ensureProfile({ id: identity.id, email: identity.email, fullName: identity.name }));
+  }
+
+  async findById(id: string) {
+    const row = await prisma.profile.findUnique({ where: { id } });
+    return row ? toDTO(row) : null;
   }
 
   async findByUsername(username: string) {

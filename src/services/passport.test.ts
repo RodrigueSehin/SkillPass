@@ -21,6 +21,8 @@ const passportService = () =>
     new CrudService(createMemoryProjects(ME), "Projet"),
     new CrudService(createMemoryExperiences(ME), "Expérience"),
     new CrudService(createMemoryCertifications(ME), "Certification"),
+    { listForProfile: async () => [] },
+    { listApproved: async () => [] },
   );
 
 const validProfile = {

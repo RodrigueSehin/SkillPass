@@ -68,11 +68,14 @@ model Profile {
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")
 
-  talentSkills   TalentSkill[]
-  projects       Project[]
-  experiences    Experience[]
-  certifications Certification[]
-  evidence       SkillEvidence[]
+  talentSkills    TalentSkill[]
+  projects        Project[]
+  experiences     Experience[]
+  certifications  Certification[]
+  evidence        SkillEvidence[]
+  attempts        AssessmentAttempt[]
+  credentials     Credential[]
+  recommendations Recommendation[]
 
   @@map("profiles")
 }
@@ -101,6 +104,9 @@ model Skill {
 }
 
 model TalentSkill {
+  attempts           AssessmentAttempt[]
+  credentials        Credential[]
+  recommendations    Recommendation[]
   evidence           SkillEvidence[]
   id                 String                  @id @default(uuid()) @db.Uuid
   profileId          String                  @map("profile_id") @db.Uuid
@@ -121,19 +127,20 @@ model TalentSkill {
 }
 
 model Project {
-  evidence      SkillEvidence[]
-  id            String          @id @default(uuid()) @db.Uuid
-  profileId     String          @map("profile_id") @db.Uuid
-  name          String
-  description   String?
-  organization  String?
-  role          String?
-  startDate     DateTime?       @map("start_date")
-  endDate       DateTime?       @map("end_date")
-  repositoryUrl String?         @map("repository_url")
-  url           String?
-  createdAt     DateTime        @default(now()) @map("created_at")
-  updatedAt     DateTime        @updatedAt @map("updated_at")
+  recommendations Recommendation[]
+  evidence        SkillEvidence[]
+  id              String           @id @default(uuid()) @db.Uuid
+  profileId       String           @map("profile_id") @db.Uuid
+  name            String
+  description     String?
+  organization    String?
+  role            String?
+  startDate       DateTime?        @map("start_date")
+  endDate         DateTime?        @map("end_date")
+  repositoryUrl   String?          @map("repository_url")
+  url             String?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
 
   profile Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
   skills  ProjectSkill[]
@@ -232,4 +239,103 @@ model SkillEvidence {
   @@index([profileId])
   @@index([talentSkillId])
   @@map("skill_evidence")
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  PASSED
+  FAILED
+  PENDING_REVIEW
+  REJECTED
+}
+
+enum CredentialStatus {
+  VALID
+  REVOKED
+}
+
+enum RecommendationStatus {
+  REQUESTED
+  SUBMITTED
+  APPROVED
+  DECLINED
+}
+
+// Question content lives in code (src/config/assessment-bank.ts, versioned by `bankVersion`):
+// correct answers never reach the database read paths exposed to clients.
+model AssessmentAttempt {
+  id             String        @id @default(uuid()) @db.Uuid
+  profileId      String        @map("profile_id") @db.Uuid
+  talentSkillId  String        @map("talent_skill_id") @db.Uuid
+  assessmentSlug String        @map("assessment_slug")
+  bankVersion    Int           @map("bank_version")
+  status         AttemptStatus @default(IN_PROGRESS)
+  startedAt      DateTime      @default(now()) @map("started_at")
+  // Server-enforced time limit.
+  deadlineAt     DateTime      @map("deadline_at")
+  submittedAt    DateTime?     @map("submitted_at")
+  // [{ "questionId": string, "selected": number | null }]
+  answers        Json?
+  overallScore   Int?          @map("overall_score")
+  // { "KNOWLEDGE": number, "PRACTICAL": number, "ARCHITECTURE": number }
+  domainScores   Json?         @map("domain_scores")
+  level          SkillLevel?
+  reviewedById   String?       @map("reviewed_by_id") @db.Uuid
+  reviewedAt     DateTime?     @map("reviewed_at")
+  reviewNote     String?       @map("review_note")
+
+  profile     Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  talentSkill TalentSkill @relation(fields: [talentSkillId], references: [id], onDelete: Cascade)
+  credential  Credential?
+
+  @@index([profileId, assessmentSlug])
+  @@index([status])
+  @@map("assessment_attempts")
+}
+
+model Credential {
+  id            String           @id @default(uuid()) @db.Uuid
+  // Public identifier, format SP-XXXXXX.
+  credentialId  String           @unique @map("credential_id")
+  profileId     String           @map("profile_id") @db.Uuid
+  talentSkillId String?          @map("talent_skill_id") @db.Uuid
+  skillName     String           @map("skill_name")
+  level         SkillLevel
+  issuer        String           @default("SkillPass")
+  issuedAt      DateTime         @default(now()) @map("issued_at")
+  expiresAt     DateTime?        @map("expires_at")
+  status        CredentialStatus @default(VALID)
+  revokedAt     DateTime?        @map("revoked_at")
+  attemptId     String?          @unique @map("attempt_id") @db.Uuid
+
+  profile     Profile            @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  talentSkill TalentSkill?       @relation(fields: [talentSkillId], references: [id], onDelete: SetNull)
+  attempt     AssessmentAttempt? @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+
+  @@index([profileId])
+  @@map("credentials")
+}
+
+model Recommendation {
+  id            String               @id @default(uuid()) @db.Uuid
+  profileId     String               @map("profile_id") @db.Uuid
+  talentSkillId String?              @map("talent_skill_id") @db.Uuid
+  projectId     String?              @map("project_id") @db.Uuid
+  // Unguessable, single-use link sent to the recommender (no account needed).
+  token         String               @unique
+  authorName    String               @map("author_name")
+  authorEmail   String?              @map("author_email")
+  authorTitle   String?              @map("author_title")
+  content       String?
+  status        RecommendationStatus @default(REQUESTED)
+  createdAt     DateTime             @default(now()) @map("created_at")
+  submittedAt   DateTime?            @map("submitted_at")
+  expiresAt     DateTime             @map("expires_at")
+
+  profile     Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  talentSkill TalentSkill? @relation(fields: [talentSkillId], references: [id], onDelete: SetNull)
+  project     Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([profileId])
+  @@map("recommendations")
 }

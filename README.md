@@ -4,7 +4,7 @@
 
 Passeport numérique des compétences : profil → compétences → preuves → évaluation → validation → badges → SkillPass → opportunités.
 
-**État : Phase 2 — Talent terminée** (compétences, projets, expériences, certifications, preuves, profil, Mon SkillPass, profil public).
+**État : Phase 3 — Vérification terminée** (talent complet + évaluations, badges, credentials vérifiables, recommandations).
 
 ## Stack
 
@@ -32,13 +32,13 @@ Sans variables Supabase, hors production, l'application démarre en **mode aper�
 
 ## Scripts
 
-| Commande | Rôle |
-| --- | --- |
-| `npm run dev` / `build` / `start` | Next.js |
-| `npm run typecheck` / `lint` / `format` | Qualité |
-| `npm test` | Tests unitaires et composants (Vitest) |
-| `npm run e2e` | Tests E2E (Playwright, `npx playwright install` requis) |
-| `npm run db:*` | Prisma (generate, migrate, seed, studio) |
+| Commande                                | Rôle                                                    |
+| --------------------------------------- | ------------------------------------------------------- |
+| `npm run dev` / `build` / `start`       | Next.js                                                 |
+| `npm run typecheck` / `lint` / `format` | Qualité                                                 |
+| `npm test`                              | Tests unitaires et composants (Vitest)                  |
+| `npm run e2e`                           | Tests E2E (Playwright, `npx playwright install` requis) |
+| `npm run db:*`                          | Prisma (generate, migrate, seed, studio)                |
 
 ## Documentation
 

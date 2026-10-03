@@ -6,6 +6,7 @@ import type {
   TalentSkillPatch,
   TalentSkillRepository,
 } from "./talent-skill.repository";
+import type { SkillLevel, SkillVerificationStatus } from "@/types/skill";
 
 /** In-memory implementation for tests and for local previews without a database. */
 export class InMemoryTalentSkillRepository implements TalentSkillRepository {
@@ -58,6 +59,24 @@ export class InMemoryTalentSkillRepository implements TalentSkillRepository {
     const row = this.forProfile(profileId).find((r) => r.id === id);
     if (!row) return null;
     Object.assign(row, patch);
+    return strip(row);
+  }
+
+  async applyVerification(
+    profileId: string,
+    id: string,
+    result: { level: SkillLevel; score: number; status: SkillVerificationStatus },
+  ) {
+    const row = this.forProfile(profileId).find((r) => r.id === id);
+    if (!row) return null;
+    Object.assign(row, { level: result.level, score: result.score, verificationStatus: result.status });
+    return strip(row);
+  }
+
+  async setStatus(profileId: string, id: string, status: SkillVerificationStatus) {
+    const row = this.forProfile(profileId).find((r) => r.id === id);
+    if (!row) return null;
+    row.verificationStatus = status;
     return strip(row);
   }
 

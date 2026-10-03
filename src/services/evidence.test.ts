@@ -189,6 +189,7 @@ describe("explainVerification", () => {
       yearsOfExperience: 2,
       evidence: [{ status: "VERIFIED" }, { status: "PENDING" }],
       projectCount: 0,
+      assessmentPassed: false,
     });
     const met = Object.fromEntries(e.checks.map((c) => [c.key, c.met]));
     expect(met).toEqual({
@@ -198,7 +199,7 @@ describe("explainVerification", () => {
       experience: true,
       assessment: false,
     });
-    expect(e.checks.find((c) => c.key === "assessment")?.upcoming).toBe(true);
+    expect(e.checks.find((c) => c.key === "assessment")?.detail).toMatch(/Passez/);
     expect(e.title).toMatch(/Comment faire vérifier/);
   });
 });

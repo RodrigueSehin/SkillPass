@@ -15,6 +15,7 @@ const DEMO: ProfileDTO = {
   careerGoal: "Concevoir des solutions métiers à fort impact.",
   availability: "IMMEDIATE",
   isPublic: true,
+  role: "TALENT",
   updatedAt: new Date().toISOString(),
 };
 
@@ -40,11 +41,23 @@ export class InMemoryProfileRepository implements ProfileRepository {
         careerGoal: null,
         availability: "IMMEDIATE",
         isPublic: true,
+        role: "TALENT",
         updatedAt: new Date().toISOString(),
       };
       this.profiles.set(identity.id, profile);
     }
     return { ...profile };
+  }
+
+  /** Test/dev helper: roles are granted by administrators, never by user input. */
+  setRole(id: string, role: ProfileDTO["role"]) {
+    const profile = this.profiles.get(id);
+    if (profile) profile.role = role;
+  }
+
+  async findById(id: string) {
+    const found = this.profiles.get(id);
+    return found ? { ...found } : null;
   }
 
   async findByUsername(username: string) {

@@ -1,6 +1,7 @@
 import { computeSkillPassScore, type ScoreResult } from "@/lib/score";
 import type { TalentSkillDTO } from "@/repositories/talent-skill.repository";
 import type { CertificationDTO, ExperienceDTO, ProjectDTO } from "@/types/portfolio";
+import type { CredentialDTO, PublicRecommendation } from "@/types/verification";
 import type { SkillService } from "./skill.service";
 
 export interface Passport {
@@ -17,6 +18,9 @@ export interface Passport {
     recommendations: number;
   };
   isVerified: boolean;
+  /** Issued credentials, shown as badges. */
+  credentials: CredentialDTO[];
+  recommendations: PublicRecommendation[];
 }
 
 /** The passport only reads: any service exposing list() fits. */
@@ -41,6 +45,8 @@ export class PassportService {
     private readonly projects: Crud<ProjectDTO>,
     private readonly experiences: Crud<ExperienceDTO>,
     private readonly certifications: Crud<CertificationDTO>,
+    private readonly credentials: { listForProfile(profileId: string): Promise<CredentialDTO[]> },
+    private readonly recommendations: { listApproved(profileId: string): Promise<PublicRecommendation[]> },
   ) {}
 
   async build(
@@ -48,11 +54,13 @@ export class PassportService {
     profile: { yearsOfExperience: number; updatedAt: string },
     now = new Date(),
   ): Promise<Passport> {
-    const [skillList, projects, experiences, certs] = await Promise.all([
+    const [skillList, projects, experiences, certs, credentials, recommendations] = await Promise.all([
       this.skills.list(profileId, { sort: "score" }),
       this.projects.list(profileId),
       this.experiences.list(profileId),
       this.certifications.list(profileId),
+      this.credentials.listForProfile(profileId),
+      this.recommendations.listApproved(profileId),
     ]);
     const today = now.toISOString().slice(0, 10);
     const certifications = certs.map((c) => ({
@@ -60,14 +68,13 @@ export class PassportService {
       expired: Boolean(c.expirationDate && c.expirationDate < today),
     }));
     const skills = skillList.items;
-    const recommendations = 0; // Recommendations table arrives in Phase 3.
 
     const score = computeSkillPassScore({
       skills,
       yearsOfExperience: Math.max(profile.yearsOfExperience, yearsFromExperiences(experiences, now)),
       projectCount: projects.length,
       certifications,
-      recommendationCount: recommendations,
+      recommendationCount: recommendations.length,
       daysSinceActivity: Math.floor((now.getTime() - Date.parse(profile.updatedAt)) / DAY_MS),
     });
     const verifiedSkills = skills.filter((s) => s.verificationStatus === "VERIFIED").length;
@@ -83,9 +90,11 @@ export class PassportService {
         verifiedSkills,
         projects: projects.length,
         certifications: certifications.length,
-        recommendations,
+        recommendations: recommendations.length,
       },
       isVerified: verifiedSkills > 0,
+      credentials,
+      recommendations,
     };
   }
 }

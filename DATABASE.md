@@ -15,7 +15,14 @@ profiles 1─N certifications
 - `skill_evidence` : preuves rattachées à un `talent_skill` (cascade) et optionnellement à un projet. `file_path` est la clé de stockage générée par le serveur ; le nom d'origine n'est conservé que pour l'affichage.
 - Index sur toutes les clés étrangères de lecture fréquente.
 
-Tables prévues pour les phases suivantes : evidence, assessments, credentials, badges, recommendations, companies, jobs, matches, notifications, subscriptions, audit_logs.
+Phase 3 :
+
+- `assessment_attempts` : tentative (réponses et scores par domaine en JSON, version de la banque, échéance serveur, relecture éventuelle).
+- `credentials` : identifiant public `SP-XXXXXX` unique, un seul par tentative. Un badge est la représentation d'un credential.
+- `recommendations` : demande + réponse, jeton unique.
+- Le contenu des évaluations (questions, bonnes réponses) vit dans `src/config/assessment-bank.ts`, pas en base : `bank_version` relie chaque tentative à la version corrigée.
+
+Tables prévues pour les phases suivantes : companies, jobs, matches, notifications, subscriptions, audit_logs.
 
 ## Migrations
 

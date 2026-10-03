@@ -6,6 +6,7 @@ import type {
   TalentSkillPatch,
   TalentSkillRepository,
 } from "./talent-skill.repository";
+import type { SkillLevel, SkillVerificationStatus } from "@/types/skill";
 
 const include = { skill: { include: { category: true } } } satisfies Prisma.TalentSkillInclude;
 type Row = Prisma.TalentSkillGetPayload<{ include: typeof include }>;
@@ -79,6 +80,26 @@ export class PrismaTalentSkillRepository implements TalentSkillRepository {
   async update(profileId: string, id: string, patch: TalentSkillPatch) {
     // updateMany keeps the profileId in the WHERE clause, so ownership is enforced atomically.
     const { count } = await prisma.talentSkill.updateMany({ where: { id, profileId }, data: patch });
+    return count === 0 ? null : this.findById(profileId, id);
+  }
+
+  async applyVerification(
+    profileId: string,
+    id: string,
+    result: { level: SkillLevel; score: number; status: SkillVerificationStatus },
+  ) {
+    const { count } = await prisma.talentSkill.updateMany({
+      where: { id, profileId },
+      data: { level: result.level, score: result.score, verificationStatus: result.status },
+    });
+    return count === 0 ? null : this.findById(profileId, id);
+  }
+
+  async setStatus(profileId: string, id: string, status: SkillVerificationStatus) {
+    const { count } = await prisma.talentSkill.updateMany({
+      where: { id, profileId },
+      data: { verificationStatus: status },
+    });
     return count === 0 ? null : this.findById(profileId, id);
   }
 

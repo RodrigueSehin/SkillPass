@@ -29,3 +29,13 @@ create policy "project skills readable" on project_skills for select using (true
 insert into storage.buckets (id, name, public) values ('evidence', 'evidence', false) on conflict do nothing;
 create policy "owner reads own evidence files" on storage.objects for select
   using (bucket_id = 'evidence' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- Phase 3: verification tables are SERVER-ONLY. RLS is enabled with no policy on purpose:
+-- the Supabase API (anon/authenticated keys) can read and write nothing here. All access goes
+-- through the application, which checks ownership and roles.
+--   assessment_attempts : answers and scores must not be forged or read in bulk.
+--   credentials         : public verification is served by /verify, never by direct table reads.
+--   recommendations     : rows hold single-use secret tokens.
+alter table assessment_attempts enable row level security;
+alter table credentials enable row level security;
+alter table recommendations enable row level security;

@@ -1,4 +1,8 @@
-import "dotenv/config";
+import { config } from "dotenv";
+
+// Next.js reads .env.local; Prisma tooling and the seed must read the same file.
+config({ path: ".env.local" });
+config();
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 
@@ -15,17 +19,70 @@ const CATEGORIES = [
 ];
 
 const SKILLS = [
-  { name: "Power Apps", category: "power-platform", level: "EXPERT", score: 95, years: 5, status: "VERIFIED" },
-  { name: "Power Automate", category: "power-platform", level: "ADVANCED", score: 82, years: 5, status: "VERIFIED" },
-  { name: "Dataverse", category: "power-platform", level: "ADVANCED", score: 80, years: 4, status: "VERIFIED" },
-  { name: "Power BI", category: "data-analytics", level: "ADVANCED", score: 78, years: 3, status: "VERIFIED" },
-  { name: "AI & Automation", category: "ai-automation", level: "INTERMEDIATE", score: 65, years: 2, status: "PENDING" },
-  { name: "Digital Transformation", category: "transformation-design", level: "ADVANCED", score: 76, years: 4, status: "UNVERIFIED" },
-  { name: "UI/UX", category: "transformation-design", level: "INTERMEDIATE", score: 60, years: 3, status: "UNVERIFIED" },
+  {
+    name: "Power Apps",
+    category: "power-platform",
+    level: "EXPERT",
+    score: 95,
+    years: 5,
+    status: "VERIFIED",
+  },
+  {
+    name: "Power Automate",
+    category: "power-platform",
+    level: "ADVANCED",
+    score: 82,
+    years: 5,
+    status: "VERIFIED",
+  },
+  {
+    name: "Dataverse",
+    category: "power-platform",
+    level: "ADVANCED",
+    score: 80,
+    years: 4,
+    status: "VERIFIED",
+  },
+  {
+    name: "Power BI",
+    category: "data-analytics",
+    level: "ADVANCED",
+    score: 78,
+    years: 3,
+    status: "VERIFIED",
+  },
+  {
+    name: "AI & Automation",
+    category: "ai-automation",
+    level: "INTERMEDIATE",
+    score: 65,
+    years: 2,
+    status: "PENDING",
+  },
+  {
+    name: "Digital Transformation",
+    category: "transformation-design",
+    level: "ADVANCED",
+    score: 76,
+    years: 4,
+    status: "UNVERIFIED",
+  },
+  {
+    name: "UI/UX",
+    category: "transformation-design",
+    level: "INTERMEDIATE",
+    score: 60,
+    years: 3,
+    status: "UNVERIFIED",
+  },
 ] as const;
 
 const PROJECTS = [
-  { name: "A' Quotation", role: "Power Platform Developer", skills: ["Power Apps", "Dataverse", "Power Automate"] },
+  {
+    name: "A' Quotation",
+    role: "Power Platform Developer",
+    skills: ["Power Apps", "Dataverse", "Power Automate"],
+  },
   { name: "MODOCK", role: "Solution Architect", skills: ["Power Apps", "Power BI"] },
   { name: "K@PELE", role: "Power Platform Developer", skills: ["Power Apps", "Dataverse"] },
   { name: "CRUISE", role: "Digital Transformation Lead", skills: ["Power Automate", "AI & Automation"] },
@@ -37,7 +94,11 @@ const CERTIFICATIONS = [
   { name: "Azure AI Fundamentals (AI-900)", issuer: "Microsoft", credentialId: "AI-900" },
 ];
 
-const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 async function main() {
   const categoryIds = new Map<string, string>();

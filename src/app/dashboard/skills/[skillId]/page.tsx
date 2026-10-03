@@ -12,7 +12,12 @@ import { VerificationBadge } from "@/components/skills/verification-badge";
 import { requireUser } from "@/lib/auth/current-user";
 import { NotFoundError } from "@/lib/errors";
 import { explainVerification } from "@/lib/verification-explainer";
-import { getEvidenceService, getProjectService, getSkillService } from "@/services/container";
+import {
+  getCredentialService,
+  getEvidenceService,
+  getProjectService,
+  getSkillService,
+} from "@/services/container";
 import { SKILL_LEVEL_LABELS } from "@/types/skill";
 
 export const metadata: Metadata = { title: "Détail de la compétence" };
@@ -29,10 +34,11 @@ export default async function SkillDetailPage({ params }: PageProps<"/dashboard/
     throw err;
   }
 
-  const [evidence, allProjects, allSkills] = await Promise.all([
+  const [evidence, allProjects, allSkills, credentials] = await Promise.all([
     getEvidenceService().list(user.id, skill.id),
     getProjectService().list(user.id),
     getSkillService().list(user.id, { sort: "name" }),
+    getCredentialService().listForProfile(user.id),
   ]);
   const projects = allProjects.filter((p) => p.skills.includes(skill.name));
   const explanation = explainVerification({
@@ -40,6 +46,7 @@ export default async function SkillDetailPage({ params }: PageProps<"/dashboard/
     yearsOfExperience: skill.yearsOfExperience,
     evidence,
     projectCount: projects.length,
+    assessmentPassed: credentials.some((c) => c.talentSkillId === skill.id && c.status === "VALID"),
   });
 
   return (
