@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, BriefcaseBusiness, ChevronRight, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "./reveal";
 
 const STEPS = [
   {
@@ -24,7 +25,7 @@ export function Ecosystem() {
   return (
     <section id="ecosysteme" className="scroll-mt-24 py-20">
       <div className="mx-auto grid max-w-[1400px] items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.5fr]">
-        <div>
+        <Reveal>
           <p className="text-brand flex items-center gap-2 text-sm font-semibold">
             <span aria-hidden className="bg-accent h-0.5 w-6 rounded-full" /> Un écosystème complet
           </p>
@@ -42,14 +43,16 @@ export function Ecosystem() {
               Découvrir comment ça marche <ArrowRight />
             </Link>
           </Button>
-        </div>
+        </Reveal>
 
         <ol className="grid items-stretch gap-6 pt-4 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
           {STEPS.flatMap(({ icon: Icon, title, text }, i) => {
             const card = (
-              <li
+              <Reveal
+                as="li"
                 key={title}
-                className="shadow-soft relative rounded-2xl bg-white px-5 pt-9 pb-6 text-center"
+                delay={i * 160}
+                className="shadow-soft hover:shadow-lift relative rounded-2xl bg-white px-5 pt-9 pb-6 text-center hover:-translate-y-1"
               >
                 <span className="bg-brand absolute -top-4 left-1/2 flex size-8 -translate-x-1/2 items-center justify-center rounded-full text-sm font-bold text-white ring-4 ring-white">
                   {i + 1}
@@ -59,7 +62,7 @@ export function Ecosystem() {
                 </span>
                 <h3 className="text-navy mt-4 font-bold">{title}</h3>
                 <p className="text-muted mt-2 text-sm leading-relaxed">{text}</p>
-              </li>
+              </Reveal>
             );
             return i < STEPS.length - 1
               ? [

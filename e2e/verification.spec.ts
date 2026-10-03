@@ -136,10 +136,17 @@ test("recommendation: request a link, the recommender answers without an account
   // The recommender: no session, fresh context.
   const anon = await browser.newContext({ baseURL });
   const guest = await anon.newPage();
+  // Warm the page and its API route up first: a cold dev compilation can reload the page mid-fill.
+
+  await anon.request.get(new URL(link).pathname);
+
+  await anon.request.get(new URL(link).pathname.replace("/recommend/", "/api/recommend/"));
+
   await guest.goto(new URL(link).pathname);
   await expect(guest.getByRole("heading", { name: /Recommander Sehin/ })).toBeVisible();
   await guest.getByRole("button", { name: "Envoyer ma recommandation" }).click();
   await expect(guest.getByText(/au moins quelques phrases/)).toBeVisible();
+  await expect(guest.locator("form[data-hydrated=true]")).toBeVisible();
   await guest.getByLabel("Votre recommandation").fill(text);
   await guest.getByRole("button", { name: "Envoyer ma recommandation" }).click();
   await expect(guest.getByText("Merci !")).toBeVisible();

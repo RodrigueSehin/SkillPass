@@ -88,7 +88,7 @@ const APPS = [
   { label: "Dataverse", icon: Database, tile: "bg-emerald-100 text-emerald-700" },
 ] as const;
 
-function PassCard({ className }: { className?: string }) {
+export function PassCard({ className }: { className?: string }) {
   return (
     <article
       aria-label="Aperçu d'un SkillPass"
@@ -114,8 +114,8 @@ function PassCard({ className }: { className?: string }) {
           <div
             role="img"
             aria-label="Score SkillPass : 87 sur 100"
-            className="relative flex size-16 items-center justify-center rounded-full"
-            style={{ background: "conic-gradient(#16A34A 0 87%, #E2E8F0 87% 100%)" }}
+            className="score-ring relative flex size-16 items-center justify-center rounded-full"
+            style={{ "--ring": 87 } as React.CSSProperties}
           >
             <span className="flex size-[3.4rem] flex-col items-center justify-center rounded-full bg-white leading-none">
               <span className="text-navy text-lg font-bold">87</span>
@@ -162,7 +162,7 @@ function PassCard({ className }: { className?: string }) {
 /** Right-hand side of the hero. Stacked on phones, floating composition from `sm` up. */
 export function HeroVisual() {
   return (
-    <div className="relative w-full">
+    <div className="animate-pop-in relative w-full" style={{ animationDelay: "250ms" }}>
       {/* Phones: portrait, technology chips, then the card — nothing overlaps. */}
       <div className="flex flex-col items-center gap-5 sm:hidden">
         <div className="relative h-56 w-full max-w-[16rem] rounded-[2rem] bg-blue-100/70">
@@ -201,6 +201,7 @@ export function HeroVisual() {
           {APPS.map(({ label, icon: Icon, tile }, i) => (
             <li
               key={label}
+              style={{ animationDelay: `${-i * 1.4}s` }}
               className={cn(
                 "shadow-lift flex w-40 -rotate-[8deg] items-center gap-3 rounded-2xl bg-white px-3 py-2.5",
                 i % 2 === 1 && "translate-x-4",
@@ -217,7 +218,7 @@ export function HeroVisual() {
         <p
           aria-hidden
           className="text-navy absolute top-3 right-0 max-w-[11rem] -rotate-[8deg] text-right text-2xl leading-tight sm:text-3xl"
-          style={{ fontFamily: "var(--font-script), cursive" }}
+          style={{ fontFamily: "var(--font-script), cursive", animationDelay: "900ms" }}
         >
           Vos compétences ont de la valeur !
           <svg viewBox="0 0 160 14" className="text-accent mt-1 ml-auto w-36" fill="none">
@@ -225,7 +226,7 @@ export function HeroVisual() {
           </svg>
         </p>
 
-        <PassCard className="absolute right-0 bottom-2 w-[16.5rem] sm:w-[18rem]" />
+        <PassCard className="animate-float-slow absolute right-0 bottom-2 w-[16.5rem] sm:w-[18rem]" />
       </div>
     </div>
   );

@@ -27,3 +27,18 @@ export const RESOURCE_LINKS = [
   { href: "/#academies", label: "Pour les académies" },
   { href: "/#verification", label: "Vérifier un credential" },
 ] as const;
+
+/** Left panel of the sign-in pages. Anchors point at the landing page. */
+export const AUTH_NAV_LINKS = [
+  { href: "/#fonctionnalites", label: "Fonctionnalités" },
+  { href: "/#tarifs", label: "Tarifs" },
+  { href: "/#a-propos", label: "À propos" },
+] as const;
+
+/** ⚠️ Placeholder figures from the mockup, like HERO_STATS: replace with real numbers before launch. */
+export const AUTH_STATS = [
+  { value: "50K+", label: "Talents" },
+  { value: "2K+", label: "Entreprises" },
+  { value: "500+", label: "Organismes de formation" },
+  { value: "95%", label: "Taux de satisfaction" },
+] as const;

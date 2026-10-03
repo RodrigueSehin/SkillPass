@@ -5,6 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { submitRecommendationSchema } from "@/schemas/verification";
 
 export function RecommendationForm({ token, holderName }: { token: string; holderName: string }) {
@@ -12,6 +13,7 @@ export function RecommendationForm({ token, holderName }: { token: string; holde
   const [error, setError] = useState<string>();
   const [done, setDone] = useState(false);
   const [pending, startTransition] = useTransition();
+  const hydrated = useHydrated();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,8 +48,9 @@ export function RecommendationForm({ token, holderName }: { token: string; holde
     );
   }
 
+  // data-hydrated lets tests wait until submit is handled by React, not by the browser.
   return (
-    <form onSubmit={submit} noValidate className="space-y-4">
+    <form onSubmit={submit} noValidate data-hydrated={hydrated} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="rec-title">Votre fonction (optionnel)</Label>
         <Input

@@ -1,10 +1,10 @@
+import { AudienceCarousel } from "@/components/marketing/audience-carousel";
 import { Ecosystem } from "@/components/marketing/ecosystem";
 import { FeatureStrip } from "@/components/marketing/feature-strip";
 import { Hero } from "@/components/marketing/hero";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SiteHeader } from "@/components/marketing/site-header";
 import {
-  AudiencesSection,
   FeaturesSection,
   FinalCta,
   PricingSection,
@@ -20,9 +20,9 @@ export default function LandingPage() {
         <Hero />
         <FeatureStrip />
         <Ecosystem />
+        <AudienceCarousel />
         <FeaturesSection />
         <WhySection />
-        <AudiencesSection />
         <TrustSection />
         <PricingSection />
         <FinalCta />

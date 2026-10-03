@@ -39,6 +39,72 @@
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
+/* Motion. Utilities: animate-fade-up, animate-float, animate-float-slow, animate-pop-in. */
+@theme {
+  --animate-fade-up: fade-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-pop-in: pop-in 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-slow: float 9s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
+
+/* Carousel progress bar. Plain CSS (not @theme) so Tailwind never prunes it: it is referenced inline. */
+@keyframes slide-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Lets a conic-gradient ring fill smoothly (--ring is the target percentage). */
+@property --ring {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes ring-fill {
+  from {
+    --ring: 0;
+  }
+}
+
+.score-ring {
+  background: conic-gradient(#16a34a calc(var(--ring) * 1%), #e2e8f0 0);
+  animation: ring-fill 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.4s both;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -62,6 +128,7 @@ body {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
