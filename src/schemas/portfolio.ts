@@ -41,6 +41,14 @@ export const createExperienceSchema = z
 
 export const updateExperienceSchema = createExperienceSchema;
 
+export const CERTIFICATION_LEVELS = ["FUNDAMENTAL", "ASSOCIATE", "PROFESSIONAL", "EXPERT"] as const;
+export const CERTIFICATION_LEVEL_LABELS: Record<(typeof CERTIFICATION_LEVELS)[number], string> = {
+  FUNDAMENTAL: "Fondamental",
+  ASSOCIATE: "Associé",
+  PROFESSIONAL: "Professionnel",
+  EXPERT: "Expert",
+};
+
 export const createCertificationSchema = z
   .object({
     name: z.string().trim().min(2, "Nom trop court").max(160),
@@ -49,6 +57,11 @@ export const createCertificationSchema = z
     expirationDate: optionalDate,
     credentialId: optionalText(120),
     credentialUrl: optionalUrl,
+    category: optionalText(60),
+    level: z.preprocess(blankToUndefined, z.enum(CERTIFICATION_LEVELS).optional()),
+    description: optionalText(500),
+    /** Omitted by the quick edit dialog: the existing skills are then left untouched. */
+    skills: z.array(z.string().trim().min(1).max(60)).max(30).optional(),
   })
   .refine((v) => !v.expirationDate || v.expirationDate >= v.issueDate, {
     message: "L'expiration précède la date d'émission",

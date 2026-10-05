@@ -27,6 +27,15 @@ export async function updateCertificationAction(id: string, values: unknown) {
   );
 }
 
+/** Used by the full "add" page: returns the new id so the proof file can be attached afterwards. */
+export async function createCertificationAction(values: unknown): Promise<{ id?: string; error?: string }> {
+  let id: string | undefined;
+  const result = await runAction(async (userId) => {
+    id = (await getCertificationService().add(userId, createCertificationSchema.parse(values))).id;
+  });
+  return done({ ...result, id });
+}
+
 export async function deleteCertificationAction(id: string) {
   return done(await runAction((userId) => getCertificationService().remove(userId, id)));
 }

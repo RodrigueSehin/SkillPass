@@ -12,6 +12,7 @@ drop table if exists
   skill_evidence,
   project_skills,
   experiences,
+  certification_skills,
   certifications,
   projects,
   talent_skills,

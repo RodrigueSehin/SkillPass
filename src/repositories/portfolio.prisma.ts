@@ -168,7 +168,8 @@ export class PrismaExperienceRepository implements CrudRepository<
 
 // ---------- Certifications ----------
 
-type CertificationRow = Prisma.CertificationGetPayload<object>;
+const certificationInclude = { skills: { include: { skill: true } } } satisfies Prisma.CertificationInclude;
+type CertificationRow = Prisma.CertificationGetPayload<{ include: typeof certificationInclude }>;
 
 const toCertification = (r: CertificationRow): CertificationDTO => ({
   id: r.id,
@@ -178,6 +179,12 @@ const toCertification = (r: CertificationRow): CertificationDTO => ({
   expirationDate: toDay(r.expirationDate),
   credentialId: r.credentialId,
   credentialUrl: r.credentialUrl,
+  category: r.category,
+  level: r.level,
+  description: r.description,
+  documentName: r.documentName,
+  documentSize: r.documentSize,
+  skills: r.skills.map((s) => s.skill.name).sort(),
   verificationStatus: r.verificationStatus,
 });
 
@@ -188,6 +195,10 @@ const certificationData = (i: CreateCertificationInput) => ({
   expirationDate: fromDay(i.expirationDate),
   credentialId: nul(i.credentialId),
   credentialUrl: nul(i.credentialUrl),
+  // The quick edit dialog does not send these: undefined leaves the stored value untouched.
+  ...(i.category !== undefined || i.skills === undefined ? { category: nul(i.category) } : {}),
+  ...(i.level !== undefined || i.skills === undefined ? { level: nul(i.level) } : {}),
+  ...(i.description !== undefined || i.skills === undefined ? { description: nul(i.description) } : {}),
 });
 
 export class PrismaCertificationRepository implements CrudRepository<
@@ -198,33 +209,77 @@ export class PrismaCertificationRepository implements CrudRepository<
   async list(profileId: string) {
     const rows = await prisma.certification.findMany({
       where: { profileId },
+      include: certificationInclude,
       orderBy: { issueDate: "desc" },
     });
     return rows.map(toCertification);
   }
 
   async findById(profileId: string, id: string) {
-    const row = await prisma.certification.findFirst({ where: { id, profileId } });
+    const row = await prisma.certification.findFirst({
+      where: { id, profileId },
+      include: certificationInclude,
+    });
     return row ? toCertification(row) : null;
   }
 
   async create(profileId: string, input: CreateCertificationInput) {
+    const skillIds = await skillIdsFor(input.skills ?? []);
     // verificationStatus keeps its UNVERIFIED default: only a verifier can change it.
-    return toCertification(
-      await prisma.certification.create({ data: { profileId, ...certificationData(input) } }),
-    );
+    const row = await prisma.certification.create({
+      data: {
+        profileId,
+        ...certificationData(input),
+        skills: { create: skillIds.map((skillId) => ({ skillId })) },
+      },
+      include: certificationInclude,
+    });
+    return toCertification(row);
   }
 
   async update(profileId: string, id: string, input: CreateCertificationInput) {
-    const { count } = await prisma.certification.updateMany({
-      where: { id, profileId },
-      data: certificationData(input),
+    const skillIds = input.skills ? await skillIdsFor(input.skills) : undefined;
+    const ok = await prisma.$transaction(async (tx) => {
+      const { count } = await tx.certification.updateMany({
+        where: { id, profileId },
+        data: certificationData(input),
+      });
+      if (count === 0) return false;
+      if (skillIds) {
+        await tx.certificationSkill.deleteMany({ where: { certificationId: id } });
+        await tx.certificationSkill.createMany({
+          data: skillIds.map((skillId) => ({ certificationId: id, skillId })),
+        });
+      }
+      return true;
     });
-    return count === 0 ? null : this.findById(profileId, id);
+    return ok ? this.findById(profileId, id) : null;
   }
 
   async remove(profileId: string, id: string) {
     const { count } = await prisma.certification.deleteMany({ where: { id, profileId } });
     return count > 0;
+  }
+
+  /** Stores the proof's storage key and display metadata. Returns the previous key, if any. */
+  async setDocument(profileId: string, id: string, doc: { path: string; name: string; size: number }) {
+    const previous = await prisma.certification.findFirst({
+      where: { id, profileId },
+      select: { documentPath: true },
+    });
+    if (!previous) return null;
+    await prisma.certification.update({
+      where: { id },
+      data: { documentPath: doc.path, documentName: doc.name, documentSize: doc.size },
+    });
+    return { previousPath: previous.documentPath };
+  }
+
+  async getDocumentPath(profileId: string, id: string) {
+    const row = await prisma.certification.findFirst({
+      where: { id, profileId },
+      select: { documentPath: true },
+    });
+    return row?.documentPath ?? null;
   }
 }

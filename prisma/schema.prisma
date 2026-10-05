@@ -98,6 +98,7 @@ model Skill {
   category      SkillCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   talentSkills  TalentSkill[]
   projectSkills ProjectSkill[]
+  certificationSkills CertificationSkill[]
 
   @@index([categoryId])
   @@map("skills")
@@ -186,14 +187,32 @@ model Certification {
   expirationDate     DateTime?                       @map("expiration_date")
   credentialId       String?                         @map("credential_id")
   credentialUrl      String?                         @map("credential_url")
+  category           String?
+  level              String?
+  description        String?
   documentPath       String?                         @map("document_path")
+  documentName       String?                         @map("document_name")
+  documentSize       Int?                            @map("document_size")
   verificationStatus CertificationVerificationStatus @default(UNVERIFIED) @map("verification_status")
   createdAt          DateTime                        @default(now()) @map("created_at")
 
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile Profile              @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skills  CertificationSkill[]
 
   @@index([profileId])
   @@map("certifications")
+}
+
+model CertificationSkill {
+  certificationId String @map("certification_id") @db.Uuid
+  skillId         String @map("skill_id") @db.Uuid
+
+  certification Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+  skill         Skill         @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([certificationId, skillId])
+  @@index([skillId])
+  @@map("certification_skills")
 }
 
 enum EvidenceType {

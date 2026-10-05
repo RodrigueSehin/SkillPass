@@ -13,6 +13,7 @@ import {
 import { SkillService } from "./skill.service";
 import { getStorage } from "@/lib/storage/storage";
 import { EvidenceService } from "./evidence.service";
+import { CertificationDocumentService } from "./certification-document.service";
 import { AssessmentService } from "./assessment.service";
 import { CredentialService } from "./credential.service";
 import { RecommendationService } from "./recommendation.service";
@@ -23,6 +24,8 @@ export const getSkillService = () => new SkillService(getTalentSkillRepository()
 export const getProjectService = () => new CrudService(getProjectRepository(), "Projet");
 export const getExperienceService = () => new CrudService(getExperienceRepository(), "Expérience");
 export const getCertificationService = () => new CrudService(getCertificationRepository(), "Certification");
+export const getCertificationDocumentService = () =>
+  new CertificationDocumentService(getCertificationRepository(), getStorage);
 
 export const getProfileAccountService = () => new ProfileAccountService(getProfileRepository());
 export const getCredentialService = () =>

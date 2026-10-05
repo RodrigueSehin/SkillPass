@@ -33,5 +33,12 @@ export interface CertificationDTO {
   expirationDate: string | null;
   credentialId: string | null;
   credentialUrl: string | null;
+  category: string | null;
+  level: string | null;
+  description: string | null;
+  /** Original file name of the uploaded proof, if any (the file itself is served by the API). */
+  documentName: string | null;
+  documentSize: number | null;
+  skills: string[];
   verificationStatus: CertificationStatus;
 }

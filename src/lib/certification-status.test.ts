@@ -16,6 +16,12 @@ const cert = (id: string, over: Partial<CertificationDTO>): CertificationDTO => 
   expirationDate: null,
   credentialId: null,
   credentialUrl: null,
+  category: null,
+  level: null,
+  description: null,
+  documentName: null,
+  documentSize: null,
+  skills: [],
   verificationStatus: "UNVERIFIED",
   ...over,
 });
