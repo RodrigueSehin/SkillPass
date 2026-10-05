@@ -132,3 +132,11 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Scrollable but without a visible bar (the sidebar list). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
