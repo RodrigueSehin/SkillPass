@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import cityPhoto from "@/assets/profile/city.jpg";
 import {
   Award,
   BadgeCheck,
@@ -9,30 +11,38 @@ import {
   MessageSquareQuote,
   Sparkles,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { QRCodeSVG } from "qrcode.react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { QRCodeCard } from "@/components/skills/qr-code-card";
 import { SkillPassScore } from "@/components/skills/skillpass-score";
 import { SkillProgress } from "@/components/skills/skill-progress";
-import { StatCard } from "@/components/skills/stat-card";
 import { VerificationBadge } from "@/components/skills/verification-badge";
 import { formatMonth, formatPeriod } from "@/lib/utils/format";
-import type { Passport } from "@/services/passport.service";
+import { yearsFromExperiences, type Passport } from "@/services/passport.service";
 import { AVAILABILITY_LABELS, type PublicProfileDTO } from "@/types/profile";
 import { VERIFICATION_STATUS_LABELS } from "@/types/skill";
 import { CredentialBadge } from "@/components/verification/credential-badge";
 import { appUrl } from "@/lib/utils/app-url";
+import {
+  AboutCard,
+  BadgesCard,
+  CertificationsCard,
+  EvaluationCard,
+  ExperiencesCard,
+  ProjectsCard,
+  TopSkillsCard,
+} from "./overview-cards";
 import { ScoreBreakdown } from "./score-breakdown";
 
 export const PASSPORT_TABS = [
-  ["overview", "Vue d'ensemble"],
+  ["overview", "Aperçu"],
   ["skills", "Compétences"],
-  ["certifications", "Certifications"],
   ["experiences", "Expériences"],
   ["projects", "Projets"],
-  ["portfolio", "Portfolio"],
+  ["certifications", "Certifications"],
+  ["badges", "Badges"],
+  ["evaluations", "Évaluations"],
   ["recommendations", "Recommandations"],
 ] as const;
 export type PassportTab = (typeof PASSPORT_TABS)[number][0];
@@ -67,26 +77,50 @@ export function PassportView({ profile, passport, tab, basePath, publicUrl, acti
     .join("")
     .toUpperCase();
   const { stats } = passport;
+  const tabHref = (key: PassportTab) => (key === "overview" ? basePath : `${basePath}?tab=${key}`);
+  const chips = passport.skills.slice(0, 4).map((s) => s.name);
+  const kpis = [
+    ["Compétences", stats.skills, Sparkles],
+    ["Vérifiées", stats.verifiedSkills, BadgeCheck],
+    ["Projets", stats.projects, FolderKanban],
+    ["Certifications", stats.certifications, Award],
+    ["Recommandations", stats.recommendations, MessageSquareQuote],
+  ] as const;
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-start gap-4">
-            <Avatar className="size-20 text-xl">
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
+      <header className="from-navy relative overflow-hidden rounded-3xl bg-gradient-to-br via-blue-900 to-blue-700 p-5 text-white sm:p-8">
+        <Image
+          src={cityPhoto}
+          alt=""
+          aria-hidden
+          fill
+          sizes="(min-width: 1280px) 60vw, 100vw"
+          className="pointer-events-none object-cover object-right opacity-60"
+        />
+        <div
+          aria-hidden
+          className="from-navy via-navy/85 pointer-events-none absolute inset-0 bg-gradient-to-r to-transparent"
+        />
+        <div className="relative flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+          <div className="flex min-w-0 items-start gap-4 sm:gap-6">
+            <span
+              aria-hidden
+              className="flex size-20 shrink-0 items-center justify-center rounded-full border-4 border-white/80 bg-blue-600 text-2xl font-bold shadow-lg sm:size-32 sm:text-4xl"
+            >
+              {initials}
+            </span>
             <div className="min-w-0">
-              <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight">
+              <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl">
                 {profile.fullName}
                 {passport.isVerified && (
-                  <Badge tone="success">
-                    <BadgeCheck className="size-3.5" aria-hidden /> Verified
-                  </Badge>
+                  <BadgeCheck className="size-6 text-sky-300" aria-label="Profil vérifié" />
                 )}
               </h1>
-              {profile.headline && <p className="text-muted mt-1">{profile.headline}</p>}
-              <p className="text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              {profile.headline && (
+                <p className="mt-1 text-sm text-blue-100 sm:text-base">{profile.headline}</p>
+              )}
+              <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-blue-100">
                 {profile.location && (
                   <span className="flex items-center gap-1">
                     <MapPin className="size-4" aria-hidden /> {profile.location}
@@ -94,30 +128,74 @@ export function PassportView({ profile, passport, tab, basePath, publicUrl, acti
                 )}
                 <span>{AVAILABILITY_LABELS[profile.availability]}</span>
               </p>
-              {actions && <div className="mt-4 flex flex-wrap gap-3">{actions}</div>}
+              {chips.length > 0 && (
+                <ul aria-label="Compétences clés" className="mt-4 flex flex-wrap gap-2">
+                  {chips.map((name) => (
+                    <li
+                      key={name}
+                      className="rounded-md bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/20"
+                    >
+                      {name}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
-          <div className="flex items-center justify-between gap-6 sm:justify-start">
-            <SkillPassScore score={passport.score.total} verified={passport.isVerified} size={132} />
-            <QRCodeCard url={publicUrl} label="Scannez pour vérifier" />
-          </div>
-        </CardContent>
-      </Card>
 
-      <section aria-label="Indicateurs" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Compétences" value={stats.skills} icon={Sparkles} />
-        <StatCard label="Vérifiées" value={stats.verifiedSkills} icon={BadgeCheck} />
-        <StatCard label="Projets" value={stats.projects} icon={FolderKanban} />
-        <StatCard label="Certifications" value={stats.certifications} icon={Award} />
-        <StatCard label="Recommandations" value={stats.recommendations} icon={MessageSquareQuote} />
-      </section>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center xl:shrink-0">
+            <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20">
+              <p className="text-center text-xs font-semibold text-blue-100">SkillPass Score</p>
+              <SkillPassScore
+                score={passport.score.total}
+                verified={passport.isVerified}
+                size={120}
+                tone="dark"
+              />
+            </div>
+            <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
+              <div className="flex items-center gap-3">
+                <QRCodeSVG
+                  value={publicUrl}
+                  size={72}
+                  fgColor="#172554"
+                  level="M"
+                  title={`QR code vers ${publicUrl}`}
+                />
+                <div>
+                  <p className="text-navy text-sm font-bold">Mon QR Code</p>
+                  <p className="text-muted text-xs">Scannez pour vérifier mon profil</p>
+                </div>
+              </div>
+              {actions && <div className="mt-3 flex flex-wrap gap-2">{actions}</div>}
+            </div>
+          </div>
+        </div>
+
+        <section
+          aria-label="Indicateurs"
+          className="relative mt-6 grid grid-cols-2 gap-x-4 gap-y-4 rounded-2xl bg-white p-4 text-slate-900 shadow-lg sm:grid-cols-5"
+        >
+          {kpis.map(([label, value, Icon]) => (
+            <div key={label} className="flex min-w-0 items-center gap-3">
+              <span className="text-brand flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                <Icon className="size-5" aria-hidden />
+              </span>
+              <span className="min-w-0">
+                <span className="text-navy block text-xl leading-none font-extrabold">{value}</span>
+                <span className="text-muted mt-1 block text-xs">{label}</span>
+              </span>
+            </div>
+          ))}
+        </section>
+      </header>
 
       <nav aria-label="Sections du SkillPass" className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         <ul className="border-border flex min-w-max gap-1 border-b">
           {PASSPORT_TABS.map(([key, label]) => (
             <li key={key}>
               <Link
-                href={key === "overview" ? basePath : `${basePath}?tab=${key}`}
+                href={tabHref(key)}
                 scroll={false}
                 aria-current={tab === key ? "page" : undefined}
                 className={`inline-block border-b-2 px-4 py-3 text-sm font-medium ${
@@ -133,7 +211,7 @@ export function PassportView({ profile, passport, tab, basePath, publicUrl, acti
         </ul>
       </nav>
 
-      <TabContent tab={tab} profile={profile} passport={passport} />
+      <TabContent tab={tab} profile={profile} passport={passport} tabHref={tabHref} />
     </div>
   );
 }
@@ -142,64 +220,69 @@ function TabContent({
   tab,
   profile,
   passport,
+  tabHref,
 }: {
   tab: PassportTab;
   profile: PublicProfileDTO;
   passport: Passport;
+  tabHref: (key: PassportTab) => string;
 }) {
   switch (tab) {
-    case "overview":
+    case "overview": {
+      const years = Math.max(profile.yearsOfExperience, yearsFromExperiences(passport.experiences));
       return (
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            {profile.bio && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>À propos</CardTitle>
-                </CardHeader>
-                <CardContent className="text-muted pt-4 text-sm leading-relaxed">{profile.bio}</CardContent>
-              </Card>
-            )}
-            {passport.credentials.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Badges vérifiés</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-4 sm:grid-cols-2">
-                  {passport.credentials.slice(0, 4).map((c) => (
-                    <CredentialBadge
-                      key={c.credentialId}
-                      credential={c}
-                      verifyUrl={`${appUrl()}/verify/${c.credentialId}`}
-                      showQr={false}
-                    />
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-            <Card>
-              <CardHeader>
-                <CardTitle>Top compétences</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                {passport.skills.length === 0 && (
-                  <p className="text-muted text-sm">Aucune compétence renseignée.</p>
-                )}
-                {passport.skills.slice(0, 5).map((s) => (
-                  <SkillProgress key={s.id} name={s.name} score={s.score} />
-                ))}
-              </CardContent>
-            </Card>
+        <div className="grid items-start gap-6 2xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="grid min-w-0 gap-6 lg:grid-cols-2">
+            <AboutCard profile={profile} years={years} />
+            <TopSkillsCard skills={passport.skills} moreHref={tabHref("skills")} />
+            <ProjectsCard projects={passport.projects} moreHref={tabHref("projects")} />
+            <ExperiencesCard experiences={passport.experiences} moreHref={tabHref("experiences")} />
           </div>
-          <Card className="h-fit">
-            <CardHeader>
-              <CardTitle>Pourquoi ce score ?</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScoreBreakdown score={passport.score} />
-            </CardContent>
-          </Card>
+          <div className="grid min-w-0 gap-6 md:grid-cols-2 2xl:grid-cols-1">
+            <BadgesCard credentials={passport.credentials} moreHref={tabHref("badges")} />
+            <CertificationsCard
+              certifications={passport.certifications}
+              moreHref={tabHref("certifications")}
+            />
+            <div className="md:col-span-2 2xl:col-span-1">
+              <EvaluationCard score={passport.score} moreHref={tabHref("evaluations")} />
+            </div>
+          </div>
         </div>
+      );
+    }
+
+    case "badges":
+      return passport.credentials.length === 0 ? (
+        <EmptyState
+          icon={BadgeCheck}
+          title="Aucun badge pour l'instant"
+          description="Un badge vérifiable est délivré après une évaluation réussie et validée."
+        />
+      ) : (
+        <ul className="grid gap-4 lg:grid-cols-2">
+          {passport.credentials.map((c) => (
+            <li key={c.credentialId}>
+              <CredentialBadge
+                credential={c}
+                verifyUrl={`${appUrl()}/verify/${c.credentialId}`}
+                showQr={false}
+              />
+            </li>
+          ))}
+        </ul>
+      );
+
+    case "evaluations":
+      return (
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>Pourquoi ce score ?</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScoreBreakdown score={passport.score} />
+          </CardContent>
+        </Card>
       );
 
     case "skills":
@@ -312,15 +395,6 @@ function TabContent({
             </li>
           ))}
         </ul>
-      );
-
-    case "portfolio":
-      return (
-        <EmptyState
-          icon={FolderKanban}
-          title="Portfolio bientôt disponible"
-          description="Les images et documents de vos projets arriveront avec les preuves."
-        />
       );
 
     case "recommendations":

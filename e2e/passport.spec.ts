@@ -3,14 +3,18 @@ import { expect, test } from "@playwright/test";
 test("Mon SkillPass shows the explainable score and switches tabs via the URL", async ({ page }) => {
   await page.goto("/dashboard/skillpass");
   await expect(page.getByRole("heading", { level: 1, name: /Sehin G. Rodrigue/ })).toBeVisible();
-  await expect(page.getByRole("img", { name: /Score SkillPass/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Score SkillPass/ }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Top compétences" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mes badges" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Indicateurs" })).toBeVisible();
+
+  const tabs = page.getByRole("navigation", { name: "Sections du SkillPass" });
+  await tabs.getByRole("link", { name: "Évaluations" }).click();
+  await expect(page).toHaveURL(/tab=evaluations/);
   await expect(page.getByText("Pourquoi ce score ?")).toBeVisible();
   await expect(page.getByText("Compétences évaluées")).toBeVisible();
 
-  await page
-    .getByRole("navigation", { name: "Sections du SkillPass" })
-    .getByRole("link", { name: "Certifications" })
-    .click();
+  await tabs.getByRole("link", { name: "Certifications" }).click();
   await expect(page).toHaveURL(/tab=certifications/);
   await expect(page.getByText(/PL-200/).first()).toBeVisible();
 });

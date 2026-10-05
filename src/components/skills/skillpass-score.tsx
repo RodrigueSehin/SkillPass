@@ -6,6 +6,8 @@ interface SkillPassScoreProps {
   max?: number;
   verified?: boolean;
   size?: number;
+  /** "dark" for use on the navy banner. */
+  tone?: "light" | "dark";
   className?: string;
 }
 
@@ -15,6 +17,7 @@ export function SkillPassScore({
   max = 100,
   verified = false,
   size = 160,
+  tone = "light",
   className,
 }: SkillPassScoreProps) {
   const stroke = 12;
@@ -37,7 +40,14 @@ export function SkillPassScore({
               <stop offset="100%" stopColor="#F59E0B" />
             </linearGradient>
           </defs>
-          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#E2E8F0" strokeWidth={stroke} />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={tone === "dark" ? "rgba(255,255,255,0.18)" : "#E2E8F0"}
+            strokeWidth={stroke}
+          />
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -51,12 +61,23 @@ export function SkillPassScore({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-navy text-4xl font-bold tracking-tight">{score}</span>
-          <span className="text-muted text-xs font-medium">/{max}</span>
+          <span
+            className={cn("text-4xl font-bold tracking-tight", tone === "dark" ? "text-white" : "text-navy")}
+          >
+            {score}
+          </span>
+          <span className={cn("text-xs font-medium", tone === "dark" ? "text-blue-200" : "text-muted")}>
+            /{max}
+          </span>
         </div>
       </div>
       {verified && (
-        <span className="text-success inline-flex items-center gap-1 text-sm font-semibold">
+        <span
+          className={cn(
+            "inline-flex items-center gap-1 text-sm font-semibold",
+            tone === "dark" ? "text-emerald-300" : "text-success",
+          )}
+        >
           <BadgeCheck className="size-4" aria-hidden /> Vérifié
         </span>
       )}
