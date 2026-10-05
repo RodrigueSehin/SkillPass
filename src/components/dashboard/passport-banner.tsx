@@ -72,7 +72,7 @@ export function PassportBanner({ name, headline, score, verified, publicUrl, cou
             <QRCodeSVG
               value={publicUrl}
               size={52}
-              fgColor="#172554"
+              fgColor="#011E50"
               level="M"
               title="QR code de votre profil"
             />

@@ -33,7 +33,7 @@ function TalentIllustration({ className }: { className?: string }) {
       aria-label="Illustration d'un professionnel souriant"
     >
       {/* Jacket and shirt */}
-      <path d="M10 520C10 405 78 352 200 342c122 10 190 63 190 178Z" fill="#172554" />
+      <path d="M10 520C10 405 78 352 200 342c122 10 190 63 190 178Z" fill="#011E50" />
       <path d="M148 344 200 452l52-108-26-14h-52Z" fill="#FFFFFF" />
       <path d="M148 344 118 360l82 100-6-14Z" fill="#0F1D45" />
       <path d="M252 344l30 16-82 100 6-14Z" fill="#0F1D45" />
@@ -134,7 +134,7 @@ export function PassCard({ className }: { className?: string }) {
         <QRCodeSVG
           value="https://skillpass.com/verify/SP-9F82A1"
           size={56}
-          fgColor="#172554"
+          fgColor="#011E50"
           level="M"
           title="QR code d'exemple"
         />

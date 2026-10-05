@@ -11,7 +11,10 @@ export function Sidebar() {
       <div className="px-2 py-3">
         <Logo href="/dashboard" tone="light" size="lg" priority />
       </div>
-      <nav aria-label="Navigation principale" className="mt-4 min-h-0 flex-1 space-y-1 no-scrollbar overflow-y-auto">
+      <nav
+        aria-label="Navigation principale"
+        className="no-scrollbar mt-4 min-h-0 flex-1 space-y-1 overflow-y-auto"
+      >
         {DASHBOARD_NAV.map((item) => (
           <SidebarLink key={item.href} item={item} />
         ))}

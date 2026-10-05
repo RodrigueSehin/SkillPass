@@ -2,14 +2,16 @@
 
 /* SkillPass design tokens — single source of truth for the palette. */
 :root {
-  --background: #f8fafc;
+  --background: #f5f7fa;
   --foreground: #0f172a;
   --surface: #ffffff;
   --muted: #64748b;
   --border: #e2e8f0;
-  --navy: #172554;
-  --brand: #2563eb;
-  --accent: #f59e0b;
+  --navy: #011e50;
+  --brand: #063db2;
+  --brand-light: #0b5cad;
+  --accent: #ffb800;
+  --orange: #ff7a00;
   --success: #16a34a;
   --danger: #dc2626;
   --radius: 16px;
@@ -23,6 +25,8 @@
   --color-border: var(--border);
   --color-navy: var(--navy);
   --color-brand: var(--brand);
+  --color-brand-light: var(--brand-light);
+  --color-orange: var(--orange);
   --color-accent: var(--accent);
   --color-success: var(--success);
   --color-danger: var(--danger);
@@ -35,7 +39,7 @@
   --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 16px rgb(15 23 42 / 0.05);
   --shadow-lift: 0 2px 4px rgb(15 23 42 / 0.05), 0 12px 32px rgb(23 37 84 / 0.12);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 

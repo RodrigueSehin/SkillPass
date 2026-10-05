@@ -158,7 +158,7 @@ export function PassportView({ profile, passport, tab, basePath, publicUrl, acti
                 <QRCodeSVG
                   value={publicUrl}
                   size={72}
-                  fgColor="#172554"
+                  fgColor="#011E50"
                   level="M"
                   title={`QR code vers ${publicUrl}`}
                 />

@@ -55,7 +55,7 @@ export function CredentialBadge({ credential, verifyUrl, showQr = true }: Creden
             <QRCodeSVG
               value={verifyUrl}
               size={64}
-              fgColor="#172554"
+              fgColor="#011E50"
               level="M"
               title={`QR code vers ${verifyUrl}`}
             />
