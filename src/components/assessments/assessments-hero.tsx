@@ -3,8 +3,15 @@ import Link from "next/link";
 import { Award, Play } from "lucide-react";
 import heroPhoto from "@/assets/skills/hero.jpg";
 import { buttonVariants } from "@/components/ui/button";
+import { StartAssessmentButton } from "@/components/verification/start-assessment-button";
+import type { AssessmentOverview } from "@/services/assessment.service";
 
-export function AssessmentsHero() {
+/** The primary button opens the most useful assessment: the running one, else the first startable. */
+export function AssessmentsHero({ items }: { items: AssessmentOverview[] }) {
+  const target =
+    items.find((a) => a.activeAttemptId) ??
+    items.find((a) => !a.blockedReason && !a.lastAttempt) ??
+    items.find((a) => !a.blockedReason);
   return (
     <section
       aria-label="Présentation"
@@ -18,9 +25,18 @@ export function AssessmentsHero() {
           Passez des évaluations pratiques, obtenez des badges et renforcez votre crédibilité sur le marché.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <a href="#liste-evaluations" className={buttonVariants()}>
-            <Play /> Passer une évaluation
-          </a>
+          {target ? (
+            <StartAssessmentButton
+              slug={target.slug}
+              resume={Boolean(target.activeAttemptId)}
+              label="Passer une évaluation"
+              size="md"
+            />
+          ) : (
+            <a href="#liste-evaluations" className={buttonVariants()}>
+              <Play /> Voir les évaluations
+            </a>
+          )}
           <Link
             href="/dashboard/certifications"
             className="text-brand border-brand/40 inline-flex h-11 items-center gap-2 rounded-xl border bg-white/70 px-5 text-sm font-semibold hover:bg-white"

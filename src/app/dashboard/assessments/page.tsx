@@ -47,7 +47,7 @@ export default async function AssessmentsPage({ searchParams }: PageProps<"/dash
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0 space-y-6">
-          <AssessmentsHero />
+          <AssessmentsHero items={items} />
           <AssessmentKpis summary={summary} />
           <AssessmentTabs />
 

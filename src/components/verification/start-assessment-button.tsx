@@ -11,6 +11,7 @@ interface StartAssessmentButtonProps {
   /** Overrides the default wording, e.g. "Réessayer" after a failed attempt. */
   label?: string;
   variant?: "primary" | "outline";
+  size?: "sm" | "md";
 }
 
 export function StartAssessmentButton({
@@ -18,6 +19,7 @@ export function StartAssessmentButton({
   resume,
   label,
   variant = "primary",
+  size = "sm",
 }: StartAssessmentButtonProps) {
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -27,7 +29,7 @@ export function StartAssessmentButton({
     <div>
       <Button
         variant={variant}
-        size="sm"
+        size={size}
         className={variant === "outline" ? "text-brand border-brand/40" : undefined}
         disabled={pending}
         onClick={() =>

@@ -25,3 +25,10 @@ test("assessments page: an unknown tab in the URL falls back to the full list", 
   await page.goto("/dashboard/assessments?tab=nope&result=bogus");
   await expect(page.getByRole("heading", { name: /Power Apps — Niveau Avancé/ })).toBeVisible();
 });
+
+test("assessments page: the hero button opens an assessment", async ({ page }) => {
+  await page.goto("/dashboard/assessments");
+  await page.getByRole("button", { name: "Passer une évaluation" }).click();
+  await expect(page).toHaveURL(/\/assessments\/take\//, { timeout: 20_000 });
+  await expect(page.getByRole("timer")).toBeVisible();
+});
