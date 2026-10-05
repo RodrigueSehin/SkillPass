@@ -8,10 +8,14 @@ test("skills: add, filter, edit and delete", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Compétences", level: 1 })).toBeVisible();
   await expect(page.getByText("Power Apps").first()).toBeVisible();
 
-  await page.getByRole("button", { name: "Ajouter une compétence" }).first().click();
-  const dialog = page.getByRole("dialog", { name: "Ajouter une compétence" });
-  await dialog.getByLabel("Nom de la compétence").fill(name);
-  await dialog.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await page.getByRole("link", { name: "Ajouter une compétence" }).first().click();
+  await expect(page).toHaveURL(/\/dashboard\/skills\/new/);
+  await expect(page.getByRole("heading", { level: 1, name: "Ajouter une compétence" })).toBeVisible();
+  await page.getByLabel(/Nom de la compétence/).fill(name);
+  await page.getByLabel("Catégorie").fill("Power Platform");
+  await page.getByRole("radio", { name: "Avancé" }).check({ force: true });
+  await page.getByRole("button", { name: "Enregistrer la compétence" }).click();
+  await expect(page).toHaveURL(/\/dashboard\/skills$/, { timeout: 20_000 });
   await expect(page.getByRole("link", { name })).toBeVisible();
 
   await page.getByLabel("Rechercher une compétence").fill(name);
@@ -21,9 +25,9 @@ test("skills: add, filter, edit and delete", async ({ page }, testInfo) => {
 
   await page.getByRole("button", { name: `Modifier ${name}` }).click();
   const edit = page.getByRole("dialog", { name: `Modifier ${name}` });
-  await edit.getByLabel("Niveau").selectOption("ADVANCED");
+  await edit.getByLabel("Niveau").selectOption("EXPERT");
   await edit.getByRole("button", { name: "Enregistrer" }).click();
-  await expect(page.getByRole("article").filter({ hasText: name }).getByText("Avancé")).toBeVisible();
+  await expect(page.getByRole("article").filter({ hasText: name }).getByText("Expert")).toBeVisible();
 
   await page.getByRole("button", { name: `Supprimer ${name}` }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Supprimer", exact: true }).click();
@@ -36,4 +40,18 @@ test("skills API requires a valid payload", async ({ request }) => {
   });
   expect(res.status()).toBe(400);
   expect((await res.json()).error.code).toBe("VALIDATION");
+});
+
+test("add skill page: validation, and a suggestion pre-fills the name", async ({ page }) => {
+  await page.goto("/dashboard/skills/new");
+  await page.getByRole("button", { name: "Enregistrer la compétence" }).click();
+  await expect(page.getByText("Nom trop court")).toBeVisible();
+
+  await page.getByRole("link", { name: "Dataverse", exact: true }).click();
+  await expect(page).toHaveURL(/name=Dataverse/);
+  await expect(page.getByLabel(/Nom de la compétence/)).toHaveValue("Dataverse");
+
+  // Dataverse is already in the demo profile: the server says so instead of duplicating it.
+  await page.getByRole("button", { name: "Enregistrer la compétence" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "figure déjà" })).toBeVisible();
 });
