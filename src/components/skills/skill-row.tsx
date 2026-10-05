@@ -2,11 +2,11 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { FileCheck2, MessageSquareQuote, Pencil, Trash2 } from "lucide-react";
+import { ArrowRight, FileCheck2, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
-import { SkillProgress } from "./skill-progress";
+import { LEVEL_CHIP, skillVisual } from "@/config/skill-visuals";
+import { cn } from "@/lib/utils/cn";
 import { SkillForm } from "./skill-form";
 import { VerificationBadge } from "./verification-badge";
 import { deleteSkillAction, updateSkillAction } from "@/app/dashboard/skills/actions";
@@ -20,6 +20,7 @@ export function SkillRow({ skill }: { skill: TalentSkillDTO }) {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
+  const { icon: Icon, tile } = skillVisual(skill.name);
 
   function remove() {
     startTransition(async () => {
@@ -30,39 +31,32 @@ export function SkillRow({ skill }: { skill: TalentSkillDTO }) {
   }
 
   return (
-    <Card className="p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
+    <article className="border-border/60 shadow-soft hover:shadow-lift flex h-full flex-col rounded-2xl border bg-white p-4 transition-shadow">
+      <div className="flex items-start gap-3">
+        <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-xl", tile)}>
+          <Icon className="size-6" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
           <Link
             href={`/dashboard/skills/${skill.id}`}
-            className="hover:text-brand font-semibold hover:underline"
+            className="text-navy hover:text-brand block truncate text-sm font-bold hover:underline"
           >
             {skill.name}
           </Link>
-          <p className="text-muted text-sm">
-            {skill.category ?? "Sans catégorie"} · {plural(skill.yearsOfExperience, "an")} ·{" "}
+          <span
+            className={cn(
+              "mt-1 inline-block rounded-md px-2 py-0.5 text-xs font-semibold",
+              LEVEL_CHIP[skill.level],
+            )}
+          >
             {SKILL_LEVEL_LABELS[skill.level]}
-          </p>
+          </span>
         </div>
-        <VerificationBadge status={skill.verificationStatus} />
-      </div>
-      <div className="mt-4">
-        <SkillProgress name="Score" score={skill.score} />
-      </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-muted flex items-center gap-4 text-xs">
-          <span className="flex items-center gap-1">
-            <FileCheck2 className="size-3.5" aria-hidden /> {plural(skill.evidenceCount, "preuve")}
-          </span>
-          <span className="flex items-center gap-1">
-            <MessageSquareQuote className="size-3.5" aria-hidden />{" "}
-            {plural(skill.recommendationCount, "recommandation")}
-          </span>
-        </p>
-        <div className="flex gap-1">
+        <div className="flex shrink-0 gap-0.5">
           <Button
             variant="ghost"
             size="icon"
+            className="size-8"
             aria-label={`Modifier ${skill.name}`}
             onClick={() => setEditing(true)}
           >
@@ -71,6 +65,7 @@ export function SkillRow({ skill }: { skill: TalentSkillDTO }) {
           <Button
             variant="ghost"
             size="icon"
+            className="size-8"
             aria-label={`Supprimer ${skill.name}`}
             onClick={() => setConfirming(true)}
           >
@@ -78,6 +73,43 @@ export function SkillRow({ skill }: { skill: TalentSkillDTO }) {
           </Button>
         </div>
       </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <span
+          role="progressbar"
+          aria-label={`${skill.name} : ${skill.score}%`}
+          aria-valuenow={skill.score}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          className="block h-2 flex-1 overflow-hidden rounded-full bg-slate-100"
+        >
+          <span className="bg-brand block h-full rounded-full" style={{ width: `${skill.score}%` }} />
+        </span>
+        <span className="text-navy text-sm font-bold">{skill.score}%</span>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <VerificationBadge status={skill.verificationStatus} />
+        <span className="text-muted rounded-md bg-slate-100 px-2 py-0.5 text-xs">
+          {skill.category ?? "Sans catégorie"}
+        </span>
+        <span className="text-muted rounded-md bg-slate-100 px-2 py-0.5 text-xs">
+          {plural(skill.yearsOfExperience, "an")}
+        </span>
+      </div>
+
+      <p className="text-muted mt-3 flex items-center gap-1 text-xs">
+        <FileCheck2 className="size-3.5" aria-hidden /> {plural(skill.evidenceCount, "preuve")} ·{" "}
+        {plural(skill.recommendationCount, "recommandation")}
+      </p>
+
+      <Link
+        href={`/dashboard/skills/${skill.id}`}
+        className="text-brand mt-4 flex h-9 items-center justify-center gap-1.5 rounded-lg bg-blue-50 text-xs font-semibold hover:bg-blue-100"
+      >
+        Voir détails <ArrowRight className="size-3.5" aria-hidden />
+      </Link>
+
       {error && (
         <p role="alert" className="text-danger mt-3 text-sm">
           {error}
@@ -108,6 +140,6 @@ export function SkillRow({ skill }: { skill: TalentSkillDTO }) {
           </Button>
         </div>
       </Modal>
-    </Card>
+    </article>
   );
 }

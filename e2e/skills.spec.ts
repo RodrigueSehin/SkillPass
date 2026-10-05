@@ -23,7 +23,7 @@ test("skills: add, filter, edit and delete", async ({ page }, testInfo) => {
   const edit = page.getByRole("dialog", { name: `Modifier ${name}` });
   await edit.getByLabel("Niveau").selectOption("ADVANCED");
   await edit.getByRole("button", { name: "Enregistrer" }).click();
-  await expect(page.getByText(/an · Avancé/)).toBeVisible();
+  await expect(page.getByRole("article").filter({ hasText: name }).getByText("Avancé")).toBeVisible();
 
   await page.getByRole("button", { name: `Supprimer ${name}` }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Supprimer", exact: true }).click();

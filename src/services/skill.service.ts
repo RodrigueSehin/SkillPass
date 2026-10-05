@@ -40,6 +40,10 @@ export class SkillService {
       items: sortSkills(filtered, query.sort ?? "score"),
       categories: [...new Set(all.map((s) => s.category).filter((c): c is string => Boolean(c)))].sort(),
       total: all.length,
+      /** Unfiltered head-count per level, for the overview chart. */
+      levels: Object.fromEntries(
+        SKILL_LEVELS.map((l) => [l, all.filter((s) => s.level === l).length]),
+      ) as Record<SkillLevel, number>,
     };
   }
 
