@@ -1,51 +1,40 @@
-import { Bell, MessageSquare, Search } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Bell, MessageSquare } from "lucide-react";
+import { GlobalSearch } from "./global-search";
+import { HeaderMenu } from "./header-menu";
 import { Logo } from "./logo";
-import { logoutAction } from "@/app/(auth)/actions";
+import { UserMenu } from "./user-menu";
 
-interface TopbarProps {
-  userName: string;
+export interface TopbarUser {
+  name: string;
+  roleLabel: string;
+  canReview: boolean;
 }
 
-export function Topbar({ userName }: TopbarProps) {
-  const initials = userName
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-
+export function Topbar({ user }: { user: TopbarUser }) {
   return (
-    <header className="border-border bg-surface/90 sticky top-0 z-20 flex h-16 items-center gap-3 border-b px-4 backdrop-blur sm:px-6">
+    <header className="border-border/70 sticky top-0 z-20 flex h-[4.5rem] items-center gap-3 border-b bg-white/85 px-4 backdrop-blur sm:px-6">
       <Logo href="/dashboard" size="sm" className="lg:hidden" />
-      <form role="search" className="relative ml-auto hidden max-w-md flex-1 sm:ml-0 sm:block">
-        <Search
-          className="text-muted pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2"
-          aria-hidden
-        />
-        <input
-          type="search"
-          aria-label="Rechercher"
-          placeholder="Rechercher une compétence, un projet…"
-          className="border-border bg-background h-10 w-full rounded-xl border pr-4 pl-10 text-sm"
-        />
-      </form>
-      <div className="ml-auto flex items-center gap-1">
-        <Button variant="ghost" size="icon" aria-label="Notifications">
-          <Bell />
-        </Button>
-        <Button variant="ghost" size="icon" aria-label="Messages">
-          <MessageSquare />
-        </Button>
-        <form action={logoutAction}>
-          <Button variant="ghost" size="sm" type="submit" className="hidden sm:inline-flex">
-            Déconnexion
-          </Button>
-        </form>
-        <Avatar aria-label={userName}>
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
+      <GlobalSearch />
+      <div className="ml-auto flex items-center gap-1 sm:gap-2">
+        <HeaderMenu
+          label="Notifications"
+          triggerClassName="size-11 justify-center text-slate-600"
+          trigger={<Bell className="size-5" aria-hidden />}
+        >
+          <p className="text-muted px-3 py-4 text-sm">
+            Aucune notification pour l&apos;instant. Vous serez prévenu ici d&apos;une vérification, d&apos;un
+            badge ou d&apos;une recommandation.
+          </p>
+        </HeaderMenu>
+        <HeaderMenu
+          label="Messages"
+          triggerClassName="size-11 justify-center text-slate-600"
+          trigger={<MessageSquare className="size-5" aria-hidden />}
+        >
+          <p className="text-muted px-3 py-4 text-sm">La messagerie arrive avec SkillPass Business.</p>
+        </HeaderMenu>
+        <span aria-hidden className="bg-border mx-1 hidden h-8 w-px sm:block" />
+        <UserMenu name={user.name} roleLabel={user.roleLabel} canReview={user.canReview} />
       </div>
     </header>
   );

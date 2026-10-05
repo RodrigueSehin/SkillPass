@@ -91,3 +91,35 @@ export function computeCompletion({ profile, counts }: CompletionInput): Complet
   const done = items.filter((i) => i.done).length;
   return { percent: Math.round((done / items.length) * 100), items, next: items.find((i) => !i.done) };
 }
+
+export interface CompletionMessage {
+  title: string;
+  hint: string;
+  href: string;
+}
+
+/** Encouragement shown next to the completion bar, adapted to how far along the profile is. */
+export function completionMessage({
+  percent,
+  next,
+}: Pick<Completion, "percent" | "next">): CompletionMessage {
+  if (!next || percent >= 100) {
+    return {
+      title: "Votre profil est complet 🎉",
+      hint: "Gardez-le à jour pour rester visible auprès des recruteurs.",
+      href: "/dashboard/settings",
+    };
+  }
+  if (percent >= 70) {
+    return {
+      title: "Super ! Votre profil est presque complet.",
+      hint: `${next.label} pour augmenter votre visibilité.`,
+      href: next.href,
+    };
+  }
+  return {
+    title: "Continuez : votre profil prend forme.",
+    hint: `${next.label} pour être mieux repéré.`,
+    href: next.href,
+  };
+}

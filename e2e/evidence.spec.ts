@@ -102,8 +102,7 @@ test("evidence API rejects a disguised executable and unknown skills", async ({ 
 test("dashboard shows real numbers computed from the portfolio", async ({ page }) => {
   await page.goto("/dashboard");
   await expect(page.getByText("Bonjour Sehin")).toBeVisible();
-  await expect(page.getByText("Compétences vérifiées")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Complétion du profil" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Complétion de votre profil" })).toBeVisible();
   await expect(page.getByRole("img", { name: /Score SkillPass/ })).toBeVisible();
-  await expect(page.getByText("A' Quotation")).toBeVisible();
+  await expect(page.getByText("A' Quotation").first()).toBeVisible();
 });

@@ -19,6 +19,18 @@ export type UserRole =
   | "SKILLPASS_ADMIN"
   | "VERIFIER";
 
+export const ROLE_LABELS: Record<UserRole, string> = {
+  TALENT: "Talent",
+  RECRUITER: "Recruteur",
+  MANAGER: "Manager",
+  EVALUATOR: "Évaluateur",
+  TRAINER: "Formateur",
+  COMPANY_ADMIN: "Admin entreprise",
+  ACADEMY_ADMIN: "Admin académie",
+  SKILLPASS_ADMIN: "Administrateur",
+  VERIFIER: "Vérificateur",
+};
+
 /** Roles allowed to review critical assessments. */
 export const REVIEWER_ROLES: readonly UserRole[] = ["VERIFIER", "EVALUATOR", "SKILLPASS_ADMIN"];
 
