@@ -91,6 +91,46 @@
   }
 }
 
+/* Hero photo crossfade: two photos share a 12s cycle, the second one runs half a cycle behind. */
+@keyframes hero-crossfade {
+  0%,
+  38% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50%,
+  88% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hero-photo {
+  animation: hero-crossfade 12s ease-in-out infinite;
+}
+
+.hero-photo-alt {
+  animation-delay: -6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo {
+    animation: none;
+  }
+  .hero-photo-alt {
+    display: none;
+  }
+}
+
+/* Fades the left edge of the hero photo into the white page background. */
+.hero-fade-left {
+  mask-image: linear-gradient(to right, transparent 0%, #000 38%);
+}
+
 /* Lets a conic-gradient ring fill smoothly (--ring is the target percentage). */
 @property --ring {
   syntax: "<number>";

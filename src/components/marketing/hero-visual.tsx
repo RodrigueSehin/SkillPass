@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import Image from "next/image";
 import {
   AppWindow,
@@ -15,69 +13,27 @@ import { QRCodeSVG } from "qrcode.react";
 import { LogoMark } from "@/components/layout/logo";
 import { cn } from "@/lib/utils/cn";
 
-const PHOTO_CANDIDATES = ["hero-talent.webp", "hero-talent.png", "hero-talent.jpg"] as const;
+const PHOTOS = [
+  { src: "/images/hero-talent.png", alt: "Un professionnel souriant, ordinateur sous le bras" },
+  { src: "/images/hero-office.png", alt: "Deux collègues qui travaillent ensemble devant un ordinateur" },
+] as const;
 
-/** A photo dropped in public/images/ replaces the illustration: no code change needed. */
-function findHeroPhoto() {
-  const dir = path.join(process.cwd(), "public", "images");
-  return PHOTO_CANDIDATES.find((file) => fs.existsSync(path.join(dir, file)));
-}
-
-/** Flat portrait used until a real photo is provided. */
-function TalentIllustration({ className }: { className?: string }) {
+/** The two photos crossfade endlessly (pure CSS, see .hero-photo in globals.css). */
+function Portrait() {
   return (
-    <svg
-      viewBox="0 0 400 520"
-      className={className}
-      role="img"
-      aria-label="Illustration d'un professionnel souriant"
-    >
-      {/* Jacket and shirt */}
-      <path d="M10 520C10 405 78 352 200 342c122 10 190 63 190 178Z" fill="#011E50" />
-      <path d="M148 344 200 452l52-108-26-14h-52Z" fill="#FFFFFF" />
-      <path d="M148 344 118 360l82 100-6-14Z" fill="#0F1D45" />
-      <path d="M252 344l30 16-82 100 6-14Z" fill="#0F1D45" />
-      {/* Backpack strap */}
-      <path d="M92 380c-10 40-14 90-12 140h34c-2-48 4-92 20-134Z" fill="#0B1533" />
-      {/* Neck and head */}
-      <rect x="172" y="285" width="56" height="70" rx="24" fill="#7A4A2E" />
-      <ellipse cx="200" cy="212" rx="68" ry="82" fill="#8B5A3C" />
-      <ellipse cx="133" cy="218" rx="10" ry="18" fill="#7A4A2E" />
-      <ellipse cx="267" cy="218" rx="10" ry="18" fill="#7A4A2E" />
-      {/* Hair */}
-      <path d="M131 196c-4-70 38-98 69-98s73 28 69 98c-12-40-40-56-69-56s-57 16-69 56Z" fill="#14110F" />
-      {/* Glasses */}
-      <rect x="146" y="196" width="50" height="38" rx="15" fill="none" stroke="#0B0B0B" strokeWidth="5" />
-      <rect x="204" y="196" width="50" height="38" rx="15" fill="none" stroke="#0B0B0B" strokeWidth="5" />
-      <path d="M196 213h8" stroke="#0B0B0B" strokeWidth="5" />
-      <circle cx="171" cy="215" r="4.5" fill="#14110F" />
-      <circle cx="229" cy="215" r="4.5" fill="#14110F" />
-      {/* Smile */}
-      <path d="M170 258c18 22 42 22 60 0-6 8-14 20-30 20s-24-12-30-20Z" fill="#FFFFFF" />
-      <path
-        d="M170 258c18 22 42 22 60 0"
-        fill="none"
-        stroke="#4A2A18"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function Portrait({ className }: { className?: string }) {
-  const photo = findHeroPhoto();
-  return photo ? (
-    <Image
-      src={`/images/${photo}`}
-      alt="Un professionnel souriant, ordinateur sous le bras"
-      fill
-      priority
-      sizes="(min-width: 1024px) 420px, 70vw"
-      className={cn("object-contain object-bottom", className)}
-    />
-  ) : (
-    <TalentIllustration className={cn("h-full w-full", className)} />
+    <>
+      {PHOTOS.map(({ src, alt }, i) => (
+        <Image
+          key={src}
+          src={src}
+          alt={alt}
+          fill
+          priority={i === 0}
+          sizes="(min-width: 1024px) 560px, 80vw"
+          className={cn("hero-photo object-cover object-[50%_20%]", i === 1 && "hero-photo-alt")}
+        />
+      ))}
+    </>
   );
 }
 
@@ -165,8 +121,8 @@ export function HeroVisual() {
     <div className="animate-pop-in relative w-full" style={{ animationDelay: "250ms" }}>
       {/* Phones: portrait, technology chips, then the card — nothing overlaps. */}
       <div className="flex flex-col items-center gap-5 sm:hidden">
-        <div className="relative h-56 w-full max-w-[16rem] rounded-[2rem] bg-blue-100/70">
-          <Portrait className="px-6" />
+        <div className="relative h-56 w-full max-w-[16rem] overflow-hidden rounded-[2rem] bg-blue-100/70">
+          <Portrait />
         </div>
         <ul aria-label="Technologies" className="flex flex-wrap justify-center gap-2">
           {APPS.map(({ label, icon: Icon, tile }) => (
@@ -193,7 +149,7 @@ export function HeroVisual() {
         />
         <div aria-hidden className="absolute bottom-10 left-1/4 size-64 rounded-full bg-blue-50 blur-2xl" />
 
-        <div className="absolute top-2 bottom-0 left-[18%] w-[50%]">
+        <div className="hero-fade-left absolute top-2 bottom-0 left-0 w-[68%] overflow-hidden rounded-r-[3rem]">
           <Portrait />
         </div>
 
