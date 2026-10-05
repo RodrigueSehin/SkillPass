@@ -5,7 +5,7 @@ import {
   type BankAssessment,
   type AssessmentDomain,
 } from "@/config/assessment-bank";
-import { scoreAttempt } from "@/lib/assessment-scoring";
+import { PASS_SCORE, scoreAttempt } from "@/lib/assessment-scoring";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import type { AttemptRepository } from "@/repositories/attempt.repository";
 import type { ProfileRepository } from "@/repositories/profile.repository";
@@ -38,6 +38,12 @@ export interface AssessmentOverview {
 export interface TakeableAssessment {
   attemptId: string;
   title: string;
+  skillName: string;
+  description: string;
+  durationMinutes: number;
+  requiresReview: boolean;
+  /** Minimum overall score (in %) to pass. */
+  passScore: number;
   deadlineAt: string;
   questions: { id: string; domain: AssessmentDomain; prompt: string; options: readonly string[] }[];
 }
@@ -165,6 +171,11 @@ export class AssessmentService {
     return {
       attemptId: attempt.id,
       title: assessment.title,
+      skillName: assessment.skillName,
+      description: assessment.description,
+      durationMinutes: assessment.durationMinutes,
+      requiresReview: assessment.requiresReview,
+      passScore: PASS_SCORE,
       deadlineAt: attempt.deadlineAt,
       questions: assessment.questions.map(({ id, domain, prompt, options }) => ({
         id,

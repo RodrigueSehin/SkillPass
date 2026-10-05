@@ -7,9 +7,13 @@ const SLUG_FOR = { desktop: "power-automate", mobile: "power-apps" } as const;
 
 async function answerAll(page: Page, slug: string, correct: boolean) {
   const assessment = ASSESSMENT_BANK.find((a) => a.slug === slug)!;
-  for (const q of assessment.questions) {
+  // One question at a time: answer, then move on.
+  for (const [i, q] of assessment.questions.entries()) {
     const index = correct ? q.correctIndex : (q.correctIndex + 1) % q.options.length;
     await page.locator(`input[name="${q.id}"]`).nth(index).check();
+    if (i < assessment.questions.length - 1) {
+      await page.getByRole("button", { name: "Question suivante" }).click();
+    }
   }
 }
 
