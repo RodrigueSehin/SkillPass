@@ -177,10 +177,25 @@ model Experience {
   createdAt   DateTime  @default(now()) @map("created_at")
 
   profile Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  skills  ExperienceSkill[]
+  skills    ExperienceSkill[]
+  documents ExperienceDocument[]
 
   @@index([profileId])
   @@map("experiences")
+}
+
+model ExperienceDocument {
+  id           String   @id @default(uuid()) @db.Uuid
+  experienceId String   @map("experience_id") @db.Uuid
+  path         String
+  name         String
+  size         Int
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@index([experienceId])
+  @@map("experience_documents")
 }
 
 model ExperienceSkill {

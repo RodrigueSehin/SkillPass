@@ -112,7 +112,10 @@ export class PrismaProjectRepository implements CrudRepository<
 
 // ---------- Experiences ----------
 
-const experienceInclude = { skills: { include: { skill: true } } } satisfies Prisma.ExperienceInclude;
+const experienceInclude = {
+  skills: { include: { skill: true } },
+  documents: { orderBy: { createdAt: "asc" } },
+} satisfies Prisma.ExperienceInclude;
 type ExperienceRow = Prisma.ExperienceGetPayload<{ include: typeof experienceInclude }>;
 
 const toExperience = (r: ExperienceRow): ExperienceDTO => ({
@@ -127,6 +130,7 @@ const toExperience = (r: ExperienceRow): ExperienceDTO => ({
   startDate: toDay(r.startDate)!,
   endDate: toDay(r.endDate),
   skills: r.skills.map((s) => s.skill.name).sort(),
+  documents: r.documents.map((d) => ({ id: d.id, name: d.name, size: d.size })),
 });
 
 const experienceData = (i: CreateExperienceInput) => ({
@@ -176,10 +180,15 @@ export class PrismaExperienceRepository implements CrudRepository<
   async update(profileId: string, id: string, input: CreateExperienceInput) {
     const skillIds = await skillIdsFor(input.skills);
     const ok = await prisma.$transaction(async (tx) => {
-      const { count } = await tx.experience.updateMany({ where: { id, profileId }, data: experienceData(input) });
+      const { count } = await tx.experience.updateMany({
+        where: { id, profileId },
+        data: experienceData(input),
+      });
       if (count === 0) return false;
       await tx.experienceSkill.deleteMany({ where: { experienceId: id } });
-      await tx.experienceSkill.createMany({ data: skillIds.map((skillId) => ({ experienceId: id, skillId })) });
+      await tx.experienceSkill.createMany({
+        data: skillIds.map((skillId) => ({ experienceId: id, skillId })),
+      });
       return true;
     });
     return ok ? this.findById(profileId, id) : null;
@@ -188,6 +197,22 @@ export class PrismaExperienceRepository implements CrudRepository<
   async remove(profileId: string, id: string) {
     const { count } = await prisma.experience.deleteMany({ where: { id, profileId } });
     return count > 0;
+  }
+
+  /** Returns the new document id, or null when the experience is not the caller's. */
+  async addDocument(profileId: string, id: string, doc: { path: string; name: string; size: number }) {
+    const owned = await prisma.experience.findFirst({ where: { id, profileId }, select: { id: true } });
+    if (!owned) return null;
+    const row = await prisma.experienceDocument.create({ data: { experienceId: id, ...doc } });
+    return row.id;
+  }
+
+  async getDocumentPath(profileId: string, id: string, docId: string) {
+    const row = await prisma.experienceDocument.findFirst({
+      where: { id: docId, experienceId: id, experience: { profileId } },
+      select: { path: true },
+    });
+    return row?.path ?? null;
   }
 }
 

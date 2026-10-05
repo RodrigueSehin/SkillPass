@@ -1,6 +1,7 @@
-import { Laptop, MapPin } from "lucide-react";
+import { Laptop, MapPin, Paperclip } from "lucide-react";
 import type { ItemView } from "@/components/resources/resource-manager";
 import { experiencePeriod, isCurrent } from "@/lib/experience-view";
+import { stripFormatting } from "@/lib/rich-text";
 import { cn } from "@/lib/utils/cn";
 import { CONTRACT_LABELS, WORK_MODE_LABELS } from "@/schemas/portfolio";
 import type { ExperienceDTO } from "@/types/portfolio";
@@ -91,7 +92,26 @@ export function ExperienceCard({ experience: e, item }: { experience: Experience
             </p>
           )}
 
-          {e.description && <p className="text-navy/80 mt-2 line-clamp-2 text-sm">{e.description}</p>}
+          {e.description && (
+            <p className="text-navy/80 mt-2 line-clamp-2 text-sm">{stripFormatting(e.description)}</p>
+          )}
+
+          {e.documents.length > 0 && (
+            <ul aria-label="Pièces jointes" className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {e.documents.map((d) => (
+                <li key={d.id}>
+                  <a
+                    href={`/api/experiences/${e.id}/documents/${d.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted hover:text-brand flex items-center gap-1 text-xs"
+                  >
+                    <Paperclip className="size-3.5" aria-hidden /> {d.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             <ul aria-label="Compétences" className="flex flex-wrap gap-1.5">

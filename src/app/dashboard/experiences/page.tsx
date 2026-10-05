@@ -5,7 +5,7 @@ import { Briefcase, Building2, CalendarClock, ChevronRight, FolderKanban } from 
 import heroPhoto from "@/assets/skills/hero.jpg";
 import { ExperienceCard } from "@/components/experiences/experience-card";
 import { ExperienceFilters, ExperienceSort } from "@/components/experiences/experience-controls";
-import { AddExperienceButton, ExperienceEditor } from "@/components/experiences/experience-editor";
+import { ExperienceEditor } from "@/components/experiences/experience-editor";
 import {
   AddExperiencePanel,
   CareerFigures,
@@ -137,9 +137,6 @@ export default async function ExperiencesPage({ searchParams }: PageProps<"/dash
                   Ajoutez vos expériences professionnelles, mettez en avant vos réalisations et faites la
                   différence auprès des recruteurs.
                 </p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <AddExperienceButton />
-                </div>
               </div>
               <div aria-hidden className="absolute inset-y-0 right-0 hidden w-2/5 md:block">
                 <Image
@@ -179,7 +176,6 @@ export default async function ExperiencesPage({ searchParams }: PageProps<"/dash
                     icon={Briefcase}
                     title="Aucune expérience pour l'instant"
                     description="Ajoutez vos postes pour appuyer vos années d'expérience."
-                    action={<AddExperienceButton />}
                   />
                 ) : shown.length === 0 ? (
                   <EmptyState

@@ -25,6 +25,8 @@ export interface ExperienceDTO {
   startDate: string;
   endDate: string | null;
   skills: string[];
+  /** Attachments (recommendation letter, certificate…). The files are served by the API. */
+  documents: { id: string; name: string; size: number }[];
 }
 
 export type CertificationStatus = "UNVERIFIED" | "PENDING" | "VERIFIED" | "EXPIRED";

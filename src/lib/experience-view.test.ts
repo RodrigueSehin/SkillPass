@@ -23,6 +23,7 @@ const exp = (id: string, over: Partial<ExperienceDTO>): ExperienceDTO => ({
   startDate: "2020-01-01",
   endDate: null,
   skills: [],
+  documents: [],
   ...over,
 });
 

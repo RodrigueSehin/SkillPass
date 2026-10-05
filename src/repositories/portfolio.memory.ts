@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { InMemoryCrudRepository } from "@/lib/crud";
 import { DEMO_CERTIFICATIONS, DEMO_EXPERIENCES, DEMO_PROJECT_ROWS } from "@/config/demo-data";
 import type {
@@ -26,23 +27,76 @@ export const createMemoryProjects = (seedProfileId?: string) =>
     }),
   );
 
+/** Attachments live beside the rows; editing an experience never wipes them. */
+export class MemoryExperienceRepository extends InMemoryCrudRepository<
+  ExperienceDTO,
+  CreateExperienceInput,
+  CreateExperienceInput
+> {
+  private paths = new Map<string, string>();
+
+  constructor(seedProfileId?: string) {
+    super(
+      seedProfileId,
+      () => DEMO_EXPERIENCES.map((e) => ({ ...e, skills: [...e.skills], documents: [] })),
+      (i) => ({
+        title: i.title,
+        company: i.company,
+        location: n(i.location),
+        description: n(i.description),
+        contractType: n(i.contractType),
+        workMode: n(i.workMode),
+        domain: n(i.domain),
+        startDate: i.startDate,
+        endDate: n(i.endDate),
+        skills: [...i.skills].sort(),
+        documents: [],
+      }),
+    );
+  }
+
+  override async update(profileId: string, id: string, input: CreateExperienceInput) {
+    const row = await this.findById(profileId, id);
+    if (!row) return null;
+    const { documents, ...scalars } = this.rebuild(input);
+    void documents;
+    Object.assign(row, scalars);
+    return row;
+  }
+
+  private rebuild(input: CreateExperienceInput) {
+    return {
+      title: input.title,
+      company: input.company,
+      location: n(input.location),
+      description: n(input.description),
+      contractType: n(input.contractType),
+      workMode: n(input.workMode),
+      domain: n(input.domain),
+      startDate: input.startDate,
+      endDate: n(input.endDate),
+      skills: [...input.skills].sort(),
+      documents: [],
+    };
+  }
+
+  async addDocument(profileId: string, id: string, doc: { path: string; name: string; size: number }) {
+    const row = await this.findById(profileId, id);
+    if (!row) return null;
+    const docId = randomUUID();
+    this.paths.set(docId, doc.path);
+    row.documents = [...row.documents, { id: docId, name: doc.name, size: doc.size }];
+    return docId;
+  }
+
+  async getDocumentPath(profileId: string, id: string, docId: string) {
+    const row = await this.findById(profileId, id);
+    return row?.documents.some((d) => d.id === docId) ? (this.paths.get(docId) ?? null) : null;
+  }
+}
+
 export const createMemoryExperiences = (seedProfileId?: string) =>
-  new InMemoryCrudRepository<ExperienceDTO, CreateExperienceInput, CreateExperienceInput>(
-    seedProfileId,
-    () => DEMO_EXPERIENCES.map((e) => ({ ...e })),
-    (i) => ({
-      title: i.title,
-      company: i.company,
-      location: n(i.location),
-      description: n(i.description),
-      contractType: n(i.contractType),
-      workMode: n(i.workMode),
-      domain: n(i.domain),
-      startDate: i.startDate,
-      endDate: n(i.endDate),
-      skills: [...i.skills].sort(),
-    }),
-  );
+  new MemoryExperienceRepository(seedProfileId);
 
 /** Keeps proof-document metadata beside the rows; a quick edit never wipes skills or the document. */
 export class MemoryCertificationRepository extends InMemoryCrudRepository<

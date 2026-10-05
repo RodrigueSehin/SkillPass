@@ -179,6 +179,7 @@ export const DEMO_EXPERIENCES = [
     startDate: "2021-02-01",
     endDate: null,
     skills: ["Power Apps", "Dataverse", "Power Automate"] as string[],
+    documents: [] as { id: string; name: string; size: number }[],
   },
   {
     title: "Digital Transformation Specialist",
@@ -191,6 +192,7 @@ export const DEMO_EXPERIENCES = [
     startDate: "2019-06-01",
     endDate: "2021-01-31",
     skills: ["Gestion de projet"] as string[],
+    documents: [] as { id: string; name: string; size: number }[],
   },
 ] as const;
 
