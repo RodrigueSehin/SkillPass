@@ -28,14 +28,41 @@ export const createProjectSchema = z
 
 export const updateProjectSchema = createProjectSchema;
 
+export const CONTRACT_TYPES = [
+  "CDI",
+  "CDD",
+  "INTERNSHIP",
+  "FREELANCE",
+  "APPRENTICESHIP",
+  "ACADEMIC",
+] as const;
+export const CONTRACT_LABELS: Record<(typeof CONTRACT_TYPES)[number], string> = {
+  CDI: "CDI",
+  CDD: "CDD",
+  INTERNSHIP: "Stage",
+  FREELANCE: "Freelance",
+  APPRENTICESHIP: "Alternance",
+  ACADEMIC: "Projet académique",
+};
+export const WORK_MODES = ["ONSITE", "HYBRID", "REMOTE"] as const;
+export const WORK_MODE_LABELS: Record<(typeof WORK_MODES)[number], string> = {
+  ONSITE: "Sur site",
+  HYBRID: "Hybride",
+  REMOTE: "Télétravail",
+};
+
 export const createExperienceSchema = z
   .object({
     title: z.string().trim().min(2, "Intitulé trop court").max(120),
     company: z.string().trim().min(2, "Entreprise requise").max(120),
     location: optionalText(120),
     description: optionalText(2000),
+    contractType: z.preprocess(blankToUndefined, z.enum(CONTRACT_TYPES).optional()),
+    workMode: z.preprocess(blankToUndefined, z.enum(WORK_MODES).optional()),
+    domain: optionalText(60),
     startDate: date,
     endDate: optionalDate,
+    skills: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
   })
   .refine(endAfterStart, endAfterStartIssue);
 

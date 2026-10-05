@@ -35,8 +35,12 @@ export const createMemoryExperiences = (seedProfileId?: string) =>
       company: i.company,
       location: n(i.location),
       description: n(i.description),
+      contractType: n(i.contractType),
+      workMode: n(i.workMode),
+      domain: n(i.domain),
       startDate: i.startDate,
       endDate: n(i.endDate),
+      skills: [...i.skills].sort(),
     }),
   );
 

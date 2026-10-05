@@ -112,7 +112,8 @@ export class PrismaProjectRepository implements CrudRepository<
 
 // ---------- Experiences ----------
 
-type ExperienceRow = Prisma.ExperienceGetPayload<object>;
+const experienceInclude = { skills: { include: { skill: true } } } satisfies Prisma.ExperienceInclude;
+type ExperienceRow = Prisma.ExperienceGetPayload<{ include: typeof experienceInclude }>;
 
 const toExperience = (r: ExperienceRow): ExperienceDTO => ({
   id: r.id,
@@ -120,8 +121,12 @@ const toExperience = (r: ExperienceRow): ExperienceDTO => ({
   company: r.company,
   location: r.location,
   description: r.description,
+  contractType: r.contractType,
+  workMode: r.workMode,
+  domain: r.domain,
   startDate: toDay(r.startDate)!,
   endDate: toDay(r.endDate),
+  skills: r.skills.map((s) => s.skill.name).sort(),
 });
 
 const experienceData = (i: CreateExperienceInput) => ({
@@ -129,6 +134,9 @@ const experienceData = (i: CreateExperienceInput) => ({
   company: i.company,
   location: nul(i.location),
   description: nul(i.description),
+  contractType: nul(i.contractType),
+  workMode: nul(i.workMode),
+  domain: nul(i.domain),
   startDate: fromDay(i.startDate)!,
   endDate: fromDay(i.endDate),
 });
@@ -139,25 +147,42 @@ export class PrismaExperienceRepository implements CrudRepository<
   CreateExperienceInput
 > {
   async list(profileId: string) {
-    const rows = await prisma.experience.findMany({ where: { profileId }, orderBy: { startDate: "desc" } });
+    const rows = await prisma.experience.findMany({
+      where: { profileId },
+      include: experienceInclude,
+      orderBy: { startDate: "desc" },
+    });
     return rows.map(toExperience);
   }
 
   async findById(profileId: string, id: string) {
-    const row = await prisma.experience.findFirst({ where: { id, profileId } });
+    const row = await prisma.experience.findFirst({ where: { id, profileId }, include: experienceInclude });
     return row ? toExperience(row) : null;
   }
 
   async create(profileId: string, input: CreateExperienceInput) {
-    return toExperience(await prisma.experience.create({ data: { profileId, ...experienceData(input) } }));
+    const skillIds = await skillIdsFor(input.skills);
+    const row = await prisma.experience.create({
+      data: {
+        profileId,
+        ...experienceData(input),
+        skills: { create: skillIds.map((skillId) => ({ skillId })) },
+      },
+      include: experienceInclude,
+    });
+    return toExperience(row);
   }
 
   async update(profileId: string, id: string, input: CreateExperienceInput) {
-    const { count } = await prisma.experience.updateMany({
-      where: { id, profileId },
-      data: experienceData(input),
+    const skillIds = await skillIdsFor(input.skills);
+    const ok = await prisma.$transaction(async (tx) => {
+      const { count } = await tx.experience.updateMany({ where: { id, profileId }, data: experienceData(input) });
+      if (count === 0) return false;
+      await tx.experienceSkill.deleteMany({ where: { experienceId: id } });
+      await tx.experienceSkill.createMany({ data: skillIds.map((skillId) => ({ experienceId: id, skillId })) });
+      return true;
     });
-    return count === 0 ? null : this.findById(profileId, id);
+    return ok ? this.findById(profileId, id) : null;
   }
 
   async remove(profileId: string, id: string) {

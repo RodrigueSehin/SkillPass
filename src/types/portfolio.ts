@@ -19,8 +19,12 @@ export interface ExperienceDTO {
   company: string;
   location: string | null;
   description: string | null;
+  contractType: string | null;
+  workMode: string | null;
+  domain: string | null;
   startDate: string;
   endDate: string | null;
+  skills: string[];
 }
 
 export type CertificationStatus = "UNVERIFIED" | "PENDING" | "VERIFIED" | "EXPIRED";

@@ -171,18 +171,26 @@ export const DEMO_EXPERIENCES = [
   {
     title: "Power Platform Developer",
     company: "AGL",
-    location: "Abidjan",
+    location: "Abidjan, Côte d'Ivoire",
     description: "Conception de solutions métiers Power Apps et Dataverse.",
+    contractType: "CDI",
+    workMode: "HYBRID",
+    domain: "Tech & Digital",
     startDate: "2021-02-01",
     endDate: null,
+    skills: ["Power Apps", "Dataverse", "Power Automate"] as string[],
   },
   {
     title: "Digital Transformation Specialist",
     company: "Groupe KAP",
-    location: "Abidjan",
+    location: "Abidjan, Côte d'Ivoire",
     description: "Pilotage de la digitalisation des processus.",
+    contractType: "CDD",
+    workMode: "ONSITE",
+    domain: "Gestion & Business",
     startDate: "2019-06-01",
     endDate: "2021-01-31",
+    skills: ["Gestion de projet"] as string[],
   },
 ] as const;
 

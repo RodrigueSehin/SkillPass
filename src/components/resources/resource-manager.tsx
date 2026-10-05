@@ -276,6 +276,20 @@ export function ResourceForm({
                     aria-invalid={Boolean(error)}
                     className="border-border bg-surface w-full rounded-xl border px-4 py-3 text-sm"
                   />
+                ) : field.type === "select" ? (
+                  <select
+                    id={id}
+                    value={values[field.name] as string}
+                    onChange={(e) => set(field.name, e.target.value)}
+                    className="border-border bg-surface h-11 w-full rounded-xl border px-4 text-sm"
+                  >
+                    <option value="">Non précisé</option>
+                    {field.options?.map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
                   <Input
                     id={id}

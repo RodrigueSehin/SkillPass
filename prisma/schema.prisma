@@ -99,6 +99,7 @@ model Skill {
   talentSkills  TalentSkill[]
   projectSkills ProjectSkill[]
   certificationSkills CertificationSkill[]
+  experienceSkills    ExperienceSkill[]
 
   @@index([categoryId])
   @@map("skills")
@@ -168,14 +169,30 @@ model Experience {
   company     String
   location    String?
   description String?
+  contractType String?  @map("contract_type")
+  workMode    String?   @map("work_mode")
+  domain      String?
   startDate   DateTime  @map("start_date")
   endDate     DateTime? @map("end_date")
   createdAt   DateTime  @default(now()) @map("created_at")
 
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profile Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skills  ExperienceSkill[]
 
   @@index([profileId])
   @@map("experiences")
+}
+
+model ExperienceSkill {
+  experienceId String @map("experience_id") @db.Uuid
+  skillId      String @map("skill_id") @db.Uuid
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  skill      Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([experienceId, skillId])
+  @@index([skillId])
+  @@map("experience_skills")
 }
 
 model Certification {
