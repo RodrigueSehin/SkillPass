@@ -181,7 +181,7 @@ function emptyValues(fields: FieldDef[]): FormValues {
   return Object.fromEntries(fields.map((f) => [f.name, f.type === "multiselect" ? [] : ""]));
 }
 
-function ResourceForm({
+export function ResourceForm({
   resource,
   item,
   skillOptions,
