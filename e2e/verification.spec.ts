@@ -30,7 +30,7 @@ test("assessment: pass, earn a badge, then verify it publicly", async ({
   const card = page
     .getByRole("listitem")
     .filter({ has: page.getByRole("heading", { name: assessment.title }) });
-  await card.getByRole("button", { name: /Commencer|Reprendre/ }).click();
+  await card.getByRole("button", { name: /Commencer|Reprendre|Réessayer/ }).click();
 
   await expect(page).toHaveURL(/\/assessments\/take\//);
   await expect(page.getByRole("timer")).toBeVisible();
@@ -72,7 +72,7 @@ test("assessment: a failed attempt grants no badge and the skill is unchanged", 
   // Dataverse is a critical assessment, so use a failing attempt to check the negative path.
   await page.goto("/dashboard/assessments");
   const card = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: /Dataverse/ }) });
-  await card.getByRole("button", { name: /Commencer|Reprendre/ }).click();
+  await card.getByRole("button", { name: /Commencer|Reprendre|Réessayer/ }).click();
   await answerAll(page, "dataverse", false);
   await page.getByRole("button", { name: "Soumettre mes réponses" }).click();
   await expect(page.getByText("Seuil non atteint cette fois.")).toBeVisible({ timeout: 15_000 });
@@ -86,7 +86,7 @@ test("assessment: a critical assessment waits for a verifier, who is not the can
   test.skip(testInfo.project.name !== "mobile", "uses a dedicated assessment on mobile only");
   await page.goto("/dashboard/assessments");
   const card = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: /Dataverse/ }) });
-  await card.getByRole("button", { name: /Commencer|Reprendre/ }).click();
+  await card.getByRole("button", { name: /Commencer|Reprendre|Réessayer/ }).click();
   await answerAll(page, "dataverse", true);
   await page.getByRole("button", { name: "Soumettre mes réponses" }).click();
   await expect(page.getByText(/en attente de validation par un vérificateur/)).toBeVisible({

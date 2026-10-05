@@ -10,3 +10,15 @@ export function formatPeriod(start: string | null, end: string | null) {
   if (!start) return formatMonth(end);
   return `${formatMonth(start)} – ${end ? formatMonth(end) : "En cours"}`;
 }
+
+const dayFmt = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+/** ISO timestamp or calendar day → "12 sept. 2026". */
+export function formatDay(value: string | null | undefined) {
+  return value ? dayFmt.format(new Date(value)) : "";
+}

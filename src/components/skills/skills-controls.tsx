@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Filter, LayoutGrid, List, Search } from "lucide-react";
+import { useUrlParams } from "@/lib/hooks/use-url-params";
 import { cn } from "@/lib/utils/cn";
 import {
   SKILL_LEVELS,
@@ -17,21 +17,6 @@ const SORTS = [
   ["level", "Niveau"],
   ["experience", "Expérience"],
 ] as const;
-
-/** Filters live in the URL, so views are shareable and the page stays a Server Component. */
-function useUrlParams() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const params = useSearchParams();
-  function set(key: string, value: string) {
-    const next = new URLSearchParams(params.toString());
-    if (value) next.set(key, value);
-    else next.delete(key);
-    const qs = next.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }
-  return { params, set, reset: () => router.replace(pathname, { scroll: false }) };
-}
 
 /** "Toutes" plus one pill per category the user actually has. */
 export function CategoryTabs({ categories }: { categories: string[] }) {

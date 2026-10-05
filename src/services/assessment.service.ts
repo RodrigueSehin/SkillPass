@@ -48,6 +48,18 @@ export interface TakeableAssessment {
   questions: { id: string; domain: AssessmentDomain; prompt: string; options: readonly string[] }[];
 }
 
+/** Head-count of the user's attempts, for the summary cards. */
+export interface AssessmentSummary {
+  passed: number;
+  failed: number;
+  inProgress: number;
+  pendingReview: number;
+  /** Attempts that are over, whatever the outcome. */
+  finished: number;
+  /** Mean score of scored attempts, or null when there is none yet. */
+  averageScore: number | null;
+}
+
 export interface ReviewItem {
   attempt: AttemptDTO;
   holderName: string;
@@ -121,6 +133,23 @@ export class AssessmentService {
         blockedReason,
       };
     });
+  }
+
+  async summary(profileId: string): Promise<AssessmentSummary> {
+    const attempts = await this.deps.attempts.listByProfile(profileId);
+    const count = (...statuses: AttemptDTO["status"][]) =>
+      attempts.filter((t) => statuses.includes(t.status)).length;
+    const scored = attempts.filter((t) => t.overallScore !== null && t.status !== "IN_PROGRESS");
+    return {
+      passed: count("PASSED"),
+      failed: count("FAILED", "REJECTED"),
+      inProgress: attempts.filter((t) => t.status === "IN_PROGRESS" && !this.isExpired(t)).length,
+      pendingReview: count("PENDING_REVIEW"),
+      finished: attempts.filter((t) => t.status !== "IN_PROGRESS" || this.isExpired(t)).length,
+      averageScore: scored.length
+        ? Math.round(scored.reduce((sum, t) => sum + (t.overallScore ?? 0), 0) / scored.length)
+        : null,
+    };
   }
 
   private isExpired(attempt: AttemptDTO) {
