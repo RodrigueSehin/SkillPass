@@ -36,10 +36,12 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   if (!found) notFound();
 
   const { id, profile, updatedAt } = found;
-  const passport = await getPassportService().build(id, {
-    yearsOfExperience: profile.yearsOfExperience,
-    updatedAt,
-  });
+  const passport = await getPassportService().build(
+    id,
+    { yearsOfExperience: profile.yearsOfExperience, updatedAt },
+    new Date(),
+    { publicOnly: true },
+  );
   const publicUrl = `${appUrl()}/${profile.username}`;
 
   const jsonLd = {

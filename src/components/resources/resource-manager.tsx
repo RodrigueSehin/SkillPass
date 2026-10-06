@@ -178,7 +178,9 @@ export function ResourceManager({ resource, items, skillOptions = [] }: Resource
 }
 
 function emptyValues(fields: FieldDef[]): FormValues {
-  return Object.fromEntries(fields.map((f) => [f.name, f.type === "multiselect" ? [] : ""]));
+  return Object.fromEntries(
+    fields.map((f) => [f.name, f.type === "multiselect" ? [] : (f.defaultValue ?? "")]),
+  );
 }
 
 export function ResourceForm({

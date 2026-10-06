@@ -32,6 +32,10 @@ const toProject = (r: ProjectRow): ProjectDTO => ({
   teamSize: r.teamSize,
   featured: r.featured,
   hasCover: Boolean(r.coverPath),
+  status: r.status,
+  videoUrl: r.videoUrl,
+  otherUrl: r.otherUrl,
+  isPublic: r.isPublic,
   skills: r.skills.map((s) => s.skill.name).sort(),
 });
 
@@ -61,6 +65,10 @@ const projectScalars = (i: CreateProjectInput) => ({
   domain: nul(i.domain),
   teamSize: nul(i.teamSize),
   featured: i.featured,
+  status: nul(i.status),
+  videoUrl: nul(i.videoUrl),
+  otherUrl: nul(i.otherUrl),
+  isPublic: i.isPublic,
 });
 
 export class PrismaProjectRepository implements CrudRepository<

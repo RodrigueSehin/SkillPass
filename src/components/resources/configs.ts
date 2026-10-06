@@ -31,6 +31,8 @@ export interface FieldDef {
   type: FieldType;
   required?: boolean;
   placeholder?: string;
+  /** Initial value of a new item (e.g. "true" for a pre-checked box). */
+  defaultValue?: string;
   /** For "select": [value, label] pairs. */
   options?: readonly (readonly [string, string])[];
 }
@@ -69,7 +71,21 @@ export const RESOURCE_CONFIGS: Record<ResourceKey, ResourceConfig> = {
       { name: "endDate", label: "Date de fin", type: "date" },
       { name: "repositoryUrl", label: "Dépôt (GitHub…)", type: "url", placeholder: "https://github.com/…" },
       { name: "url", label: "URL du projet", type: "url", placeholder: "https://…" },
-      { name: "domain", label: "Domaine", type: "text", placeholder: "Tech & Digital, Data & Analyse…" },
+      {
+        name: "status",
+        label: "Statut",
+        type: "select",
+        options: [
+          ["COMPLETED", "Terminé"],
+          ["IN_PROGRESS", "En cours"],
+          ["PAUSED", "En pause"],
+          ["PLANNED", "En planification"],
+        ],
+      },
+      { name: "videoUrl", label: "Lien vidéo", type: "url", placeholder: "https://youtube.com/…" },
+      { name: "otherUrl", label: "Autre lien", type: "url", placeholder: "https://…" },
+      { name: "isPublic", label: "Rendre ce projet public", type: "checkbox", defaultValue: "true" },
+      { name: "domain", label: "Catégorie", type: "text", placeholder: "Tech & Digital, Data & Analyse…" },
       { name: "teamSize", label: "Taille de l'équipe", type: "text", placeholder: "Ex : 4" },
       { name: "featured", label: "Mettre ce projet en avant", type: "checkbox" },
       { name: "cover", label: "Image de couverture (PNG, JPG, WebP)", type: "image" },

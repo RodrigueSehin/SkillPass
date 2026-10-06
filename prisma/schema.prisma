@@ -145,6 +145,10 @@ model Project {
   teamSize        Int?             @map("team_size")
   featured        Boolean          @default(false)
   coverPath       String?          @map("cover_path")
+  status          String?
+  videoUrl        String?          @map("video_url")
+  otherUrl        String?          @map("other_url")
+  isPublic        Boolean          @default(true) @map("is_public")
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
 

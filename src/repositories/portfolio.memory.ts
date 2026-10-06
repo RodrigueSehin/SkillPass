@@ -35,6 +35,10 @@ export class MemoryProjectRepository extends InMemoryCrudRepository<
         teamSize: n(i.teamSize),
         featured: i.featured,
         hasCover: false,
+        status: n(i.status),
+        videoUrl: n(i.videoUrl),
+        otherUrl: n(i.otherUrl),
+        isPublic: i.isPublic,
         skills: i.skills,
       }),
     );

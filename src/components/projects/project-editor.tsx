@@ -1,15 +1,16 @@
 "use client";
 
 import { createContext, useContext, useState, useTransition } from "react";
+import Link from "next/link";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { deleteProjectAction } from "@/app/dashboard/projects/actions";
 import { RESOURCE_CONFIGS } from "@/components/resources/configs";
 import { ResourceForm, type ItemView } from "@/components/resources/resource-manager";
-import { Button, type ButtonProps } from "@/components/ui/button";
+import { Button, buttonVariants, type ButtonProps } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
+import { cn } from "@/lib/utils/cn";
 
 interface Editor {
-  openNew: () => void;
   openEdit: (item: ItemView) => void;
   openDelete: (item: ItemView) => void;
 }
@@ -31,7 +32,7 @@ export function ProjectEditor({
   children: React.ReactNode;
 }) {
   const config = RESOURCE_CONFIGS.project;
-  const [editing, setEditing] = useState<ItemView | "new" | null>(null);
+  const [editing, setEditing] = useState<ItemView | null>(null);
   const [deleting, setDeleting] = useState<ItemView | null>(null);
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -47,9 +48,7 @@ export function ProjectEditor({
   }
 
   return (
-    <EditorContext.Provider
-      value={{ openNew: () => setEditing("new"), openEdit: setEditing, openDelete: setDeleting }}
-    >
+    <EditorContext.Provider value={{ openEdit: setEditing, openDelete: setDeleting }}>
       {children}
       {error && (
         <p role="alert" className="text-danger mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm">
@@ -59,12 +58,12 @@ export function ProjectEditor({
       <Modal
         open={editing !== null}
         onClose={() => setEditing(null)}
-        title={editing === "new" || editing === null ? config.addLabel : `Modifier ${editing.title}`}
+        title={editing ? `Modifier ${editing.title}` : config.addLabel}
       >
         {editing !== null && (
           <ResourceForm
             resource="project"
-            item={editing === "new" ? undefined : editing}
+            item={editing}
             skillOptions={skillOptions}
             onDone={() => setEditing(null)}
           />
@@ -87,12 +86,12 @@ export function ProjectEditor({
   );
 }
 
+/** Adding happens on its own page; only editing stays in a dialog. */
 export function AddProjectButton({ variant, className }: Pick<ButtonProps, "variant" | "className">) {
-  const { openNew } = useEditor();
   return (
-    <Button variant={variant} className={className} onClick={openNew}>
+    <Link href="/dashboard/projects/new" className={cn(buttonVariants({ variant }), className)}>
       <Plus /> Ajouter un projet
-    </Button>
+    </Link>
   );
 }
 

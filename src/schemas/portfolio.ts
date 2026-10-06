@@ -12,6 +12,8 @@ const endAfterStart = (v: { startDate?: string; endDate?: string }) =>
   !v.startDate || !v.endDate || v.endDate >= v.startDate;
 const endAfterStartIssue = { message: "La date de fin précède la date de début", path: ["endDate"] };
 
+export const PROJECT_STATUSES = ["COMPLETED", "IN_PROGRESS", "PAUSED", "PLANNED"] as const;
+
 export const createProjectSchema = z
   .object({
     name: z.string().trim().min(2, "Nom trop court").max(120),
@@ -29,6 +31,11 @@ export const createProjectSchema = z
     ),
     // Forms send "true" / "" for a checkbox.
     featured: z.preprocess((v) => v === true || v === "true", z.boolean()).default(false),
+    status: z.preprocess(blankToUndefined, z.enum(PROJECT_STATUSES).optional()),
+    videoUrl: optionalUrl,
+    otherUrl: optionalUrl,
+    // Visible by default; forms send "true" / "".
+    isPublic: z.preprocess((v) => (v === undefined ? true : v === true || v === "true"), z.boolean()),
     skills: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
   })
   .refine(endAfterStart, endAfterStartIssue);

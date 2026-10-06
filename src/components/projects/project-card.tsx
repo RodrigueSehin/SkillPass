@@ -1,4 +1,13 @@
-import { CalendarDays, CheckCircle2, ExternalLink, FolderKanban, Star, Timer, Users } from "lucide-react";
+import {
+  CalendarDays,
+  CheckCircle2,
+  ExternalLink,
+  FolderKanban,
+  Pause,
+  Star,
+  Timer,
+  Users,
+} from "lucide-react";
 import type { ItemView } from "@/components/resources/resource-manager";
 import { monthLabel, PROJECT_STATUS_LABELS, type ProjectStatus } from "@/lib/project-view";
 import { cn } from "@/lib/utils/cn";
@@ -8,6 +17,7 @@ import { ProjectCardActions } from "./project-editor";
 const STATUS_STYLE: Record<ProjectStatus, { tone: string; icon: typeof Timer }> = {
   COMPLETED: { tone: "bg-green-50 text-green-700", icon: CheckCircle2 },
   IN_PROGRESS: { tone: "bg-blue-50 text-brand", icon: Timer },
+  PAUSED: { tone: "bg-amber-50 text-amber-700", icon: Pause },
   PLANNED: { tone: "bg-purple-50 text-purple-700", icon: CalendarDays },
 };
 

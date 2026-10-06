@@ -1,10 +1,11 @@
 import type { ProjectDTO } from "@/types/portfolio";
 
-export type ProjectStatus = "COMPLETED" | "IN_PROGRESS" | "PLANNED";
+export type ProjectStatus = "COMPLETED" | "IN_PROGRESS" | "PAUSED" | "PLANNED";
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   COMPLETED: "Réalisé",
   IN_PROGRESS: "En cours",
+  PAUSED: "En pause",
   PLANNED: "En planification",
 };
 
@@ -21,8 +22,15 @@ export const parseProjectSort = (v: string | undefined): ProjectSort =>
 export const PROJECTS_PER_PAGE = 6;
 export const TECH_FILTERS_SHOWN = 5;
 
-/** Derived from the dates, so a project moves on by itself: no status to keep up to date. */
-export function projectStatus(p: Pick<ProjectDTO, "startDate" | "endDate">, today: string): ProjectStatus {
+const isStatus = (v: string | null | undefined): v is ProjectStatus =>
+  Boolean(v && v in PROJECT_STATUS_LABELS);
+
+/** The owner's explicit status, otherwise derived from the dates so the project moves on by itself. */
+export function projectStatus(
+  p: Pick<ProjectDTO, "startDate" | "endDate"> & { status?: string | null },
+  today: string,
+): ProjectStatus {
+  if (isStatus(p.status)) return p.status;
   if (p.startDate && p.startDate > today) return "PLANNED";
   if (!p.endDate && p.startDate) return "IN_PROGRESS";
   if (p.endDate && p.endDate > today) return "IN_PROGRESS";
@@ -79,6 +87,7 @@ export function projectStats(all: ProjectDTO[], today: string) {
     total: all.length,
     completed: count("COMPLETED"),
     inProgress: count("IN_PROGRESS"),
+    paused: count("PAUSED"),
     planned: count("PLANNED"),
     featured: all.filter((p) => p.featured).length,
   };

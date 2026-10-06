@@ -134,6 +134,10 @@ export const DEMO_PROJECT_ROWS = [
     teamSize: 4,
     featured: true,
     hasCover: false,
+    status: null,
+    videoUrl: null,
+    otherUrl: null,
+    isPublic: true,
     skills: ["Power Apps", "Dataverse", "Power Automate"],
   },
   {
@@ -149,6 +153,10 @@ export const DEMO_PROJECT_ROWS = [
     teamSize: 3,
     featured: false,
     hasCover: false,
+    status: null,
+    videoUrl: null,
+    otherUrl: null,
+    isPublic: true,
     skills: ["Power Apps", "Power BI"],
   },
   {
@@ -164,6 +172,10 @@ export const DEMO_PROJECT_ROWS = [
     teamSize: 2,
     featured: true,
     hasCover: false,
+    status: null,
+    videoUrl: null,
+    otherUrl: null,
+    isPublic: true,
     skills: ["Power Apps", "Dataverse"],
   },
   {
@@ -179,6 +191,10 @@ export const DEMO_PROJECT_ROWS = [
     teamSize: 3,
     featured: false,
     hasCover: false,
+    status: null,
+    videoUrl: null,
+    otherUrl: null,
+    isPublic: true,
     skills: ["Power Automate", "AI & Automation"],
   },
 ] as const;

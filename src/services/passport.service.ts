@@ -53,8 +53,10 @@ export class PassportService {
     profileId: string,
     profile: { yearsOfExperience: number; updatedAt: string },
     now = new Date(),
+    /** The public profile never shows projects the owner marked private. */
+    options: { publicOnly?: boolean } = {},
   ): Promise<Passport> {
-    const [skillList, projects, experiences, certs, credentials, recommendations] = await Promise.all([
+    const [skillList, allProjects, experiences, certs, credentials, recommendations] = await Promise.all([
       this.skills.list(profileId, { sort: "score" }),
       this.projects.list(profileId),
       this.experiences.list(profileId),
@@ -62,6 +64,7 @@ export class PassportService {
       this.credentials.listForProfile(profileId),
       this.recommendations.listApproved(profileId),
     ]);
+    const projects = options.publicOnly ? allProjects.filter((p) => p.isPublic) : allProjects;
     const today = now.toISOString().slice(0, 10);
     const certifications = certs.map((c) => ({
       ...c,

@@ -25,6 +25,10 @@ const project = (name: string, over: Partial<ProjectDTO>): ProjectDTO => ({
   teamSize: null,
   featured: false,
   hasCover: false,
+  status: null,
+  videoUrl: null,
+  otherUrl: null,
+  isPublic: true,
   skills: [],
   ...over,
 });
@@ -42,6 +46,9 @@ describe("project view", () => {
     expect(projectStatus(items[2], today)).toBe("PLANNED");
     expect(projectStatus({ startDate: null, endDate: null }, today)).toBe("COMPLETED");
     expect(projectStatus({ startDate: "2026-01-01", endDate: "2026-12-01" }, today)).toBe("IN_PROGRESS");
+    // An explicit status wins over the dates.
+    expect(projectStatus({ ...items[2], status: "PAUSED" }, today)).toBe("PAUSED");
+    expect(projectStatus({ ...items[0], status: "bogus" }, today)).toBe("COMPLETED");
   });
 
   it("filters by text, status, domain and technology", () => {
@@ -73,6 +80,7 @@ describe("project view", () => {
       total: 3,
       completed: 1,
       inProgress: 1,
+      paused: 0,
       planned: 1,
       featured: 1,
     });

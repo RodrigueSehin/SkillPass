@@ -74,6 +74,7 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/dashboa
   const statusCounts: Record<ProjectStatus, number> = {
     COMPLETED: stats.completed,
     IN_PROGRESS: stats.inProgress,
+    PAUSED: stats.paused,
     PLANNED: stats.planned,
   };
   const domains = countBy(all.map((p) => p.domain));
@@ -111,6 +112,10 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/dashboa
       domain: p.domain ?? "",
       teamSize: p.teamSize ? String(p.teamSize) : "",
       featured: p.featured ? "true" : "",
+      status: p.status ?? "",
+      videoUrl: p.videoUrl ?? "",
+      otherUrl: p.otherUrl ?? "",
+      isPublic: p.isPublic ? "true" : "",
       cover: "",
       skills: p.skills,
     },

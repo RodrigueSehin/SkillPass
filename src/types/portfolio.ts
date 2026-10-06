@@ -15,6 +15,12 @@ export interface ProjectDTO {
   featured: boolean;
   /** True when a cover image was uploaded (served by /api/projects/:id/cover). */
   hasCover: boolean;
+  /** Explicit status; null means "derive it from the dates". */
+  status: string | null;
+  videoUrl: string | null;
+  otherUrl: string | null;
+  /** Hidden from the public profile when false. */
+  isPublic: boolean;
   /** Names of the demonstrated skills. */
   skills: string[];
 }
