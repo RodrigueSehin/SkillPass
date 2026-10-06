@@ -15,6 +15,7 @@ import { getStorage } from "@/lib/storage/storage";
 import { EvidenceService } from "./evidence.service";
 import { CertificationDocumentService } from "./certification-document.service";
 import { ExperienceDocumentService } from "./experience-document.service";
+import { ProjectCoverService } from "./project-cover.service";
 import { AssessmentService } from "./assessment.service";
 import { CredentialService } from "./credential.service";
 import { RecommendationService } from "./recommendation.service";
@@ -23,6 +24,7 @@ import { ProfileAccountService } from "./profile-account.service";
 
 export const getSkillService = () => new SkillService(getTalentSkillRepository(), getEvidenceRepository());
 export const getProjectService = () => new CrudService(getProjectRepository(), "Projet");
+export const getProjectCoverService = () => new ProjectCoverService(getProjectRepository(), getStorage);
 export const getExperienceService = () => new CrudService(getExperienceRepository(), "Expérience");
 export const getExperienceDocumentService = () =>
   new ExperienceDocumentService(getExperienceRepository(), getStorage);

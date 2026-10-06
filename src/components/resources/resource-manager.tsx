@@ -197,6 +197,9 @@ export function ResourceForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string>();
   const [pending, startTransition] = useTransition();
+  const [cover, setCover] = useState<File | null>(null);
+  /** Set once an add succeeded but the image upload failed, so a retry updates instead of duplicating. */
+  const [savedId, setSavedId] = useState<string>();
 
   const set = (name: string, value: string | string[]) => setValues((v) => ({ ...v, [name]: value }));
 
@@ -212,9 +215,23 @@ export function ResourceForm({
     }
     setErrors({});
     startTransition(async () => {
-      const result = item ? await config.update(item.id, values) : await config.add(values);
-      if (result.error) setServerError(result.error);
-      else onDone();
+      const targetId = item?.id ?? savedId;
+      const result = targetId ? await config.update(targetId, values) : await config.add(values);
+      if (result.error) return setServerError(result.error);
+      const id: string | undefined = targetId ?? (result as { id?: string }).id;
+      if (cover && id && config.imageUploadUrl) {
+        const body = new FormData();
+        body.append("file", cover);
+        const res = await fetch(config.imageUploadUrl(id), { method: "POST", body });
+        if (!res.ok) {
+          const json = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+          setSavedId(id);
+          return setServerError(
+            `Enregistré, mais l'image n'a pas pu être envoyée : ${json?.error?.message ?? "erreur inconnue"}`,
+          );
+        }
+      }
+      onDone();
     });
   }
 
@@ -261,6 +278,27 @@ export function ResourceForm({
                   </div>
                 )}
               </fieldset>
+            ) : field.type === "checkbox" ? (
+              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
+                <input
+                  type="checkbox"
+                  className="accent-brand size-4"
+                  checked={values[field.name] === "true"}
+                  onChange={(e) => set(field.name, e.target.checked ? "true" : "")}
+                />
+                {field.label}
+              </label>
+            ) : field.type === "image" ? (
+              <>
+                <Label htmlFor={id}>{field.label}</Label>
+                <input
+                  id={id}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => setCover(e.target.files?.[0] ?? null)}
+                  className="border-border bg-surface block w-full rounded-xl border px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-sm file:font-medium"
+                />
+              </>
             ) : (
               <>
                 <Label htmlFor={id}>

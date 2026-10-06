@@ -2,28 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { Filter, LayoutGrid, List, Search } from "lucide-react";
-import { EXPERIENCE_SORTS, parseExperienceSort } from "@/lib/experience-options";
 import { FilterChecks, type FilterOption } from "@/components/ui/filter-checks";
 import { useUrlParams } from "@/lib/hooks/use-url-params";
+import { PROJECT_SORTS, parseProjectSort } from "@/lib/project-view";
 import { cn } from "@/lib/utils/cn";
 
-export function ExperienceFilters({
-  contracts,
-  periods,
-  domains,
-  places,
-}: {
-  contracts: FilterOption[];
-  periods: FilterOption[];
+interface FiltersProps {
+  total: number;
+  statuses: FilterOption[];
   domains: FilterOption[];
-  places: FilterOption[];
-}) {
+  technologies: FilterOption[];
+  /** Technologies beyond the first few, revealed by "Voir plus". */
+  moreTechnologies: number;
+}
+
+export function ProjectFilters({ total, statuses, domains, technologies, moreTechnologies }: FiltersProps) {
   const { params, set, reset } = useUrlParams();
   const [q, setQ] = useState(params.get("q") ?? "");
+  const expanded = params.get("more") === "1";
+  const noStatus = !params.get("status");
 
   useEffect(() => {
     if (q === (params.get("q") ?? "")) return;
-    const t = setTimeout(() => set("q", q), 300);
+    const t = setTimeout(() => {
+      set("q", q);
+      if (params.get("page")) set("page", "");
+    }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
@@ -57,34 +61,57 @@ export function ExperienceFilters({
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          aria-label="Rechercher une expérience"
-          placeholder="Entreprise, poste…"
+          aria-label="Rechercher un projet"
+          placeholder="Rechercher un projet…"
           className="border-border h-10 w-full rounded-lg border bg-slate-50 pr-3 pl-9 text-sm"
         />
       </div>
-      <FilterChecks legend="Type de contrat" name="contract" options={contracts} />
-      <FilterChecks legend="Période" name="period" options={periods} />
-      <FilterChecks legend="Domaine" name="domain" options={domains} />
-      <FilterChecks legend="Lieu" name="place" options={places} />
+
+      <fieldset className="mt-5">
+        <legend className="text-navy mb-2 text-sm font-bold">Statut</legend>
+        <label className="text-navy mb-1.5 flex cursor-pointer items-center gap-2.5 text-sm">
+          <input
+            type="checkbox"
+            checked={noStatus}
+            onChange={() => set("status", "")}
+            className="accent-brand size-4 rounded"
+          />
+          Tous ({total})
+        </label>
+      </fieldset>
+      <div className="-mt-3">
+        <FilterChecks legend="" name="status" options={statuses} resetPage />
+      </div>
+      <FilterChecks legend="Domaine" name="domain" options={domains} resetPage />
+      <FilterChecks legend="Technologies" name="tech" options={technologies} resetPage />
+      {moreTechnologies > 0 && (
+        <button
+          type="button"
+          onClick={() => set("more", expanded ? "" : "1")}
+          className="text-brand mt-3 text-sm font-semibold hover:underline"
+        >
+          {expanded ? "Voir moins" : `Voir plus (${moreTechnologies})`}
+        </button>
+      )}
     </div>
   );
 }
 
-export function ExperienceSort() {
+export function ProjectSort() {
   const { params, set } = useUrlParams();
-  const view = params.get("view") === "grid" ? "grid" : "list";
+  const view = params.get("view") === "list" ? "list" : "grid";
   return (
     <div className="flex items-center gap-2 text-sm">
-      <label htmlFor="experience-sort" className="text-muted hidden sm:block">
+      <label htmlFor="project-sort" className="text-muted hidden sm:block">
         Trier par
       </label>
       <select
-        id="experience-sort"
+        id="project-sort"
         className="border-border h-9 rounded-lg border bg-white px-3 text-sm"
-        value={parseExperienceSort(params.get("sort") ?? undefined)}
+        value={parseProjectSort(params.get("sort") ?? undefined)}
         onChange={(e) => set("sort", e.target.value === "recent" ? "" : e.target.value)}
       >
-        {EXPERIENCE_SORTS.map(([value, label]) => (
+        {PROJECT_SORTS.map(([value, label]) => (
           <option key={value} value={value}>
             {label}
           </option>
@@ -102,7 +129,7 @@ export function ExperienceSort() {
             type="button"
             aria-label={label}
             aria-pressed={view === key}
-            onClick={() => set("view", key === "list" ? "" : key)}
+            onClick={() => set("view", key === "grid" ? "" : key)}
             className={cn(
               "flex size-9 items-center justify-center rounded-lg",
               view === key

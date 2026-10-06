@@ -9,6 +9,12 @@ export interface ProjectDTO {
   endDate: string | null;
   repositoryUrl: string | null;
   url: string | null;
+  domain: string | null;
+  teamSize: number | null;
+  /** Pinned by the owner ("Mis en avant"). */
+  featured: boolean;
+  /** True when a cover image was uploaded (served by /api/projects/:id/cover). */
+  hasCover: boolean;
   /** Names of the demonstrated skills. */
   skills: string[];
 }

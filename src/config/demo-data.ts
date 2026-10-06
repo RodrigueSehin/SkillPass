@@ -130,6 +130,10 @@ export const DEMO_PROJECT_ROWS = [
     endDate: "2024-06-30",
     repositoryUrl: null,
     url: null,
+    domain: "Tech & Digital",
+    teamSize: 4,
+    featured: true,
+    hasCover: false,
     skills: ["Power Apps", "Dataverse", "Power Automate"],
   },
   {
@@ -141,6 +145,10 @@ export const DEMO_PROJECT_ROWS = [
     endDate: "2023-11-30",
     repositoryUrl: null,
     url: null,
+    domain: "Gestion & Business",
+    teamSize: 3,
+    featured: false,
+    hasCover: false,
     skills: ["Power Apps", "Power BI"],
   },
   {
@@ -152,6 +160,10 @@ export const DEMO_PROJECT_ROWS = [
     endDate: "2023-02-28",
     repositoryUrl: null,
     url: null,
+    domain: "Gestion & Business",
+    teamSize: 2,
+    featured: true,
+    hasCover: false,
     skills: ["Power Apps", "Dataverse"],
   },
   {
@@ -163,6 +175,10 @@ export const DEMO_PROJECT_ROWS = [
     endDate: null,
     repositoryUrl: null,
     url: null,
+    domain: "Tech & Digital",
+    teamSize: 3,
+    featured: false,
+    hasCover: false,
     skills: ["Power Automate", "AI & Automation"],
   },
 ] as const;

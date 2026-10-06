@@ -22,7 +22,8 @@ import {
   createProjectSchema,
 } from "@/schemas/portfolio";
 
-export type FieldType = "text" | "textarea" | "date" | "url" | "multiselect" | "select";
+export type FieldType =
+  "text" | "textarea" | "date" | "url" | "multiselect" | "select" | "checkbox" | "image";
 
 export interface FieldDef {
   name: string;
@@ -42,7 +43,9 @@ export interface ResourceConfig {
   emptyDescription: string;
   fields: FieldDef[];
   schema: ZodType;
-  add: (values: unknown) => Promise<ActionResult>;
+  add: (values: unknown) => Promise<ActionResult & { id?: string }>;
+  /** Where an image field is posted once the item is saved (e.g. a project cover). */
+  imageUploadUrl?: (id: string) => string;
   update: (id: string, values: unknown) => Promise<ActionResult>;
   remove: (id: string) => Promise<ActionResult>;
 }
@@ -66,9 +69,14 @@ export const RESOURCE_CONFIGS: Record<ResourceKey, ResourceConfig> = {
       { name: "endDate", label: "Date de fin", type: "date" },
       { name: "repositoryUrl", label: "Dépôt (GitHub…)", type: "url", placeholder: "https://github.com/…" },
       { name: "url", label: "URL du projet", type: "url", placeholder: "https://…" },
-      { name: "skills", label: "Compétences démontrées", type: "multiselect" },
+      { name: "domain", label: "Domaine", type: "text", placeholder: "Tech & Digital, Data & Analyse…" },
+      { name: "teamSize", label: "Taille de l'équipe", type: "text", placeholder: "Ex : 4" },
+      { name: "featured", label: "Mettre ce projet en avant", type: "checkbox" },
+      { name: "cover", label: "Image de couverture (PNG, JPG, WebP)", type: "image" },
+      { name: "skills", label: "Technologies et compétences", type: "multiselect" },
     ],
     schema: createProjectSchema,
+    imageUploadUrl: (id) => `/api/projects/${id}/cover`,
     add: addProjectAction,
     update: updateProjectAction,
     remove: deleteProjectAction,

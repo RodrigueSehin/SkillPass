@@ -141,6 +141,10 @@ model Project {
   endDate         DateTime?        @map("end_date")
   repositoryUrl   String?          @map("repository_url")
   url             String?
+  domain          String?
+  teamSize        Int?             @map("team_size")
+  featured        Boolean          @default(false)
+  coverPath       String?          @map("cover_path")
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
 

@@ -22,6 +22,13 @@ export const createProjectSchema = z
     endDate: optionalDate,
     repositoryUrl: optionalUrl,
     url: optionalUrl,
+    domain: optionalText(60),
+    teamSize: z.preprocess(
+      blankToUndefined,
+      z.coerce.number().int("Nombre entier").min(1, "Au moins 1").max(500, "Trop élevé").optional(),
+    ),
+    // Forms send "true" / "" for a checkbox.
+    featured: z.preprocess((v) => v === true || v === "true", z.boolean()).default(false),
     skills: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
   })
   .refine(endAfterStart, endAfterStartIssue);

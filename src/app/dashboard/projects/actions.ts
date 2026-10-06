@@ -11,10 +11,12 @@ async function done<T>(result: T) {
   return result;
 }
 
-export async function addProjectAction(values: unknown) {
-  return done(
-    await runAction((userId) => getProjectService().add(userId, createProjectSchema.parse(values))),
-  );
+export async function addProjectAction(values: unknown): Promise<{ id?: string; error?: string }> {
+  let id: string | undefined;
+  const result = await runAction(async (userId) => {
+    id = (await getProjectService().add(userId, createProjectSchema.parse(values))).id;
+  });
+  return done({ ...result, id });
 }
 
 export async function updateProjectAction(id: string, values: unknown) {

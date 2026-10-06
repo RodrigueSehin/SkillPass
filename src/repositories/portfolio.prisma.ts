@@ -28,6 +28,10 @@ const toProject = (r: ProjectRow): ProjectDTO => ({
   endDate: toDay(r.endDate),
   repositoryUrl: r.repositoryUrl,
   url: r.url,
+  domain: r.domain,
+  teamSize: r.teamSize,
+  featured: r.featured,
+  hasCover: Boolean(r.coverPath),
   skills: r.skills.map((s) => s.skill.name).sort(),
 });
 
@@ -54,6 +58,9 @@ const projectScalars = (i: CreateProjectInput) => ({
   endDate: fromDay(i.endDate),
   repositoryUrl: nul(i.repositoryUrl),
   url: nul(i.url),
+  domain: nul(i.domain),
+  teamSize: nul(i.teamSize),
+  featured: i.featured,
 });
 
 export class PrismaProjectRepository implements CrudRepository<
@@ -107,6 +114,22 @@ export class PrismaProjectRepository implements CrudRepository<
   async remove(profileId: string, id: string) {
     const { count } = await prisma.project.deleteMany({ where: { id, profileId } });
     return count > 0;
+  }
+
+  /** Stores the cover's storage key. Returns the previous key, or null when the project is not the caller's. */
+  async setCover(profileId: string, id: string, path: string) {
+    const previous = await prisma.project.findFirst({
+      where: { id, profileId },
+      select: { coverPath: true },
+    });
+    if (!previous) return null;
+    await prisma.project.update({ where: { id }, data: { coverPath: path } });
+    return { previousPath: previous.coverPath };
+  }
+
+  async getCoverPath(profileId: string, id: string) {
+    const row = await prisma.project.findFirst({ where: { id, profileId }, select: { coverPath: true } });
+    return row?.coverPath ?? null;
   }
 }
 

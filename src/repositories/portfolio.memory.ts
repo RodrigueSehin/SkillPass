@@ -10,22 +10,62 @@ import type { CertificationDTO, ExperienceDTO, ProjectDTO } from "@/types/portfo
 
 const n = <T>(v: T | undefined) => v ?? null;
 
-export const createMemoryProjects = (seedProfileId?: string) =>
-  new InMemoryCrudRepository<ProjectDTO, CreateProjectInput, CreateProjectInput>(
-    seedProfileId,
-    () => DEMO_PROJECT_ROWS.map((p) => ({ ...p, skills: [...p.skills] })),
-    (i) => ({
-      name: i.name,
-      description: n(i.description),
-      organization: n(i.organization),
-      role: n(i.role),
-      startDate: n(i.startDate),
-      endDate: n(i.endDate),
-      repositoryUrl: n(i.repositoryUrl),
-      url: n(i.url),
-      skills: i.skills,
-    }),
-  );
+/** The cover image path lives beside the rows; editing a project never wipes the cover. */
+export class MemoryProjectRepository extends InMemoryCrudRepository<
+  ProjectDTO,
+  CreateProjectInput,
+  CreateProjectInput
+> {
+  private covers = new Map<string, string>();
+
+  constructor(seedProfileId?: string) {
+    super(
+      seedProfileId,
+      () => DEMO_PROJECT_ROWS.map((p) => ({ ...p, skills: [...p.skills] })),
+      (i) => ({
+        name: i.name,
+        description: n(i.description),
+        organization: n(i.organization),
+        role: n(i.role),
+        startDate: n(i.startDate),
+        endDate: n(i.endDate),
+        repositoryUrl: n(i.repositoryUrl),
+        url: n(i.url),
+        domain: n(i.domain),
+        teamSize: n(i.teamSize),
+        featured: i.featured,
+        hasCover: false,
+        skills: i.skills,
+      }),
+    );
+  }
+
+  override async update(profileId: string, id: string, input: CreateProjectInput) {
+    const row = await this.findById(profileId, id);
+    if (!row) return null;
+    const { hasCover, ...fields } = (
+      this as unknown as { build: (i: CreateProjectInput) => ProjectDTO }
+    ).build(input);
+    void hasCover;
+    Object.assign(row, fields);
+    return row;
+  }
+
+  async setCover(profileId: string, id: string, path: string) {
+    const row = await this.findById(profileId, id);
+    if (!row) return null;
+    const previousPath = this.covers.get(id) ?? null;
+    this.covers.set(id, path);
+    row.hasCover = true;
+    return { previousPath };
+  }
+
+  async getCoverPath(profileId: string, id: string) {
+    return (await this.findById(profileId, id)) ? (this.covers.get(id) ?? null) : null;
+  }
+}
+
+export const createMemoryProjects = (seedProfileId?: string) => new MemoryProjectRepository(seedProfileId);
 
 /** Attachments live beside the rows; editing an experience never wipes them. */
 export class MemoryExperienceRepository extends InMemoryCrudRepository<
