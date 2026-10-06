@@ -5,6 +5,7 @@ import type { JobAlertDTO, OpportunityDTO } from "@/types/opportunity";
 export interface OpportunityRepository {
   list(): Promise<OpportunityDTO[]>;
   findById(id: string): Promise<OpportunityDTO | null>;
+  incrementViews(id: string): Promise<void>;
 }
 
 export interface SavedOpportunityRepository {
@@ -17,4 +18,10 @@ export interface JobAlertRepository {
   list(profileId: string): Promise<JobAlertDTO[]>;
   create(profileId: string, input: CreateJobAlertInput & { name: string }): Promise<JobAlertDTO>;
   remove(profileId: string, id: string): Promise<boolean>;
+}
+
+export interface ApplicationRepository {
+  listIds(profileId: string): Promise<string[]>;
+  /** "created", "exists" (already applied) or null when the offer does not exist. */
+  apply(profileId: string, opportunityId: string, message?: string): Promise<"created" | "exists" | null>;
 }

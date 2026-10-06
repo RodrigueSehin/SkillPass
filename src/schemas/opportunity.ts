@@ -19,4 +19,11 @@ export const createJobAlertSchema = z
     path: ["query"],
   });
 
+export const applyToOpportunitySchema = z.object({
+  message: z.preprocess(
+    blankToUndefined,
+    z.string().trim().max(500, "Message trop long (500 caractères)").optional(),
+  ),
+});
+
 export type CreateJobAlertInput = z.infer<typeof createJobAlertSchema>;

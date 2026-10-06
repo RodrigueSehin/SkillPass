@@ -7,9 +7,12 @@ import {
   companyRanking,
   filterOpportunities,
   matchLabel,
+  longDate,
   matchScore,
+  neighbours,
   relativeDate,
   selectionMatch,
+  similarOffers,
 } from "./opportunity-view";
 
 const now = new Date("2026-10-06T12:00:00.000Z");
@@ -59,7 +62,7 @@ describe("opportunity view", () => {
     expect(matchScore({ skills: ["Power Apps", "SQL"] }, mine)).toBe(50);
     expect(matchScore({ skills: [] }, mine)).toBe(0);
     expect(selectionMatch([], mine)).toBe(0);
-    expect(selectionMatch([{ ...all[0] }], mine)).toBe(100);
+    expect(selectionMatch([{ ...all[0], skills: ["Power Apps", "Dataverse"] }], mine)).toBe(100);
     expect(matchLabel(78)).toBe("Excellent match !");
     expect(matchLabel(10)).toBe("À renforcer");
   });
@@ -98,5 +101,44 @@ describe("opportunity view", () => {
       domain: ["Tech & Digital"],
       level: undefined,
     });
+  });
+});
+
+describe("opportunity detail helpers", () => {
+  it("finds similar offers without the offer itself", () => {
+    const offer = all[0];
+    const similar = similarOffers(all, offer);
+    expect(similar).toHaveLength(5);
+    expect(similar.some((o) => o.id === offer.id)).toBe(false);
+    expect(
+      similar.every((o) => o.skills.some((s) => offer.skills.includes(s)) || o.domain === offer.domain),
+    ).toBe(true);
+  });
+
+  it("walks the list in the default order", () => {
+    const ordered = filterOpportunities(all, {});
+    const middle = ordered[3];
+    expect(neighbours(all, middle.id).previous?.id).toBe(ordered[2].id);
+    expect(neighbours(all, middle.id).next?.id).toBe(ordered[4].id);
+    expect(neighbours(all, ordered[0].id).previous).toBeNull();
+    expect(neighbours(all, "missing")).toEqual({ previous: null, next: null });
+  });
+
+  it("writes a long date", () => {
+    expect(longDate("2026-09-12T10:00:00.000Z")).toBe("12 Septembre 2026");
+  });
+
+  it("gives every demo offer a full sheet", () => {
+    for (const o of all) {
+      expect(o.missions.length).toBeGreaterThan(0);
+      expect(o.requirements.length).toBeGreaterThan(0);
+      expect(o.process.length).toBeGreaterThan(0);
+      expect(o.deadline && o.deadline > o.publishedAt).toBe(true);
+    }
+    const featured = all[0];
+    expect(featured.missions).toHaveLength(7);
+    expect(featured.skills).toHaveLength(12);
+    expect(featured.views).toBe(245);
+    expect(featured.applicants).toBe(32);
   });
 });

@@ -1,6 +1,7 @@
 import { CrudService } from "@/lib/crud";
 import {
   getCertificationRepository,
+  getApplicationRepository,
   getContactRepository,
   getJobAlertRepository,
   getOpportunityRepository,
@@ -77,4 +78,5 @@ export const getOpportunityService = () =>
     getOpportunityRepository(),
     getSavedOpportunityRepository(),
     getJobAlertRepository(),
+    getApplicationRepository(),
   );

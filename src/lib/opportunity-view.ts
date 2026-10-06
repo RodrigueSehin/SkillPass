@@ -130,3 +130,36 @@ export const alertFilters = (a: Pick<JobAlertDTO, "query" | "kind" | "region" | 
     domain: a.domain ? [a.domain] : undefined,
     level: a.level ? [a.level] : undefined,
   }) satisfies OpportunityFilters;
+
+/** Offers close to this one: same domain or shared skills, the most alike first, then the most recent. */
+export function similarOffers(all: OpportunityDTO[], offer: OpportunityDTO, limit = 5) {
+  const mine = new Set(offer.skills.map((s) => s.toLowerCase()));
+  const score = (o: OpportunityDTO) =>
+    o.skills.filter((s) => mine.has(s.toLowerCase())).length * 2 + (o.domain === offer.domain ? 1 : 0);
+  return all
+    .filter((o) => o.id !== offer.id)
+    .map((o) => ({ o, score: score(o) }))
+    .filter(({ score: s }) => s > 0)
+    .sort((a, b) => b.score - a.score || b.o.publishedAt.localeCompare(a.o.publishedAt))
+    .slice(0, limit)
+    .map(({ o }) => o);
+}
+
+/** Previous and next offer in the default ("Plus récentes") order of the list. */
+export function neighbours(all: OpportunityDTO[], id: string) {
+  const ordered = [...all].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  const index = ordered.findIndex((o) => o.id === id);
+  if (index === -1) return { previous: null, next: null };
+  return { previous: ordered[index - 1] ?? null, next: ordered[index + 1] ?? null };
+}
+
+const longDay = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+/** "2026-09-12T…" → "12 Septembre 2026". */
+export function longDate(iso: string) {
+  return longDay.format(new Date(iso)).replace(/ (\p{L})/u, (_, c: string) => ` ${c.toUpperCase()}`);
+}

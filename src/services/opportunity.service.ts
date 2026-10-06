@@ -1,5 +1,6 @@
 import { NotFoundError } from "@/lib/errors";
 import type {
+  ApplicationRepository,
   JobAlertRepository,
   OpportunityRepository,
   SavedOpportunityRepository,
@@ -30,10 +31,32 @@ export class OpportunityService {
     private readonly offers: OpportunityRepository,
     private readonly saved: SavedOpportunityRepository,
     private readonly alerts: JobAlertRepository,
+    private readonly applications: ApplicationRepository,
   ) {}
 
   list() {
     return this.offers.list();
+  }
+
+  async get(id: string) {
+    const offer = await this.offers.findById(id);
+    if (!offer) throw new NotFoundError("Offre introuvable");
+    return offer;
+  }
+
+  trackView(id: string) {
+    return this.offers.incrementViews(id);
+  }
+
+  appliedIds(profileId: string) {
+    return this.applications.listIds(profileId);
+  }
+
+  /** Applies with the SkillPass profile. A second application to the same offer changes nothing. */
+  async apply(profileId: string, opportunityId: string, message?: string) {
+    const result = await this.applications.apply(profileId, opportunityId, message);
+    if (result === null) throw new NotFoundError("Offre introuvable");
+    return result;
   }
 
   savedIds(profileId: string) {

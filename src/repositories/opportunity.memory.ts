@@ -3,6 +3,7 @@ import { buildDemoOpportunities } from "@/config/demo-opportunities";
 import type { CreateJobAlertInput } from "@/schemas/opportunity";
 import type { JobAlertDTO, OpportunityDTO } from "@/types/opportunity";
 import type {
+  ApplicationRepository,
   JobAlertRepository,
   OpportunityRepository,
   SavedOpportunityRepository,
@@ -18,6 +19,37 @@ export class InMemoryOpportunityRepository implements OpportunityRepository {
   async findById(id: string) {
     const row = this.rows.find((o) => o.id === id);
     return row ? { ...row, skills: [...row.skills] } : null;
+  }
+
+  async incrementViews(id: string) {
+    const row = this.rows.find((o) => o.id === id);
+    if (row) row.views += 1;
+  }
+
+  /** Used by the in-memory applications: someone applied through SkillPass. */
+  addApplicant(id: string) {
+    const row = this.rows.find((o) => o.id === id);
+    if (row) row.applicants += 1;
+  }
+}
+
+export class InMemoryApplicationRepository implements ApplicationRepository {
+  private applied = new Map<string, Set<string>>();
+
+  constructor(private readonly offers: InMemoryOpportunityRepository) {}
+
+  async listIds(profileId: string) {
+    return [...(this.applied.get(profileId) ?? [])];
+  }
+
+  async apply(profileId: string, opportunityId: string) {
+    if (!(await this.offers.findById(opportunityId))) return null;
+    const set = this.applied.get(profileId) ?? new Set<string>();
+    this.applied.set(profileId, set);
+    if (set.has(opportunityId)) return "exists" as const;
+    set.add(opportunityId);
+    this.offers.addApplicant(opportunityId);
+    return "created" as const;
   }
 }
 

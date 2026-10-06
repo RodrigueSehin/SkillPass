@@ -1,9 +1,19 @@
 import type { OpportunityDTO } from "@/types/opportunity";
 
-type Seed = Omit<OpportunityDTO, "id" | "publishedAt" | "description" | "applyUrl" | "companyLabel"> & {
-  daysAgo: number;
-  companyLabel?: string;
-};
+/** The fields written by hand for each demo offer; the rest of the sheet is generated. */
+type Seed = Pick<
+  OpportunityDTO,
+  | "company"
+  | "title"
+  | "kind"
+  | "region"
+  | "location"
+  | "workMode"
+  | "commitment"
+  | "domain"
+  | "level"
+  | "skills"
+> & { daysAgo: number; companyLabel?: string };
 
 const o = (
   company: string,
@@ -35,7 +45,7 @@ const o = (
 
 const ABIDJAN = "Abidjan, Côte d'Ivoire";
 
-/** Fictitious job board: the first six are the ones shown on the mockup. */
+/** Fictitious job board: the first six are the ones shown on the list mockup. */
 const SEEDS: Seed[] = [
   o(
     "AGL",
@@ -47,7 +57,20 @@ const SEEDS: Seed[] = [
     "CDI",
     "Tech & Digital",
     "INTERMEDIATE",
-    ["Power Apps", "Power Automate", "Dataverse"],
+    [
+      "Power Apps",
+      "Power Automate",
+      "Dataverse",
+      "Power BI",
+      "SharePoint",
+      "API",
+      "Analyse fonctionnelle",
+      "Gestion de projet",
+      "ALM",
+      "Git",
+      "UX/UI",
+      "Agilité",
+    ],
     2,
   ),
   o(
@@ -355,7 +378,7 @@ const SEEDS: Seed[] = [
 
   o(
     "Orange CI",
-    "Développeur Mobile",
+    "Développeur Power Platform",
     "EMPLOI",
     "CI",
     ABIDJAN,
@@ -363,8 +386,8 @@ const SEEDS: Seed[] = [
     "CDI",
     "Tech & Digital",
     "INTERMEDIATE",
-    ["React", "API", "SQL"],
-    8,
+    ["Power Apps", "Power Automate", "Dataverse"],
+    12,
     "Orange Digital Center",
   ),
   o(
@@ -422,7 +445,7 @@ const SEEDS: Seed[] = [
 
   o(
     "SEHIN GROUP",
-    "Développeur React",
+    "Analyste fonctionnel Power Platform",
     "EMPLOI",
     "CI",
     ABIDJAN,
@@ -430,8 +453,8 @@ const SEEDS: Seed[] = [
     "CDI",
     "Tech & Digital",
     "INTERMEDIATE",
-    ["React", "TypeScript", "Node.js"],
-    10,
+    ["Power Apps", "Analyse fonctionnelle", "Power Automate"],
+    13,
   ),
   o(
     "SEHIN GROUP",
@@ -512,24 +535,198 @@ const SEEDS: Seed[] = [
     ["Gestion de projet", "Leadership", "Agile"],
     24,
   ),
+
+  o(
+    "TotalEnergies",
+    "Développeur low-code",
+    "EMPLOI",
+    "CI",
+    ABIDJAN,
+    "HYBRID",
+    "CDI",
+    "Tech & Digital",
+    "INTERMEDIATE",
+    ["Power Apps", "Power Automate", "SharePoint"],
+    14,
+  ),
 ];
 
-const describe = (s: Seed) =>
-  `${s.companyLabel ?? s.company} recherche un(e) ${s.title} (${s.location}). ` +
-  `Vous interviendrez sur des sujets liés à ${s.skills.slice(0, 3).join(", ")} au sein d'une équipe pluridisciplinaire, ` +
-  `avec des objectifs clairs et un vrai impact sur les utilisateurs.\n\n` +
-  `Compétences recherchées : ${s.skills.join(", ")}.\n` +
-  `Type de contrat : ${s.commitment ?? "à définir"}.`;
+/** What a company says about itself, shown on each of its offers. */
+const COMPANIES: Record<
+  string,
+  { legalName: string; sector: string; size: string; tagline: string; about: string; website: string }
+> = {
+  AGL: {
+    legalName: "Africa Global Logistics",
+    sector: "Logistique & Transport",
+    size: "Plus de 10 000 employés",
+    tagline: "Connecting Africa\nEmpowering tomorrow",
+    about:
+      "AGL est un opérateur logistique de référence en Afrique, présent dans plus de 40 pays. Nous proposons des solutions intégrées de transport, logistique et supply chain pour soutenir la croissance du continent.",
+    website: "https://www.agl-group.com",
+  },
+  Microsoft: {
+    legalName: "Microsoft",
+    sector: "Logiciels & Cloud",
+    size: "Plus de 200 000 employés",
+    tagline: "Empower every person\nand every organization",
+    about:
+      "Microsoft accompagne les organisations du monde entier dans leur transformation numérique grâce au cloud, à l'intelligence artificielle et à la Power Platform.",
+    website: "https://www.microsoft.com",
+  },
+  "Orange CI": {
+    legalName: "Orange Côte d'Ivoire",
+    sector: "Télécommunications",
+    size: "Plus de 2 000 employés",
+    tagline: "Le digital au service\nde chacun",
+    about:
+      "Orange Côte d'Ivoire est l'un des principaux opérateurs télécoms du pays et investit dans l'innovation, la fintech et la formation au numérique.",
+    website: "https://www.orange.ci",
+  },
+  "SEHIN GROUP": {
+    legalName: "SEHIN GROUP",
+    sector: "Conseil & Transformation digitale",
+    size: "50 à 200 employés",
+    tagline: "Your skills.\nYour future.",
+    about:
+      "SEHIN GROUP accompagne les entreprises africaines dans leur transformation digitale : solutions Power Platform, data et formation des équipes.",
+    website: "https://skillpass.example/sehin-group",
+  },
+  "Banque Atlantique": {
+    legalName: "Banque Atlantique Côte d'Ivoire",
+    sector: "Banque & Finance",
+    size: "Plus de 1 000 employés",
+    tagline: "La banque qui\nvous ressemble",
+    about:
+      "Banque Atlantique est un acteur bancaire majeur d'Afrique de l'Ouest qui modernise ses services grâce au digital et à la donnée.",
+    website: "https://www.banqueatlantique.net",
+  },
+  Upwork: {
+    legalName: "Upwork",
+    sector: "Plateforme freelance",
+    size: "Plus de 800 employés",
+    tagline: "Work without limits",
+    about:
+      "Upwork met en relation des entreprises et des freelances du monde entier pour des missions à distance.",
+    website: "https://www.upwork.com",
+  },
+  TotalEnergies: {
+    legalName: "TotalEnergies",
+    sector: "Énergie",
+    size: "Plus de 100 000 employés",
+    tagline: "Energy for all",
+    about:
+      "TotalEnergies est une compagnie multi-énergies mondiale qui investit dans la digitalisation de ses opérations.",
+    website: "https://totalenergies.com",
+  },
+};
 
 const DAY_MS = 86_400_000;
 
+/** Stable pseudo-random number in [min, max] from a string, so demo figures never jump between reloads. */
+const spread = (seed: string, min: number, max: number) =>
+  min + ([...seed].reduce((sum, ch) => (sum * 31 + ch.charCodeAt(0)) % 9973, 7) % (max - min + 1));
+
+const WORK_MODE_DETAIL: Record<string, string> = {
+  HYBRID: "Hybride (2-3 jours sur site)",
+  ONSITE: "Sur site",
+  REMOTE: "Télétravail complet",
+};
+const EXPERIENCE: Record<string, string> = {
+  BEGINNER: "Débutant accepté",
+  INTERMEDIATE: "Intermédiaire",
+  SENIOR: "Senior",
+};
+
+/** Hand-written content for the offer shown on the detail mockup. */
+const FEATURED = {
+  title: "Développeur Power Platform",
+  company: "AGL",
+  description:
+    "Nous recherchons un Développeur Power Platform passionné et expérimenté pour rejoindre notre équipe Digital & Innovation. Vous serez en charge de concevoir, développer et déployer des solutions métiers avec Microsoft Power Platform (Power Apps, Power Automate, Power BI, Dataverse) afin d'optimiser nos processus et accompagner la transformation digitale du groupe.",
+  missions: [
+    "Analyser les besoins métiers et proposer des solutions adaptées avec Power Platform.",
+    "Développer des applications Canvas et Model-driven Apps.",
+    "Créer et automatiser des processus avec Power Automate.",
+    "Concevoir des rapports et tableaux de bord avec Power BI.",
+    "Assurer l'intégration avec les systèmes existants (SharePoint, Dataverse, APIs).",
+    "Accompagner les utilisateurs et assurer la formation.",
+    "Participer à la gouvernance et aux bonnes pratiques de la plateforme.",
+  ],
+  optionalSkills: ["Azure"],
+  experienceRange: "Intermédiaire / Senior",
+  views: 245,
+  applicants: 32,
+};
+
+function sheet(s: Seed, now: Date): Omit<OpportunityDTO, "id"> {
+  const { daysAgo, companyLabel, ...base } = s;
+  const featured = base.company === FEATURED.company && base.title === FEATURED.title;
+  const company = COMPANIES[base.company];
+  const main = base.skills.slice(0, 3).join(", ");
+  const key = `${base.company}|${base.title}`;
+  const publishedAt = new Date(now.getTime() - daysAgo * DAY_MS);
+
+  const description = featured
+    ? FEATURED.description
+    : `${companyLabel ?? base.company} recherche un(e) ${base.title} (${base.location}) pour rejoindre ses équipes. ` +
+      `Vous interviendrez sur des sujets liés à ${main}, au sein d'une équipe pluridisciplinaire, avec des objectifs clairs et un vrai impact sur les utilisateurs.`;
+
+  return {
+    ...base,
+    companyLabel: companyLabel ?? null,
+    description,
+    applyUrl: null,
+    publishedAt: publishedAt.toISOString(),
+    deadline: new Date(publishedAt.getTime() + 28 * DAY_MS).toISOString(),
+    views: featured ? FEATURED.views : spread(key, 40, 600),
+    applicants: featured ? FEATURED.applicants : spread(`${key}#`, 4, 60),
+    workModeDetail: base.workMode ? (WORK_MODE_DETAIL[base.workMode] ?? null) : null,
+    experienceRange: featured ? FEATURED.experienceRange : (EXPERIENCE[base.level] ?? null),
+    salary: base.kind === "STAGE" ? "Gratification selon la grille en vigueur" : "À discuter",
+    missions: featured
+      ? FEATURED.missions
+      : [
+          "Analyser les besoins et proposer des solutions adaptées.",
+          `Concevoir et mettre en œuvre avec ${main}.`,
+          "Assurer la qualité, les tests et la documentation.",
+          "Collaborer avec les équipes métiers et techniques.",
+          "Partager les bonnes pratiques et accompagner les utilisateurs.",
+        ],
+    requirements: [
+      `${EXPERIENCE[base.level] ?? "Expérience adaptée"} sur un poste proche.`,
+      `Maîtrise de ${main}.`,
+      "Autonomie, rigueur et sens du service.",
+      "Esprit d'équipe et bonne communication.",
+      "Français courant ; anglais professionnel apprécié.",
+    ],
+    perks: [
+      "Assurance santé",
+      "Formation et certifications financées",
+      ...(base.workMode === "HYBRID" || base.workMode === "REMOTE" ? ["Télétravail partiel ou complet"] : []),
+      "Environnement de travail moderne",
+      "Perspectives d'évolution",
+      "Prime de performance",
+    ],
+    process: [
+      "Candidature en ligne",
+      "Entretien téléphonique (30 min)",
+      "Entretien technique",
+      "Rencontre avec l'équipe",
+      "Proposition et intégration",
+    ],
+    optionalSkills: featured ? FEATURED.optionalSkills : [],
+    companyLegalName: company?.legalName ?? base.company,
+    companySector: company?.sector ?? null,
+    companySize: company?.size ?? null,
+    companyAbout: company?.about ?? null,
+    companyTagline: company?.tagline ?? null,
+    companyVerified: Boolean(company),
+    companyWebsite: company?.website ?? null,
+  };
+}
+
 /** Offers with publication dates relative to `now`, so "il y a 2 jours" stays true whenever the demo runs. */
 export function buildDemoOpportunities(now = new Date()): Omit<OpportunityDTO, "id">[] {
-  return SEEDS.map(({ daysAgo, ...s }) => ({
-    ...s,
-    companyLabel: s.companyLabel ?? null,
-    description: describe({ daysAgo, ...s }),
-    applyUrl: null,
-    publishedAt: new Date(now.getTime() - daysAgo * DAY_MS).toISOString(),
-  }));
+  return SEEDS.map((s) => sheet(s, now));
 }

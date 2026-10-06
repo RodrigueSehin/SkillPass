@@ -77,6 +77,7 @@ model Profile {
   credentials     Credential[]
   recommendations Recommendation[]
   savedOpportunities SavedOpportunity[]
+  applications    Application[]
   jobAlerts       JobAlert[]
   contacts        Contact[]
 
@@ -427,8 +428,27 @@ model Opportunity {
   applyUrl     String?  @map("apply_url")
   publishedAt  DateTime @default(now()) @map("published_at")
   createdAt    DateTime @default(now()) @map("created_at")
+  deadline     DateTime?
+  views        Int      @default(0)
+  applicants   Int      @default(0)
+  workModeDetail String? @map("work_mode_detail")
+  experienceRange String? @map("experience_range")
+  salary       String?
+  missions     String[] @default([])
+  requirements String[] @default([])
+  perks        String[] @default([])
+  process      String[] @default([])
+  optionalSkills String[] @default([]) @map("optional_skills")
+  companyLegalName String? @map("company_legal_name")
+  companySector String? @map("company_sector")
+  companySize  String?  @map("company_size")
+  companyAbout String?  @map("company_about")
+  companyTagline String? @map("company_tagline")
+  companyVerified Boolean @default(false) @map("company_verified")
+  companyWebsite String? @map("company_website")
 
   saved SavedOpportunity[]
+  applications Application[]
 
   @@index([publishedAt])
   @@map("opportunities")
@@ -477,4 +497,18 @@ model Contact {
 
   @@index([profileId])
   @@map("contacts")
+}
+
+model Application {
+  profileId     String   @map("profile_id") @db.Uuid
+  opportunityId String   @map("opportunity_id") @db.Uuid
+  message       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  profile     Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, opportunityId])
+  @@index([opportunityId])
+  @@map("applications")
 }

@@ -16,6 +16,7 @@ import type { EvidenceRepository } from "./evidence.repository";
 import { InMemoryProfileRepository } from "./profile.memory";
 import { PrismaProfileRepository } from "./profile.prisma";
 import type {
+  ApplicationRepository,
   JobAlertRepository,
   OpportunityRepository,
   SavedOpportunityRepository,
@@ -35,11 +36,13 @@ import {
 import { createMemoryContacts } from "./contact.memory";
 import { PrismaContactRepository } from "./contact.prisma";
 import {
+  InMemoryApplicationRepository,
   InMemoryJobAlertRepository,
   InMemoryOpportunityRepository,
   InMemorySavedOpportunityRepository,
 } from "./opportunity.memory";
 import {
+  PrismaApplicationRepository,
   PrismaJobAlertRepository,
   PrismaOpportunityRepository,
   PrismaSavedOpportunityRepository,
@@ -61,6 +64,7 @@ const g = globalThis as unknown as {
     opportunities: InMemoryOpportunityRepository;
     savedOpportunities: InMemorySavedOpportunityRepository;
     jobAlerts: InMemoryJobAlertRepository;
+    applications: InMemoryApplicationRepository;
     contacts: ReturnType<typeof createMemoryContacts>;
   };
 };
@@ -78,6 +82,7 @@ function memory() {
       opportunities,
       savedOpportunities: new InMemorySavedOpportunityRepository(opportunities),
       jobAlerts: new InMemoryJobAlertRepository(),
+      applications: new InMemoryApplicationRepository(opportunities),
       contacts: createMemoryContacts(DEMO_PROFILE_ID),
     };
   }
@@ -127,4 +132,6 @@ export const getSavedOpportunityRepository = (): SavedOpportunityRepository =>
   hasDatabase() ? new PrismaSavedOpportunityRepository() : memory().savedOpportunities;
 export const getJobAlertRepository = (): JobAlertRepository =>
   hasDatabase() ? new PrismaJobAlertRepository() : memory().jobAlerts;
+export const getApplicationRepository = (): ApplicationRepository =>
+  hasDatabase() ? new PrismaApplicationRepository() : memory().applications;
 export const getContactRepository = () => (hasDatabase() ? new PrismaContactRepository() : memory().contacts);

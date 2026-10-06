@@ -52,6 +52,32 @@ export interface OpportunityDTO {
   description: string;
   applyUrl: string | null;
   publishedAt: string;
+  /** Last day to apply, if the employer set one. */
+  deadline: string | null;
+  views: number;
+  /** People who applied through SkillPass. */
+  applicants: number;
+  /** "Hybride (2-3 jours sur site)". */
+  workModeDetail: string | null;
+  /** "Intermédiaire / Senior". */
+  experienceRange: string | null;
+  salary: string | null;
+  /** What the person will do ("Vos principales missions"). */
+  missions: string[];
+  /** The profile looked for. */
+  requirements: string[];
+  perks: string[];
+  /** Hiring steps, in order. */
+  process: string[];
+  /** Skills that are a plus rather than a requirement. */
+  optionalSkills: string[];
+  companyLegalName: string | null;
+  companySector: string | null;
+  companySize: string | null;
+  companyAbout: string | null;
+  companyTagline: string | null;
+  companyVerified: boolean;
+  companyWebsite: string | null;
 }
 
 /** A saved search: the filters are re-applied from the alert. */

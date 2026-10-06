@@ -8,7 +8,6 @@ import {
   deleteJobAlertAction,
   toggleSaveOpportunityAction,
 } from "@/app/dashboard/opportunities/actions";
-import { CompanyLogo } from "@/components/opportunities/company-logo";
 import { Button, buttonVariants, type ButtonProps } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Modal } from "@/components/ui/modal";
@@ -52,7 +51,6 @@ export interface AlertView {
 interface Ctx {
   saved: Set<string>;
   toggleSave: (id: string) => void;
-  openOffer: (offer: OfferView) => void;
   openAlerts: () => void;
   pending: boolean;
 }
@@ -220,93 +218,7 @@ function AlertsDialog({
   );
 }
 
-function OfferDialog({ offer, onClose }: { offer: OfferView | null; onClose: () => void }) {
-  const { saved, toggleSave, pending } = useOpportunities();
-  const [copied, setCopied] = useState(false);
-  const isSaved = offer ? saved.has(offer.id) : false;
-
-  async function copyLink() {
-    if (!offer) return;
-    const url = `${window.location.origin}/dashboard/opportunities?offer=${offer.id}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      window.prompt("Copiez ce lien :", url);
-    }
-  }
-
-  return (
-    <Modal open={offer !== null} onClose={onClose} title={offer?.title ?? "Offre"}>
-      {offer && (
-        <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
-          <div className="flex items-center gap-3">
-            <CompanyLogo company={offer.company} />
-            <div>
-              <p className="text-navy font-bold">{offer.companyName}</p>
-              <p className="text-muted text-sm">
-                {offer.location} · Publié {offer.published}
-              </p>
-            </div>
-            <span className="text-brand ml-auto rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold">
-              {offer.match}% de correspondance
-            </span>
-          </div>
-          <ul className="flex flex-wrap gap-2 text-xs font-semibold">
-            <li className="text-brand rounded-full bg-blue-50 px-3 py-1">{offer.badge}</li>
-            {offer.workMode && <li className="rounded-full bg-slate-100 px-3 py-1">{offer.workMode}</li>}
-            {offer.commitment && <li className="rounded-full bg-slate-100 px-3 py-1">{offer.commitment}</li>}
-            <li className="rounded-full bg-slate-100 px-3 py-1">{offer.domain}</li>
-            <li className="rounded-full bg-slate-100 px-3 py-1">{offer.levelLabel}</li>
-          </ul>
-          <p className="text-navy/85 text-sm leading-relaxed whitespace-pre-line">{offer.description}</p>
-          <div>
-            <p className="text-navy mb-2 text-sm font-bold">Compétences demandées</p>
-            <ul className="flex flex-wrap gap-2">
-              {offer.skills.map((s) => (
-                <li
-                  key={s.name}
-                  className={cn(
-                    "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium",
-                    s.owned ? "bg-green-50 text-green-700" : "text-brand bg-blue-50",
-                  )}
-                >
-                  {s.owned && <Check className="size-3" aria-label="Vous maîtrisez cette compétence" />}{" "}
-                  {s.name}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="flex flex-wrap gap-3 pt-2">
-            {offer.applyUrl ? (
-              <a
-                href={offer.applyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={buttonVariants({ variant: "primary" })}
-              >
-                Postuler <ExternalLink />
-              </a>
-            ) : (
-              <p className="text-muted w-full text-xs">
-                Offre de démonstration : aucun lien de candidature n&apos;est associé.
-              </p>
-            )}
-            <Button variant="outline" disabled={pending} onClick={() => toggleSave(offer.id)}>
-              {isSaved ? <BookmarkCheck /> : <Bookmark />} {isSaved ? "Enregistrée" : "Enregistrer"}
-            </Button>
-            <Button variant="outline" onClick={copyLink}>
-              {copied ? <Check /> : <Copy />} {copied ? "Lien copié" : "Copier le lien"}
-            </Button>
-          </div>
-        </div>
-      )}
-    </Modal>
-  );
-}
-
-/** Owns the offer dialog, the alerts dialog and the "saved" state shared by every card. */
+/** Owns the alerts dialog and the "saved" state shared by every card. */
 export function OpportunityProvider({
   initialSaved,
   alerts,
@@ -319,7 +231,6 @@ export function OpportunityProvider({
   children: React.ReactNode;
 }) {
   const [saved, setSaved] = useState(() => new Set(initialSaved));
-  const [offer, setOffer] = useState<OfferView | null>(null);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -346,7 +257,7 @@ export function OpportunityProvider({
 
   return (
     <OpportunityContext.Provider
-      value={{ saved, toggleSave, openOffer: setOffer, openAlerts: () => setAlertsOpen(true), pending }}
+      value={{ saved, toggleSave, openAlerts: () => setAlertsOpen(true), pending }}
     >
       {children}
       {error && (
@@ -354,7 +265,6 @@ export function OpportunityProvider({
           {error}
         </p>
       )}
-      <OfferDialog offer={offer} onClose={() => setOffer(null)} />
       <AlertsDialog
         open={alertsOpen}
         onClose={() => setAlertsOpen(false)}
@@ -378,20 +288,8 @@ export function CreateAlertButton({
   );
 }
 
-/** Opens an offer on arrival (shared "Copier le lien" URLs). */
-export function AutoOpenOffer({ offer }: { offer: OfferView }) {
-  const { openOffer } = useOpportunities();
-  const opened = useRef(false);
-  useEffect(() => {
-    if (opened.current) return;
-    opened.current = true;
-    openOffer(offer);
-  }, [offer, openOffer]);
-  return null;
-}
-
 export function OfferMenu({ offer }: { offer: OfferView }) {
-  const { saved, toggleSave, openOffer } = useOpportunities();
+  const { saved, toggleSave } = useOpportunities();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -411,7 +309,7 @@ export function OfferMenu({ offer }: { offer: OfferView }) {
   }, [open]);
 
   async function copyLink() {
-    const url = `${window.location.origin}/dashboard/opportunities?offer=${offer.id}`;
+    const url = `${window.location.origin}/dashboard/opportunities/${offer.id}`;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -439,17 +337,9 @@ export function OfferMenu({ offer }: { offer: OfferView }) {
           role="menu"
           className="border-border shadow-lift absolute top-full right-0 z-20 mt-1 w-48 overflow-hidden rounded-xl border bg-white"
         >
-          <button
-            role="menuitem"
-            type="button"
-            className={item}
-            onClick={() => {
-              setOpen(false);
-              openOffer(offer);
-            }}
-          >
+          <Link role="menuitem" href={`/dashboard/opportunities/${offer.id}`} className={item}>
             <ExternalLink className="size-4" aria-hidden /> Voir l&apos;offre
-          </button>
+          </Link>
           <button
             role="menuitem"
             type="button"
@@ -477,17 +367,16 @@ export function OfferMenu({ offer }: { offer: OfferView }) {
 }
 
 export function OfferActions({ offer }: { offer: OfferView }) {
-  const { saved, toggleSave, openOffer, pending } = useOpportunities();
+  const { saved, toggleSave, pending } = useOpportunities();
   const isSaved = saved.has(offer.id);
   return (
     <div className="mt-auto flex gap-2 pt-4">
-      <Button
-        variant="outline"
-        className="text-brand border-brand/40 h-10 flex-1"
-        onClick={() => openOffer(offer)}
+      <Link
+        href={`/dashboard/opportunities/${offer.id}`}
+        className={cn(buttonVariants({ variant: "outline" }), "text-brand border-brand/40 h-10 flex-1")}
       >
         Voir l&apos;offre
-      </Button>
+      </Link>
       <button
         type="button"
         aria-label={isSaved ? `Retirer ${offer.title} des offres enregistrées` : `Enregistrer ${offer.title}`}

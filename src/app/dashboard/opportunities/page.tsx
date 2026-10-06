@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ChevronLeft, ChevronRight, Quote, ShieldCheck } from "lucide-react";
 import heroPhoto from "@/assets/skills/hero.jpg";
 import { OpportunityCard } from "@/components/opportunities/opportunity-card";
@@ -11,7 +12,6 @@ import {
   SearchOpportunitiesButton,
 } from "@/components/opportunities/opportunity-controls";
 import {
-  AutoOpenOffer,
   CreateAlertButton,
   OpportunityProvider,
   type AlertView,
@@ -61,6 +61,9 @@ const DOMAINS = ["Tech & Digital", "Gestion & Business", "Data & IA", "Cloud & I
 export default async function OpportunitiesPage({ searchParams }: PageProps<"/dashboard/opportunities">) {
   const user = await requireUser();
   const raw = await searchParams;
+  // Links copied before offers had their own page still work.
+  const legacyOffer = first(raw.offer);
+  if (legacyOffer) redirect(`/dashboard/opportunities/${encodeURIComponent(legacyOffer)}`);
   const service = getOpportunityService();
   const [all, savedIds, alerts, skills] = await Promise.all([
     service.list(),
@@ -141,9 +144,6 @@ export default async function OpportunitiesPage({ searchParams }: PageProps<"/da
     href: alertHref(a),
   }));
 
-  const sharedOffer = first(raw.offer);
-  const sharedOfferView = sharedOffer ? all.find((o) => o.id === sharedOffer) : undefined;
-
   /** Keeps the active filters when moving between pages. */
   const hrefWith = (overrides: Record<string, string | undefined>) => {
     const next = new URLSearchParams();
@@ -167,7 +167,6 @@ export default async function OpportunitiesPage({ searchParams }: PageProps<"/da
 
   return (
     <OpportunityProvider initialSaved={savedIds} alerts={alertViews} domains={DOMAINS}>
-      {sharedOfferView && <AutoOpenOffer offer={view(sharedOfferView)} />}
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
