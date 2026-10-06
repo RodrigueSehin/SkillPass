@@ -13,8 +13,8 @@ export interface ProjectDTO {
   teamSize: number | null;
   /** Pinned by the owner ("Mis en avant"). */
   featured: boolean;
-  /** True when a cover image was uploaded (served by /api/projects/:id/cover). */
-  hasCover: boolean;
+  /** Cover image: an uploaded one (/api/projects/:id/cover) or a bundled one (/images/...). */
+  coverUrl: string | null;
   /** Explicit status; null means "derive it from the dates". */
   status: string | null;
   videoUrl: string | null;

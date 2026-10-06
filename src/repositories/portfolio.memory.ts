@@ -34,7 +34,7 @@ export class MemoryProjectRepository extends InMemoryCrudRepository<
         domain: n(i.domain),
         teamSize: n(i.teamSize),
         featured: i.featured,
-        hasCover: false,
+        coverUrl: null,
         status: n(i.status),
         videoUrl: n(i.videoUrl),
         otherUrl: n(i.otherUrl),
@@ -47,10 +47,10 @@ export class MemoryProjectRepository extends InMemoryCrudRepository<
   override async update(profileId: string, id: string, input: CreateProjectInput) {
     const row = await this.findById(profileId, id);
     if (!row) return null;
-    const { hasCover, ...fields } = (
+    const { coverUrl, ...fields } = (
       this as unknown as { build: (i: CreateProjectInput) => ProjectDTO }
     ).build(input);
-    void hasCover;
+    void coverUrl;
     Object.assign(row, fields);
     return row;
   }
@@ -60,7 +60,7 @@ export class MemoryProjectRepository extends InMemoryCrudRepository<
     if (!row) return null;
     const previousPath = this.covers.get(id) ?? null;
     this.covers.set(id, path);
-    row.hasCover = true;
+    row.coverUrl = `/api/projects/${id}/cover`;
     return { previousPath };
   }
 

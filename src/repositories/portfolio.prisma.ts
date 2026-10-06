@@ -31,7 +31,8 @@ const toProject = (r: ProjectRow): ProjectDTO => ({
   domain: r.domain,
   teamSize: r.teamSize,
   featured: r.featured,
-  hasCover: Boolean(r.coverPath),
+  // A path starting with "/" is a bundled image (demo data); anything else is a storage key.
+  coverUrl: r.coverPath ? (r.coverPath.startsWith("/") ? r.coverPath : `/api/projects/${r.id}/cover`) : null,
   status: r.status,
   videoUrl: r.videoUrl,
   otherUrl: r.otherUrl,

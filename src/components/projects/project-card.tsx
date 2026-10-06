@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   CalendarDays,
   CheckCircle2,
@@ -49,9 +50,17 @@ export function ProjectCard({
   return (
     <article className="border-border/60 shadow-soft hover:shadow-lift flex h-full flex-col rounded-2xl border bg-white p-3 transition-shadow">
       <div className="relative h-36 overflow-hidden rounded-xl">
-        {p.hasCover ? (
+        {p.coverUrl?.startsWith("/api/") ? (
           // eslint-disable-next-line @next/next/no-img-element -- private, owner-only image served by the API
-          <img src={`/api/projects/${p.id}/cover`} alt="" className="h-full w-full object-cover" />
+          <img src={p.coverUrl} alt="" className="h-full w-full object-cover" />
+        ) : p.coverUrl ? (
+          <Image
+            src={p.coverUrl}
+            alt=""
+            fill
+            sizes="(min-width: 1536px) 320px, (min-width: 640px) 45vw, 100vw"
+            className="object-cover object-top"
+          />
         ) : (
           <div
             aria-hidden

@@ -24,7 +24,7 @@ const project = (name: string, over: Partial<ProjectDTO>): ProjectDTO => ({
   domain: null,
   teamSize: null,
   featured: false,
-  hasCover: false,
+  coverUrl: null,
   status: null,
   videoUrl: null,
   otherUrl: null,
