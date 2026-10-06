@@ -87,6 +87,11 @@ export interface RecommendationDTO {
   authorName: string;
   authorEmail: string | null;
   authorTitle: string | null;
+  /** MANAGER, COLLEAGUE, CLIENT, PARTNER, MENTOR or OTHER. */
+  relation: string | null;
+  /** 1 to 5, given by the recommender. */
+  rating: number | null;
+  keywords: string[];
   content: string | null;
   status: RecommendationStatus;
   createdAt: string;

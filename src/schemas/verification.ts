@@ -25,9 +25,32 @@ export const requestRecommendationSchema = z.object({
   talentSkillId: z.preprocess(blankToUndefined, z.string().trim().min(1).optional()),
 });
 
+export const RECOMMENDATION_RELATIONS = [
+  "MANAGER",
+  "COLLEAGUE",
+  "CLIENT",
+  "PARTNER",
+  "MENTOR",
+  "OTHER",
+] as const;
+export const RECOMMENDATION_RELATION_LABELS: Record<(typeof RECOMMENDATION_RELATIONS)[number], string> = {
+  MANAGER: "Manager",
+  COLLEAGUE: "Collègue",
+  CLIENT: "Client",
+  PARTNER: "Partenaire",
+  MENTOR: "Mentor",
+  OTHER: "Autre",
+};
+
 export const submitRecommendationSchema = z.object({
   content: z.string().trim().min(40, "Écrivez au moins quelques phrases (40 caractères)").max(2000),
   authorTitle: z.preprocess(blankToUndefined, z.string().trim().max(120).optional()),
+  relation: z.preprocess(blankToUndefined, z.enum(RECOMMENDATION_RELATIONS).optional()),
+  rating: z.preprocess(
+    (v) => (v === "" || v === null || v === 0 ? undefined : v),
+    z.coerce.number().int().min(1, "Note entre 1 et 5").max(5, "Note entre 1 et 5").optional(),
+  ),
+  keywords: z.array(z.string().trim().min(1).max(40)).max(8).default([]),
 });
 
 export type RequestRecommendationInput = z.infer<typeof requestRecommendationSchema>;

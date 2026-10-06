@@ -16,6 +16,9 @@ export class InMemoryRecommendationRepository implements RecommendationRepositor
       authorName: input.authorName,
       authorEmail: input.authorEmail ?? null,
       authorTitle: null,
+      relation: null,
+      rating: null,
+      keywords: [],
       content: null,
       status: "REQUESTED",
       createdAt: new Date().toISOString(),
@@ -38,13 +41,26 @@ export class InMemoryRecommendationRepository implements RecommendationRepositor
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
-  async submitByToken(token: string, answer: { content: string; authorTitle?: string }, now: string) {
+  async submitByToken(
+    token: string,
+    answer: {
+      content: string;
+      authorTitle?: string;
+      relation?: string;
+      rating?: number;
+      keywords?: string[];
+    },
+    now: string,
+  ) {
     const row = this.rows.find((r) => r.token === token && r.status === "REQUESTED" && r.expiresAt > now);
     if (!row) return null;
     Object.assign(row, {
       status: "SUBMITTED",
       content: answer.content,
       authorTitle: answer.authorTitle ?? null,
+      relation: answer.relation ?? null,
+      rating: answer.rating ?? null,
+      keywords: [...new Set(answer.keywords ?? [])],
       submittedAt: now,
     });
     return { ...row };

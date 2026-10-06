@@ -19,7 +19,13 @@ export interface RecommendationRepository {
   /** Atomic REQUESTED → SUBMITTED. Returns null if already answered, expired or unknown. */
   submitByToken(
     token: string,
-    answer: { content: string; authorTitle?: string },
+    answer: {
+      content: string;
+      authorTitle?: string;
+      relation?: string;
+      rating?: number;
+      keywords?: string[];
+    },
     now: string,
   ): Promise<RecommendationDTO | null>;
   /** Owner-scoped moderation, only from SUBMITTED. */

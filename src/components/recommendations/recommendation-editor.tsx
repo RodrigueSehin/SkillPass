@@ -1,38 +1,34 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Check, Copy, Plus, Trash2, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Modal } from "@/components/ui/modal";
+import { createContext, useContext, useState, useTransition } from "react";
+import { Check, Copy, Trash2, UserPlus, X } from "lucide-react";
 import {
   deleteRecommendationAction,
   moderateRecommendationAction,
   requestRecommendationAction,
 } from "@/app/dashboard/recommendations/actions";
+import { Button, type ButtonProps } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Modal } from "@/components/ui/modal";
 import { requestRecommendationSchema } from "@/schemas/verification";
-import { RECOMMENDATION_STATUS_LABELS, type RecommendationStatus } from "@/types/verification";
-import { MessageSquareQuote } from "lucide-react";
 
-export interface RecommendationView {
-  id: string;
-  authorName: string;
-  authorTitle: string | null;
-  skillName: string | null;
-  content: string | null;
-  status: RecommendationStatus;
-  /** Link to send to the recommender; only meaningful while the request is open. */
-  link: string | null;
-  expiresAt: string;
+interface Editor {
+  openRequest: () => void;
+  /** Runs a row action and shows its error, if any, above the list. */
+  act: (fn: () => Promise<{ error?: string }>) => void;
+  pending: boolean;
 }
 
-const TONES = { REQUESTED: "neutral", SUBMITTED: "accent", APPROVED: "success", DECLINED: "danger" } as const;
+const EditorContext = createContext<Editor | null>(null);
 
-function CopyLink({ link }: { link: string }) {
+function useEditor() {
+  const editor = useContext(EditorContext);
+  if (!editor) throw new Error("Recommendation controls must be rendered inside <RecommendationEditor>");
+  return editor;
+}
+
+export function CopyLink({ link }: { link: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="flex items-center gap-2">
@@ -63,25 +59,28 @@ function CopyLink({ link }: { link: string }) {
   );
 }
 
-export function RecommendationsManager({
-  items,
+const EMPTY = { authorName: "", authorEmail: "", talentSkillId: "" };
+
+/** Owns the "request a recommendation" dialog and the per-card actions (publish, decline, delete). */
+export function RecommendationEditor({
   skills,
+  children,
 }: {
-  items: RecommendationView[];
   skills: { id: string; name: string }[];
+  children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const [values, setValues] = useState({ authorName: "", authorEmail: "", talentSkillId: "" });
+  const [values, setValues] = useState(EMPTY);
   const [error, setError] = useState<string>();
   const [created, setCreated] = useState<string>();
-  const [pending, startTransition] = useTransition();
   const [rowError, setRowError] = useState<string>();
+  const [pending, startTransition] = useTransition();
 
   function close() {
     setOpen(false);
     setCreated(undefined);
     setError(undefined);
-    setValues({ authorName: "", authorEmail: "", talentSkillId: "" });
+    setValues(EMPTY);
   }
 
   function submit(e: React.FormEvent) {
@@ -101,97 +100,14 @@ export function RecommendationsManager({
     startTransition(async () => setRowError((await fn()).error));
   }
 
-  const requestButton = (
-    <Button onClick={() => setOpen(true)}>
-      <Plus /> Demander une recommandation
-    </Button>
-  );
-
   return (
-    <>
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <p className="text-muted">
-          {items.length} demande{items.length > 1 ? "s" : ""}
-        </p>
-        {requestButton}
-      </div>
-
+    <EditorContext.Provider value={{ openRequest: () => setOpen(true), act, pending }}>
+      {children}
       {rowError && (
-        <p role="alert" className="text-danger mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm">
+        <p role="alert" className="text-danger mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm">
           {rowError}
         </p>
       )}
-
-      {items.length === 0 ? (
-        <EmptyState
-          icon={MessageSquareQuote}
-          title="Aucune recommandation pour l'instant"
-          description="Demandez à un collègue ou un client d'attester votre travail. Il reçoit un lien, sans compte à créer."
-          action={requestButton}
-        />
-      ) : (
-        <ul className="space-y-4">
-          {items.map((r) => (
-            <li key={r.id}>
-              <Card className="p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold">
-                      {r.authorName}
-                      {r.authorTitle && <span className="text-muted font-normal"> · {r.authorTitle}</span>}
-                    </p>
-                    {r.skillName && <p className="text-muted text-sm">À propos de {r.skillName}</p>}
-                  </div>
-                  <Badge tone={TONES[r.status]}>{RECOMMENDATION_STATUS_LABELS[r.status]}</Badge>
-                </div>
-
-                {r.content && (
-                  <blockquote className="border-border mt-3 border-l-2 pl-4 text-sm">{r.content}</blockquote>
-                )}
-
-                {r.status === "REQUESTED" && r.link && (
-                  <div className="mt-3">
-                    <p className="text-muted mb-1 text-xs">Envoyez ce lien à {r.authorName} :</p>
-                    <CopyLink link={r.link} />
-                  </div>
-                )}
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {r.status === "SUBMITTED" && (
-                    <>
-                      <Button
-                        size="sm"
-                        disabled={pending}
-                        onClick={() => act(() => moderateRecommendationAction(r.id, "APPROVED"))}
-                      >
-                        <Check /> Publier
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={pending}
-                        onClick={() => act(() => moderateRecommendationAction(r.id, "DECLINED"))}
-                      >
-                        <X /> Refuser
-                      </Button>
-                    </>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={pending}
-                    aria-label={`Supprimer la demande de ${r.authorName}`}
-                    onClick={() => act(() => deleteRecommendationAction(r.id))}
-                  >
-                    <Trash2 /> Supprimer
-                  </Button>
-                </div>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      )}
-
       <Modal open={open} onClose={close} title="Demander une recommandation">
         {created ? (
           <div className="space-y-4">
@@ -255,6 +171,74 @@ export function RecommendationsManager({
           </form>
         )}
       </Modal>
-    </>
+    </EditorContext.Provider>
+  );
+}
+
+export function RequestRecommendationButton({
+  variant,
+  className,
+}: Pick<ButtonProps, "variant" | "className">) {
+  const { openRequest } = useEditor();
+  return (
+    <Button variant={variant} className={className} onClick={openRequest}>
+      <UserPlus /> Demander une recommandation
+    </Button>
+  );
+}
+
+export function RecommendationActions({
+  id,
+  authorName,
+  submitted,
+  link,
+}: {
+  id: string;
+  authorName: string;
+  /** Waiting for the holder's decision. */
+  submitted: boolean;
+  /** Link to send to the recommender while the request is open. */
+  link: string | null;
+}) {
+  const { act, pending } = useEditor();
+  return (
+    <div className="mt-3 space-y-3">
+      {link && (
+        <div>
+          <p className="text-muted mb-1 text-xs">Envoyez ce lien à {authorName} :</p>
+          <CopyLink link={link} />
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {submitted && (
+          <>
+            <Button
+              size="sm"
+              disabled={pending}
+              onClick={() => act(() => moderateRecommendationAction(id, "APPROVED"))}
+            >
+              <Check /> Publier
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={pending}
+              onClick={() => act(() => moderateRecommendationAction(id, "DECLINED"))}
+            >
+              <X /> Refuser
+            </Button>
+          </>
+        )}
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={pending}
+          aria-label={`Supprimer la demande de ${authorName}`}
+          onClick={() => act(() => deleteRecommendationAction(id))}
+        >
+          <Trash2 /> Supprimer
+        </Button>
+      </div>
+    </div>
   );
 }

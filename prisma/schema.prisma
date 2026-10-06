@@ -385,6 +385,10 @@ model Recommendation {
   authorName    String               @map("author_name")
   authorEmail   String?              @map("author_email")
   authorTitle   String?              @map("author_title")
+  // How the recommender knows the holder (MANAGER, COLLEAGUE, CLIENT…), a 1-5 rating and free keywords.
+  relation      String?
+  rating        Int?
+  keywords      String[]             @default([])
   content       String?
   status        RecommendationStatus @default(REQUESTED)
   createdAt     DateTime             @default(now()) @map("created_at")

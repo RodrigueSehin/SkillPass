@@ -83,10 +83,16 @@ export class RecommendationService {
     };
   }
 
-  async submit(token: string, input: SubmitRecommendationInput) {
+  async submit(token: string, input: Omit<SubmitRecommendationInput, "keywords"> & { keywords?: string[] }) {
     const saved = await this.repo.submitByToken(
       token,
-      { content: input.content, authorTitle: input.authorTitle },
+      {
+        content: input.content,
+        authorTitle: input.authorTitle,
+        relation: input.relation,
+        rating: input.rating,
+        keywords: input.keywords,
+      },
       this.now().toISOString(),
     );
     if (saved) return saved;

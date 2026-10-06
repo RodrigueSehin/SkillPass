@@ -16,6 +16,9 @@ const toDTO = (r: Row): RecommendationDTO => ({
   authorName: r.authorName,
   authorEmail: r.authorEmail,
   authorTitle: r.authorTitle,
+  relation: r.relation,
+  rating: r.rating,
+  keywords: r.keywords,
   content: r.content,
   status: r.status,
   createdAt: r.createdAt.toISOString(),
@@ -54,7 +57,17 @@ export class PrismaRecommendationRepository implements RecommendationRepository 
     return rows.map(toDTO);
   }
 
-  async submitByToken(token: string, answer: { content: string; authorTitle?: string }, now: string) {
+  async submitByToken(
+    token: string,
+    answer: {
+      content: string;
+      authorTitle?: string;
+      relation?: string;
+      rating?: number;
+      keywords?: string[];
+    },
+    now: string,
+  ) {
     // One atomic conditional update: a replayed or expired link matches no row.
     const { count } = await prisma.recommendation.updateMany({
       where: { token, status: "REQUESTED", expiresAt: { gt: new Date(now) } },
@@ -62,6 +75,9 @@ export class PrismaRecommendationRepository implements RecommendationRepository 
         status: "SUBMITTED",
         content: answer.content,
         authorTitle: answer.authorTitle,
+        relation: answer.relation,
+        rating: answer.rating,
+        keywords: [...new Set(answer.keywords ?? [])],
         submittedAt: new Date(now),
       },
     });

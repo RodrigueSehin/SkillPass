@@ -347,6 +347,7 @@ async function main() {
       status: "APPROVED" | "SUBMITTED" | "REQUESTED",
       content: string | null,
       ago: number,
+      extra: { relation?: string; rating?: number; keywords?: string[] } = {},
     ) =>
       prisma.recommendation.create({
         data: {
@@ -355,6 +356,9 @@ async function main() {
           token: randomBytes(32).toString("hex"),
           authorName,
           authorTitle: content ? authorTitle : null,
+          relation: content ? extra.relation : undefined,
+          rating: content ? extra.rating : undefined,
+          keywords: content ? (extra.keywords ?? []) : [],
           content,
           status,
           createdAt: daysAgo(ago + 3),
@@ -369,6 +373,7 @@ async function main() {
       "APPROVED",
       "Sehin possède une excellente maîtrise de Power Apps et sait transformer des besoins métiers complexes en solutions simples et efficaces. Il a livré A' Quotation dans les délais et l'application est adoptée par toute l'équipe commerciale.",
       60,
+      { relation: "MANAGER", rating: 5, keywords: ["Power Platform", "Gestion de projet", "Leadership"] },
     );
     await reco(
       "Jean-Marc Yao",
@@ -377,6 +382,7 @@ async function main() {
       "APPROVED",
       "Un modèle de données propre et une vraie rigueur sur la sécurité par rôles. Sehin explique ses choix et forme les équipes avec patience.",
       45,
+      { relation: "COLLEAGUE", rating: 5, keywords: ["Dataverse", "Communication", "Esprit d'équipe"] },
     );
     await reco(
       "Fatou Diallo",
@@ -385,6 +391,7 @@ async function main() {
       "APPROVED",
       "Les automatisations qu'il a mises en place nous ont fait gagner plusieurs heures par semaine. Fiable, réactif et très à l'écoute.",
       20,
+      { relation: "CLIENT", rating: 4, keywords: ["Power Platform", "Professionnalisme", "Résultats"] },
     );
     await reco(
       "Mamadou Traoré",
