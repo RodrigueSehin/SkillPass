@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -11,10 +12,12 @@ import {
   Mail,
   Search,
   Send,
+  Trash2,
   UserRound,
   UserRoundCheck,
 } from "lucide-react";
 import { requestRecommendationAction } from "@/app/dashboard/recommendations/actions";
+import { addContactAction, deleteContactAction } from "@/app/dashboard/recommendations/contact-actions";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Modal } from "@/components/ui/modal";
@@ -24,10 +27,17 @@ import { REQUEST_ASPECTS, REQUEST_ASPECT_LABELS } from "@/schemas/verification";
 import { NetworkMakesTheDifference, RequestQuote, RequestTips } from "./request-form-side";
 
 export interface Contact {
+  /** Set for address-book entries: it allows deleting them. */
+  id?: string;
   name: string;
   email: string | null;
+  /** Job title ("IT Manager"). */
   title: string | null;
+  company: string | null;
 }
+
+const contactLine = (c: Pick<Contact, "title" | "company">) =>
+  [c.title, c.company].filter(Boolean).join(" • ");
 
 const MAX_MESSAGE = 1000;
 const DEFAULT_SUBJECT = "Demande de recommandation sur SkillPass";
@@ -88,6 +98,7 @@ const fill = (template: string, name: string, signature: string) =>
 
 const TABS = [
   ["search", "Rechercher un contact"],
+  ["book", "Mes contacts"],
   ["recent", "Contacts récents"],
   ["manual", "Saisir manuellement"],
 ] as const;
@@ -132,6 +143,9 @@ function CopyButton({ text, label, className }: { text: string; label: string; c
 }
 
 interface Props {
+  /** The address book. */
+  addressBook: Contact[];
+  /** People already asked, most recent first. */
   contacts: Contact[];
   /** Signs the default message. */
   holderName: string;
@@ -139,11 +153,13 @@ interface Props {
   appOrigin: string;
 }
 
-export function NewRequestForm({ contacts, holderName, holderSlug, appOrigin }: Props) {
+export function NewRequestForm({ addressBook, contacts, holderName, holderSlug, appOrigin }: Props) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("search");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Contact | null>(null);
-  const [manual, setManual] = useState({ name: "", email: "", title: "" });
+  const [manual, setManual] = useState({ name: "", email: "", title: "", company: "" });
+  const [saveToBook, setSaveToBook] = useState(true);
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
   const [template, setTemplate] = useState(DEFAULT_MESSAGE);
   /** Set as soon as the user types in the message: it then stops following the recipient's name. */
@@ -157,16 +173,30 @@ export function NewRequestForm({ contacts, holderName, holderSlug, appOrigin }: 
 
   const person: Contact | null =
     tab === "manual"
-      ? { name: manual.name.trim(), email: manual.email.trim() || null, title: manual.title.trim() || null }
+      ? {
+          name: manual.name.trim(),
+          email: manual.email.trim() || null,
+          title: manual.title.trim() || null,
+          company: manual.company.trim() || null,
+        }
       : selected;
   const message = custom ?? fill(template, person?.name ?? "", holderName);
   const profileLink = `${appOrigin}/${holderSlug}`;
 
   const q = query.trim().toLowerCase();
+  // Searching covers the address book first, then people already asked (without duplicates).
+  const everyone = [
+    ...addressBook,
+    ...contacts.filter((c) => !addressBook.some((b) => b.name.toLowerCase() === c.name.toLowerCase())),
+  ];
   const visible =
     tab === "recent"
       ? contacts.slice(0, RECENT_SHOWN)
-      : contacts.filter((c) => !q || [c.name, c.title, c.email].some((t) => t?.toLowerCase().includes(q)));
+      : tab === "book"
+        ? addressBook
+        : everyone.filter(
+            (c) => !q || [c.name, c.title, c.company, c.email].some((t) => t?.toLowerCase().includes(q)),
+          );
 
   const toggleAspect = (a: string) =>
     setAspects((list) => (list.includes(a) ? list.filter((x) => x !== a) : [...list, a]));
@@ -180,10 +210,19 @@ export function NewRequestForm({ contacts, holderName, holderSlug, appOrigin }: 
     if (message.length > MAX_MESSAGE)
       return setError(`Message trop long (${MAX_MESSAGE} caractères maximum)`);
     startTransition(async () => {
+      // A person typed by hand can join the address book for next time; a failure here must not block the request.
+      if (tab === "manual" && saveToBook) {
+        await addContactAction({
+          name: person.name,
+          email: person.email ?? "",
+          title: person.title ?? "",
+          company: person.company ?? "",
+        });
+      }
       const result = await requestRecommendationAction({
         authorName: person.name,
         authorEmail: person.email ?? "",
-        authorTitle: person.title ?? "",
+        authorTitle: contactLine(person),
         subject,
         message,
         aspects,
@@ -196,7 +235,7 @@ export function NewRequestForm({ contacts, holderName, holderSlug, appOrigin }: 
   function reset() {
     setLink(undefined);
     setSelected(null);
-    setManual({ name: "", email: "", title: "" });
+    setManual({ name: "", email: "", title: "", company: "" });
     setCustom(null);
     setTemplate(DEFAULT_MESSAGE);
   }
@@ -317,16 +356,37 @@ export function NewRequestForm({ contacts, holderName, holderSlug, appOrigin }: 
                     className={inputClass}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="manual-title">Fonction et entreprise (optionnel)</Label>
-                  <input
-                    id="manual-title"
-                    value={manual.title}
-                    onChange={(e) => setManual((m) => ({ ...m, title: e.target.value }))}
-                    placeholder="Ex : IT Manager, SEHIN GROUP"
-                    className={inputClass}
-                  />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-title">Fonction (optionnel)</Label>
+                    <input
+                      id="manual-title"
+                      value={manual.title}
+                      onChange={(e) => setManual((m) => ({ ...m, title: e.target.value }))}
+                      placeholder="Ex : IT Manager"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="manual-company">Entreprise (optionnel)</Label>
+                    <input
+                      id="manual-company"
+                      value={manual.company}
+                      onChange={(e) => setManual((m) => ({ ...m, company: e.target.value }))}
+                      placeholder="Ex : SEHIN GROUP"
+                      className={inputClass}
+                    />
+                  </div>
                 </div>
+                <label className="text-navy flex cursor-pointer items-center gap-2.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={saveToBook}
+                    onChange={(e) => setSaveToBook(e.target.checked)}
+                    className="accent-brand size-4"
+                  />
+                  Enregistrer dans mes contacts
+                </label>
               </div>
             ) : (
               <>
@@ -348,14 +408,17 @@ export function NewRequestForm({ contacts, holderName, holderSlug, appOrigin }: 
                 )}
                 {visible.length === 0 ? (
                   <p className="text-muted rounded-xl bg-slate-50 px-4 py-6 text-center text-sm">
-                    {contacts.length === 0
-                      ? "Aucun contact pour l'instant : les personnes que vous sollicitez apparaîtront ici. Utilisez « Saisir manuellement »."
-                      : "Aucun contact ne correspond à votre recherche."}
+                    {tab === "book"
+                      ? "Votre carnet d'adresses est vide. Utilisez « Saisir manuellement » et cochez « Enregistrer dans mes contacts »."
+                      : tab === "recent" || everyone.length === 0
+                        ? "Aucun contact pour l'instant : les personnes que vous sollicitez apparaîtront ici. Utilisez « Saisir manuellement »."
+                        : "Aucun contact ne correspond à votre recherche."}
                   </p>
                 ) : (
                   <ul className="divide-border divide-y">
                     {visible.map((c) => {
-                      const on = selected?.name === c.name && selected.email === c.email;
+                      const on =
+                        selected?.name === c.name && selected.email === c.email && selected.id === c.id;
                       return (
                         <li key={`${c.name}|${c.email}`} className="flex items-center gap-3 py-3">
                           <span
@@ -366,8 +429,26 @@ export function NewRequestForm({ contacts, holderName, holderSlug, appOrigin }: 
                           </span>
                           <div className="min-w-0 flex-1">
                             <p className="text-navy truncate font-semibold">{c.name}</p>
-                            {c.title && <p className="text-muted truncate text-xs">{c.title}</p>}
+                            {contactLine(c) && (
+                              <p className="text-muted truncate text-xs">{contactLine(c)}</p>
+                            )}
                           </div>
+                          {tab === "book" && c.id && (
+                            <button
+                              type="button"
+                              aria-label={`Supprimer ${c.name} de mes contacts`}
+                              onClick={() =>
+                                startTransition(async () => {
+                                  if (selected?.id === c.id) setSelected(null);
+                                  await deleteContactAction(c.id!);
+                                  router.refresh();
+                                })
+                              }
+                              className="text-muted hover:text-danger rounded-md p-1.5"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          )}
                           <Button
                             type="button"
                             size="sm"

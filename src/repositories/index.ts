@@ -15,6 +15,11 @@ import { PrismaEvidenceRepository } from "./evidence.prisma";
 import type { EvidenceRepository } from "./evidence.repository";
 import { InMemoryProfileRepository } from "./profile.memory";
 import { PrismaProfileRepository } from "./profile.prisma";
+import type {
+  JobAlertRepository,
+  OpportunityRepository,
+  SavedOpportunityRepository,
+} from "./opportunity.repository";
 import type { ProfileRepository } from "./profile.repository";
 import {
   createMemoryCertifications,
@@ -26,6 +31,19 @@ import {
   PrismaExperienceRepository,
   PrismaProjectRepository,
 } from "./portfolio.prisma";
+
+import { createMemoryContacts } from "./contact.memory";
+import { PrismaContactRepository } from "./contact.prisma";
+import {
+  InMemoryJobAlertRepository,
+  InMemoryOpportunityRepository,
+  InMemorySavedOpportunityRepository,
+} from "./opportunity.memory";
+import {
+  PrismaJobAlertRepository,
+  PrismaOpportunityRepository,
+  PrismaSavedOpportunityRepository,
+} from "./opportunity.prisma";
 
 const DEMO_PROFILE_ID = "demo";
 
@@ -40,6 +58,10 @@ const g = globalThis as unknown as {
     projects: ReturnType<typeof createMemoryProjects>;
     experiences: ReturnType<typeof createMemoryExperiences>;
     certifications: ReturnType<typeof createMemoryCertifications>;
+    opportunities: InMemoryOpportunityRepository;
+    savedOpportunities: InMemorySavedOpportunityRepository;
+    jobAlerts: InMemoryJobAlertRepository;
+    contacts: ReturnType<typeof createMemoryContacts>;
   };
 };
 
@@ -49,7 +71,21 @@ const g = globalThis as unknown as {
  */
 function memory() {
   if (process.env.NODE_ENV === "production") throw new Error("DATABASE_URL is required in production");
-  return (g.memory ??= {
+  if (!g.memory) {
+    const opportunities = new InMemoryOpportunityRepository();
+    g.memory = {
+      ...baseMemory(),
+      opportunities,
+      savedOpportunities: new InMemorySavedOpportunityRepository(opportunities),
+      jobAlerts: new InMemoryJobAlertRepository(),
+      contacts: createMemoryContacts(DEMO_PROFILE_ID),
+    };
+  }
+  return g.memory;
+}
+
+function baseMemory() {
+  return {
     skills: new InMemoryTalentSkillRepository(DEMO_PROFILE_ID),
     profiles: new InMemoryProfileRepository(true),
     evidence: new InMemoryEvidenceRepository(DEMO_PROFILE_ID),
@@ -59,7 +95,7 @@ function memory() {
     projects: createMemoryProjects(DEMO_PROFILE_ID),
     experiences: createMemoryExperiences(DEMO_PROFILE_ID),
     certifications: createMemoryCertifications(DEMO_PROFILE_ID),
-  });
+  };
 }
 
 const hasDatabase = () => Boolean(process.env.DATABASE_URL);
@@ -84,3 +120,11 @@ export const getCredentialRepository = (): CredentialRepository =>
   hasDatabase() ? new PrismaCredentialRepository() : memory().credentials;
 export const getRecommendationRepository = (): RecommendationRepository =>
   hasDatabase() ? new PrismaRecommendationRepository() : memory().recommendations;
+
+export const getOpportunityRepository = (): OpportunityRepository =>
+  hasDatabase() ? new PrismaOpportunityRepository() : memory().opportunities;
+export const getSavedOpportunityRepository = (): SavedOpportunityRepository =>
+  hasDatabase() ? new PrismaSavedOpportunityRepository() : memory().savedOpportunities;
+export const getJobAlertRepository = (): JobAlertRepository =>
+  hasDatabase() ? new PrismaJobAlertRepository() : memory().jobAlerts;
+export const getContactRepository = () => (hasDatabase() ? new PrismaContactRepository() : memory().contacts);

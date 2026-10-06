@@ -25,7 +25,9 @@ import {
   DEMO_PROJECT_ROWS,
   DEMO_SKILL_ROWS,
 } from "../src/config/demo-data";
+import { buildDemoOpportunities } from "../src/config/demo-opportunities";
 import { normalizeSupabaseUrl } from "../src/lib/auth/env";
+import { DEMO_CONTACTS } from "../src/repositories/contact.memory";
 import { scoreAttempt } from "../src/lib/assessment-scoring";
 import { generateCredentialId } from "../src/repositories/credential.repository";
 
@@ -182,6 +184,9 @@ async function main() {
     await prisma.talentSkill.deleteMany({ where: owner });
     await prisma.experience.deleteMany({ where: owner });
     await prisma.certification.deleteMany({ where: owner });
+    await prisma.contact.deleteMany({ where: owner });
+    await prisma.jobAlert.deleteMany({ where: owner });
+    await prisma.savedOpportunity.deleteMany({ where: owner });
 
     // ---------- Skills ----------
     const skillIds = new Map<string, string>();
@@ -338,6 +343,17 @@ async function main() {
     }
     // Dataverse is a critical assessment: passed, waiting for the verifier (visible on /admin/verifications).
     await attemptFor("dataverse", 1, "PENDING_REVIEW", 2);
+
+    // ---------- Address book and job board ----------
+    for (const c of DEMO_CONTACTS) {
+      await prisma.contact.create({ data: { profileId: talent.id, ...c } });
+    }
+    // The job board is shared by everyone: only fill it when it is empty, never touch existing offers.
+    if ((await prisma.opportunity.count()) === 0) {
+      await prisma.opportunity.createMany({
+        data: buildDemoOpportunities().map((o) => ({ ...o, publishedAt: new Date(o.publishedAt) })),
+      });
+    }
 
     // ---------- Recommendations ----------
     const reco = (

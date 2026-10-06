@@ -1,6 +1,10 @@
 import { CrudService } from "@/lib/crud";
 import {
   getCertificationRepository,
+  getContactRepository,
+  getJobAlertRepository,
+  getOpportunityRepository,
+  getSavedOpportunityRepository,
   getAttemptRepository,
   getCredentialRepository,
   getEvidenceRepository,
@@ -15,6 +19,7 @@ import { getStorage } from "@/lib/storage/storage";
 import { EvidenceService } from "./evidence.service";
 import { CertificationDocumentService } from "./certification-document.service";
 import { ExperienceDocumentService } from "./experience-document.service";
+import { OpportunityService } from "./opportunity.service";
 import { ProjectCoverService } from "./project-cover.service";
 import { AssessmentService } from "./assessment.service";
 import { CredentialService } from "./credential.service";
@@ -65,3 +70,11 @@ export const getPassportService = () =>
 
 export const getEvidenceService = () =>
   new EvidenceService(getEvidenceRepository(), getSkillService(), getProjectService(), getStorage);
+
+export const getContactService = () => new CrudService(getContactRepository(), "Contact");
+export const getOpportunityService = () =>
+  new OpportunityService(
+    getOpportunityRepository(),
+    getSavedOpportunityRepository(),
+    getJobAlertRepository(),
+  );

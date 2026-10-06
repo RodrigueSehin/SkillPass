@@ -5,13 +5,17 @@ import { NewRequestForm, type Contact } from "@/components/recommendations/new-r
 import { requireUser } from "@/lib/auth/current-user";
 import { profileFor } from "@/lib/auth/profile";
 import { appUrl } from "@/lib/utils/app-url";
-import { getRecommendationService } from "@/services/container";
+import { getContactService, getRecommendationService } from "@/services/container";
 
 export const metadata: Metadata = { title: "Demander une recommandation" };
 
 export default async function NewRecommendationRequestPage() {
   const user = await requireUser();
-  const [requests, profile] = await Promise.all([getRecommendationService().list(user.id), profileFor(user)]);
+  const [requests, profile, book] = await Promise.all([
+    getRecommendationService().list(user.id),
+    profileFor(user),
+    getContactService().list(user.id),
+  ]);
 
   // People already asked, most recent first: the closest thing to an address book.
   const seen = new Set<string>();
@@ -20,7 +24,7 @@ export default async function NewRecommendationRequestPage() {
     const key = r.authorName.trim().toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    contacts.push({ name: r.authorName, email: r.authorEmail, title: r.authorTitle });
+    contacts.push({ name: r.authorName, email: r.authorEmail, title: r.authorTitle, company: null });
   }
 
   return (
@@ -50,6 +54,13 @@ export default async function NewRecommendationRequestPage() {
       </div>
 
       <NewRequestForm
+        addressBook={book.map((c) => ({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          title: c.title,
+          company: c.company,
+        }))}
         contacts={contacts}
         holderName={user.name}
         holderSlug={profile.username}

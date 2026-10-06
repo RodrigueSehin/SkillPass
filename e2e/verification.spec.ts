@@ -130,6 +130,7 @@ test("recommendation: request a link, the recommender answers without an account
   await page.getByRole("link", { name: "Demander une recommandation" }).first().click();
   await expect(page).toHaveURL(/\/dashboard\/recommendations\/new/);
   await page.getByRole("tab", { name: "Saisir manuellement" }).click();
+  await page.getByLabel("Enregistrer dans mes contacts").uncheck();
   await page.getByRole("button", { name: "Créer la demande" }).click();
   await expect(page.getByText("Choisissez ou saisissez la personne à solliciter")).toBeVisible();
   await page.getByLabel("Nom du recommandeur").fill(author);
