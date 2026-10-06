@@ -127,15 +127,15 @@ test("recommendation: request a link, the recommender answers without an account
   const text = `Sehin a livré une solution robuste et a su embarquer toute l'équipe (${testInfo.project.name}).`;
 
   await page.goto("/dashboard/recommendations");
-  await page.getByRole("button", { name: "Demander une recommandation" }).first().click();
-  const dialog = page.getByRole("dialog", { name: "Demander une recommandation" });
-  await dialog.getByRole("button", { name: "Créer le lien" }).click();
-  await expect(dialog.getByText("Nom trop court")).toBeVisible();
-  await dialog.getByLabel("Nom du recommandeur").fill(author);
-  await dialog.getByRole("button", { name: "Créer le lien" }).click();
-  const link = await dialog.getByLabel("Lien à envoyer").inputValue();
+  await page.getByRole("link", { name: "Demander une recommandation" }).first().click();
+  await expect(page).toHaveURL(/\/dashboard\/recommendations\/new/);
+  await page.getByRole("tab", { name: "Saisir manuellement" }).click();
+  await page.getByRole("button", { name: "Créer la demande" }).click();
+  await expect(page.getByText("Choisissez ou saisissez la personne à solliciter")).toBeVisible();
+  await page.getByLabel("Nom du recommandeur").fill(author);
+  await page.getByRole("button", { name: "Créer la demande" }).click();
+  const link = await page.getByLabel("Lien à envoyer").inputValue();
   expect(link).toMatch(/\/recommend\/[0-9a-f]{64}$/);
-  await dialog.getByRole("button", { name: "Terminer" }).click();
 
   // The recommender: no session, fresh context.
   const anon = await browser.newContext({ baseURL });

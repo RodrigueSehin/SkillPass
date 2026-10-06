@@ -19,10 +19,34 @@ export const reviewDecisionSchema = z.object({
 
 const blankToUndefined = (v: unknown) => (typeof v === "string" && v.trim() === "" ? undefined : v);
 
+export const REQUEST_ASPECTS = [
+  "TECHNICAL",
+  "PROFESSIONAL",
+  "TEAMWORK",
+  "LEADERSHIP",
+  "PROJECT_MANAGEMENT",
+  "OTHER",
+] as const;
+export const REQUEST_ASPECT_LABELS: Record<(typeof REQUEST_ASPECTS)[number], string> = {
+  TECHNICAL: "Compétences techniques",
+  PROFESSIONAL: "Qualités professionnelles",
+  TEAMWORK: "Travail en équipe",
+  LEADERSHIP: "Leadership",
+  PROJECT_MANAGEMENT: "Gestion de projet",
+  OTHER: "Autre",
+};
+
 export const requestRecommendationSchema = z.object({
   authorName: z.string().trim().min(2, "Nom trop court").max(100),
   authorEmail: z.preprocess(blankToUndefined, z.string().trim().email("E-mail invalide").max(200).optional()),
   talentSkillId: z.preprocess(blankToUndefined, z.string().trim().min(1).optional()),
+  authorTitle: z.preprocess(blankToUndefined, z.string().trim().max(120).optional()),
+  subject: z.preprocess(blankToUndefined, z.string().trim().max(120).optional()),
+  message: z.preprocess(
+    blankToUndefined,
+    z.string().trim().max(1000, "Message trop long (1000 caractères)").optional(),
+  ),
+  aspects: z.array(z.enum(REQUEST_ASPECTS)).max(6).default([]),
 });
 
 export const RECOMMENDATION_RELATIONS = [

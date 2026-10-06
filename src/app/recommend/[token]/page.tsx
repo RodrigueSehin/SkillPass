@@ -5,6 +5,7 @@ import { Logo } from "@/components/layout/logo";
 import { Card, CardContent } from "@/components/ui/card";
 import { RecommendationForm } from "@/components/verification/recommendation-form";
 import { NotFoundError } from "@/lib/errors";
+import { REQUEST_ASPECT_LABELS } from "@/schemas/verification";
 import { getRecommendationService } from "@/services/container";
 
 // Private link: keep it out of search engines and out of the Referer header.
@@ -43,6 +44,28 @@ export default async function RecommendPage({ params }: PageProps<"/recommend/[t
                   {invite.skillName ? ` (${invite.skillName})` : ""}. Quelques phrases sincères suffisent.
                   Vous n&apos;avez pas besoin de compte.
                 </p>
+                {invite.message && (
+                  <blockquote className="border-brand/40 text-navy mt-4 border-l-2 bg-blue-50/60 px-4 py-3 text-sm whitespace-pre-line">
+                    {invite.message}
+                  </blockquote>
+                )}
+                {invite.aspects.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium">
+                      Points que {invite.holderName} aimerait voir aborder
+                    </p>
+                    <ul className="mt-2 flex flex-wrap gap-2">
+                      {invite.aspects.map((a) => (
+                        <li
+                          key={a}
+                          className="text-brand rounded-lg bg-blue-50 px-3 py-1 text-xs font-medium"
+                        >
+                          {(REQUEST_ASPECT_LABELS as Record<string, string>)[a] ?? a}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div className="mt-6">
                   <RecommendationForm token={token} holderName={invite.holderName} />
                 </div>

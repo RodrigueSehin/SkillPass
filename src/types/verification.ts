@@ -92,6 +92,10 @@ export interface RecommendationDTO {
   /** 1 to 5, given by the recommender. */
   rating: number | null;
   keywords: string[];
+  requestSubject: string | null;
+  requestMessage: string | null;
+  /** What the holder asked the recommender to talk about (see REQUEST_ASPECTS). */
+  requestAspects: string[];
   content: string | null;
   status: RecommendationStatus;
   createdAt: string;

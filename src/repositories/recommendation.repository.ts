@@ -8,6 +8,10 @@ export interface NewRecommendationRequest {
   projectId?: string;
   authorName: string;
   authorEmail?: string;
+  authorTitle?: string;
+  requestSubject?: string;
+  requestMessage?: string;
+  requestAspects?: string[];
   expiresAt: string;
 }
 

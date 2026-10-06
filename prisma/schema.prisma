@@ -389,6 +389,10 @@ model Recommendation {
   relation      String?
   rating        Int?
   keywords      String[]             @default([])
+  // The holder's own words when asking: shown to the recommender on their link.
+  requestSubject String?             @map("request_subject")
+  requestMessage String?             @map("request_message")
+  requestAspects String[]            @default([]) @map("request_aspects")
   content       String?
   status        RecommendationStatus @default(REQUESTED)
   createdAt     DateTime             @default(now()) @map("created_at")

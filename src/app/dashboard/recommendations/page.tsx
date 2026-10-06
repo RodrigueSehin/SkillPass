@@ -35,7 +35,7 @@ import {
 } from "@/lib/recommendation-view";
 import { appUrl } from "@/lib/utils/app-url";
 import { RECOMMENDATION_RELATION_LABELS } from "@/schemas/verification";
-import { getRecommendationService, getSkillService } from "@/services/container";
+import { getRecommendationService } from "@/services/container";
 import { RECOMMENDATION_STATUS_LABELS, type RecommendationStatus } from "@/types/verification";
 
 export const metadata: Metadata = { title: "Recommandations" };
@@ -46,11 +46,7 @@ export default async function RecommendationsPage({ searchParams }: PageProps<"/
   const user = await requireUser();
   const raw = await searchParams;
   const service = getRecommendationService();
-  const [all, skills, profile] = await Promise.all([
-    service.list(user.id),
-    getSkillService().list(user.id, { sort: "name" }),
-    profileFor(user),
-  ]);
+  const [all, profile] = await Promise.all([service.list(user.id), profileFor(user)]);
 
   const shown = filterRecommendations(all, {
     q: first(raw.q),
@@ -85,7 +81,7 @@ export default async function RecommendationsPage({ searchParams }: PageProps<"/
   };
 
   return (
-    <RecommendationEditor skills={skills.items.map((s) => ({ id: s.id, name: s.name }))}>
+    <RecommendationEditor>
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>

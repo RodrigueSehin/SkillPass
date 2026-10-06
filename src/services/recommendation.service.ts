@@ -18,6 +18,9 @@ export interface RecommendationInvite {
   holderName: string;
   skillName: string | null;
   authorName: string;
+  /** The holder's own words, if they wrote any. */
+  message: string | null;
+  aspects: string[];
   state: RecommendationLinkState;
 }
 
@@ -29,7 +32,10 @@ export class RecommendationService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  async request(profileId: string, input: RequestRecommendationInput) {
+  async request(
+    profileId: string,
+    input: Omit<RequestRecommendationInput, "aspects"> & { aspects?: RequestRecommendationInput["aspects"] },
+  ) {
     let skillName: string | undefined;
     if (input.talentSkillId) {
       // The skill must belong to the requester: ownership is checked by the profile-scoped lookup.
@@ -43,6 +49,10 @@ export class RecommendationService {
       skillName,
       authorName: input.authorName,
       authorEmail: input.authorEmail,
+      authorTitle: input.authorTitle,
+      requestSubject: input.subject,
+      requestMessage: input.message,
+      requestAspects: input.aspects,
       expiresAt: new Date(this.now().getTime() + RECOMMENDATION_LINK_DAYS * DAY_MS).toISOString(),
     });
   }
@@ -79,6 +89,8 @@ export class RecommendationService {
       holderName: holder?.fullName ?? "Un professionnel",
       skillName: r.skillName,
       authorName: r.authorName,
+      message: r.requestMessage,
+      aspects: r.requestAspects,
       state: this.linkState(r),
     };
   }
