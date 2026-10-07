@@ -4,6 +4,7 @@ import {
   getApplicationRepository,
   getContactRepository,
   getJobAlertRepository,
+  getJobOfferRepository,
   getOpportunityRepository,
   getOrganizationRepository,
   getSavedOpportunityRepository,
@@ -21,6 +22,7 @@ import { getStorage } from "@/lib/storage/storage";
 import { EvidenceService } from "./evidence.service";
 import { CertificationDocumentService } from "./certification-document.service";
 import { ExperienceDocumentService } from "./experience-document.service";
+import { JobOfferService } from "./job-offer.service";
 import { OpportunityService } from "./opportunity.service";
 import { OrganizationLogoService } from "./organization-logo.service";
 import { OrganizationService } from "./organization.service";
@@ -87,3 +89,5 @@ export const getOpportunityService = () =>
 export const getOrganizationService = () => new OrganizationService(getOrganizationRepository());
 export const getOrganizationLogoService = () =>
   new OrganizationLogoService(getOrganizationRepository(), getStorage);
+export const getJobOfferService = () =>
+  new JobOfferService(getJobOfferRepository(), getOpportunityRepository(), getOrganizationRepository());

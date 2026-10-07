@@ -6,7 +6,15 @@ export interface OpportunityRepository {
   list(): Promise<OpportunityDTO[]>;
   findById(id: string): Promise<OpportunityDTO | null>;
   incrementViews(id: string): Promise<void>;
+  /** Publishes (or updates) the talent-side copy of an organization's job offer. Returns its id. */
+  upsertFromOffer(sourceOfferId: string, data: OpportunityInput): Promise<string>;
+  /** Hides the copy of an offer that was closed, unpublished or deleted; applications are kept. */
+  deactivateFromOffer(sourceOfferId: string): Promise<void>;
+  /** Views and applicants measured for these opportunities. */
+  statsFor(ids: string[]): Promise<Map<string, { views: number; applicants: number }>>;
 }
+
+export type OpportunityInput = Omit<OpportunityDTO, "id" | "views" | "applicants">;
 
 export interface SavedOpportunityRepository {
   listIds(profileId: string): Promise<string[]>;

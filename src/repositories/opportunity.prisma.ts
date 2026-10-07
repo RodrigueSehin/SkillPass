@@ -3,6 +3,7 @@ import type { Opportunity } from "@/generated/prisma/client";
 import type { CreateJobAlertInput } from "@/schemas/opportunity";
 import type { JobAlertDTO, OpportunityDTO } from "@/types/opportunity";
 import type {
+  OpportunityInput,
   ApplicationRepository,
   JobAlertRepository,
   OpportunityRepository,
@@ -47,17 +48,73 @@ const toOpportunity = (r: Opportunity): OpportunityDTO => ({
 
 export class PrismaOpportunityRepository implements OpportunityRepository {
   async list() {
-    const rows = await prisma.opportunity.findMany({ orderBy: { publishedAt: "desc" } });
+    const rows = await prisma.opportunity.findMany({
+      where: {
+        active: true,
+        OR: [
+          { sourceOfferId: null },
+          {
+            AND: [
+              { publishedAt: { lte: new Date() } },
+              { OR: [{ deadline: null }, { deadline: { gte: new Date() } }] },
+            ],
+          },
+        ],
+      },
+      orderBy: { publishedAt: "desc" },
+    });
     return rows.map(toOpportunity);
   }
 
   async findById(id: string) {
-    const row = await prisma.opportunity.findUnique({ where: { id } });
+    const row = await prisma.opportunity.findFirst({
+      where: {
+        id,
+        active: true,
+        OR: [
+          { sourceOfferId: null },
+          {
+            AND: [
+              { publishedAt: { lte: new Date() } },
+              { OR: [{ deadline: null }, { deadline: { gte: new Date() } }] },
+            ],
+          },
+        ],
+      },
+    });
     return row ? toOpportunity(row) : null;
   }
 
   async incrementViews(id: string) {
     await prisma.opportunity.updateMany({ where: { id }, data: { views: { increment: 1 } } });
+  }
+
+  async upsertFromOffer(sourceOfferId: string, data: OpportunityInput) {
+    const fields = {
+      ...data,
+      publishedAt: new Date(data.publishedAt),
+      deadline: data.deadline ? new Date(data.deadline) : null,
+      active: true,
+    };
+    const row = await prisma.opportunity.upsert({
+      where: { sourceOfferId },
+      create: { ...fields, sourceOfferId },
+      update: fields,
+      select: { id: true },
+    });
+    return row.id;
+  }
+
+  async deactivateFromOffer(sourceOfferId: string) {
+    await prisma.opportunity.updateMany({ where: { sourceOfferId }, data: { active: false } });
+  }
+
+  async statsFor(ids: string[]) {
+    const rows = await prisma.opportunity.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, views: true, applicants: true },
+    });
+    return new Map(rows.map((r) => [r.id, { views: r.views, applicants: r.applicants }] as const));
   }
 }
 

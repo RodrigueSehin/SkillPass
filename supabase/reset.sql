@@ -11,6 +11,7 @@ drop table if exists
   assessment_attempts,
   skill_evidence,
   project_skills,
+  job_offers,
   department_deputies,
   department_members,
   departments,

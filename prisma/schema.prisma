@@ -448,6 +448,10 @@ model Opportunity {
   companyVerified Boolean @default(false) @map("company_verified")
   companyWebsite String? @map("company_website")
 
+  // Set when the offer was published by an organization: the link back to its job offer.
+  sourceOfferId String? @unique @map("source_offer_id") @db.Uuid
+  active        Boolean @default(true)
+
   saved SavedOpportunity[]
   applications Application[]
 
@@ -535,6 +539,7 @@ model Organization {
   createdAt   DateTime @default(now()) @map("created_at")
 
   members     OrganizationMember[]
+  jobOffers   JobOffer[]
   sites       Site[]
   departments Department[]
 
@@ -635,4 +640,45 @@ model DepartmentDeputy {
   @@id([departmentId, memberId])
   @@index([memberId])
   @@map("department_deputies")
+}
+
+model JobOffer {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  createdById     String?   @map("created_by_id") @db.Uuid
+  title           String
+  description     String    @default("")
+  contract        String    @default("CDI")
+  location        String    @default("")
+  workMode        String?   @map("work_mode")
+  departmentId    String?   @map("department_id") @db.Uuid
+  experience      String    @default("1 à 3 ans")
+  positions       Int       @default(1)
+  deadline        DateTime? @db.Date
+  salaryMin       Int?      @map("salary_min")
+  salaryMax       Int?      @map("salary_max")
+  currency        String    @default("FCFA")
+  skills          String[]  @default([])
+  softSkills      String[]  @default([]) @map("soft_skills")
+  certifications  String[]  @default([])
+  education       String?
+  languages       String[]  @default([])
+  otherLanguage   String?   @map("other_language")
+  permit          String?
+  mobility        String    @default("NONE")
+  availability    String    @default("ASAP")
+  visibility      String    @default("PUBLIC")
+  publishOn       DateTime? @map("publish_on") @db.Date
+  durationMonths  Int       @default(2) @map("duration_months")
+  channels        String[]  @default(["PLATFORM"])
+  applicationMode String    @default("SIMPLE") @map("application_mode")
+  status          String    @default("DRAFT")
+  opportunityId   String?   @map("opportunity_id") @db.Uuid
+  publishedAt     DateTime? @map("published_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("job_offers")
 }

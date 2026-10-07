@@ -34,6 +34,9 @@ import {
 } from "./portfolio.prisma";
 
 import { createMemoryContacts } from "./contact.memory";
+import { InMemoryJobOfferRepository } from "./job-offer.memory";
+import { PrismaJobOfferRepository } from "./job-offer.prisma";
+import type { JobOfferRepository } from "./job-offer.repository";
 import { InMemoryOrganizationRepository } from "./organization.memory";
 import { PrismaOrganizationRepository } from "./organization.prisma";
 import type { OrganizationRepository } from "./organization.repository";
@@ -70,6 +73,7 @@ const g = globalThis as unknown as {
     applications: InMemoryApplicationRepository;
     contacts: ReturnType<typeof createMemoryContacts>;
     organizations: InMemoryOrganizationRepository;
+    jobOffers: InMemoryJobOfferRepository;
   };
 };
 
@@ -81,6 +85,7 @@ function memory() {
   if (process.env.NODE_ENV === "production") throw new Error("DATABASE_URL is required in production");
   if (!g.memory) {
     const opportunities = new InMemoryOpportunityRepository();
+    const organizations = new InMemoryOrganizationRepository(DEMO_PROFILE_ID);
     g.memory = {
       ...baseMemory(),
       opportunities,
@@ -88,7 +93,8 @@ function memory() {
       jobAlerts: new InMemoryJobAlertRepository(),
       applications: new InMemoryApplicationRepository(opportunities),
       contacts: createMemoryContacts(DEMO_PROFILE_ID),
-      organizations: new InMemoryOrganizationRepository(DEMO_PROFILE_ID),
+      organizations,
+      jobOffers: new InMemoryJobOfferRepository(DEMO_PROFILE_ID, organizations, opportunities),
     };
   }
   return g.memory;
@@ -141,4 +147,6 @@ export const getApplicationRepository = (): ApplicationRepository =>
   hasDatabase() ? new PrismaApplicationRepository() : memory().applications;
 export const getOrganizationRepository = (): OrganizationRepository =>
   hasDatabase() ? new PrismaOrganizationRepository() : memory().organizations;
+export const getJobOfferRepository = (): JobOfferRepository =>
+  hasDatabase() ? new PrismaJobOfferRepository() : memory().jobOffers;
 export const getContactRepository = () => (hasDatabase() ? new PrismaContactRepository() : memory().contacts);

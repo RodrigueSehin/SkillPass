@@ -51,7 +51,14 @@ Entreprises multi-tenant, offres, recherche de talents, matching, skill gap. Maq
 - [x] Équipes : membres (filtres, pagination, rôle, désactivation, retrait, relance), équipes, rôles et permissions, invitations
 - [x] Assistants « Ajouter un département » et « Ajouter un membre » (4 étapes, aperçu en direct)
 - [x] Plan Starter/Pro/Business/Enterprise : limite de membres appliquée à l'invitation
-- [ ] Tableau de bord complet, Talents, Offres d'emploi (+ création), Compétences, Évaluations (+ création), Analytics, Abonnement, Paramètres — étapes suivantes
+### Étape 2 — Offres d'emploi ✅ (repositories Prisma non validés sur une vraie base)
+
+- [x] Liste (onglets, filtres, pagination, export CSV), assistant de création/modification en 3 étapes avec aperçu en direct, brouillon / publication / clôture / duplication / suppression
+- [x] Une offre publiée est répliquée en opportunité (visible dans Opportunités côté talent, candidatures existantes), masquée avant sa date de publication et après sa date limite ; limite mensuelle du plan appliquée
+- [x] SQL : `supabase/update-0013-job-offers.sql` (à lancer après 0012)
+- [ ] Diffusion LinkedIn / e-mail / site carrière : choix enregistré, pas d'envoi réel
+
+- [ ] Tableau de bord complet, Talents, Compétences, Évaluations (+ création), Analytics, Abonnement, Paramètres — étapes suivantes
 - [ ] Envoi réel des invitations par e-mail — reporté (le lien est à copier)
 
 ## Phase 5 — AI
