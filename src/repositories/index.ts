@@ -41,6 +41,9 @@ import { InMemoryOrganizationRepository } from "./organization.memory";
 import { PrismaOrganizationRepository } from "./organization.prisma";
 import type { OrganizationRepository } from "./organization.repository";
 import { PrismaContactRepository } from "./contact.prisma";
+import { InMemoryEvaluationRepository } from "./evaluation.memory";
+import { PrismaEvaluationRepository } from "./evaluation.prisma";
+import type { EvaluationRepository } from "./evaluation.repository";
 import { InMemoryTalentDirectoryRepository } from "./talent-directory.memory";
 import { PrismaTalentDirectoryRepository } from "./talent-directory.prisma";
 import type { TalentDirectoryRepository } from "./talent-directory.repository";
@@ -78,6 +81,7 @@ const g = globalThis as unknown as {
     organizations: InMemoryOrganizationRepository;
     jobOffers: InMemoryJobOfferRepository;
     talents: InMemoryTalentDirectoryRepository;
+    evaluations: InMemoryEvaluationRepository;
   };
 };
 
@@ -100,6 +104,7 @@ function memory() {
       organizations,
       jobOffers: new InMemoryJobOfferRepository(DEMO_PROFILE_ID, organizations, opportunities),
       talents: new InMemoryTalentDirectoryRepository(),
+      evaluations: new InMemoryEvaluationRepository(DEMO_PROFILE_ID, organizations),
     };
   }
   return g.memory;
@@ -157,3 +162,5 @@ export const getJobOfferRepository = (): JobOfferRepository =>
 export const getContactRepository = () => (hasDatabase() ? new PrismaContactRepository() : memory().contacts);
 export const getTalentDirectoryRepository = (): TalentDirectoryRepository =>
   hasDatabase() ? new PrismaTalentDirectoryRepository() : memory().talents;
+export const getEvaluationRepository = (): EvaluationRepository =>
+  hasDatabase() ? new PrismaEvaluationRepository() : memory().evaluations;

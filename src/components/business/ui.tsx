@@ -159,7 +159,10 @@ export function LinkTabs({
   label: string;
 }) {
   return (
-    <nav aria-label={label} className="border-border/60 flex gap-6 overflow-x-auto border-b">
+    <nav
+      aria-label={label}
+      className="border-border/60 flex gap-6 overflow-x-auto overflow-y-hidden border-b"
+    >
       {tabs.map((t) => (
         <Link
           key={t.key}

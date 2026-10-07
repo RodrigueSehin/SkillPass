@@ -81,6 +81,7 @@ model Profile {
   orgMemberships  OrganizationMember[]
   jobAlerts       JobAlert[]
   contacts        Contact[]
+  evaluationAttempts EvaluationAttempt[]
 
   @@map("profiles")
 }
@@ -540,6 +541,7 @@ model Organization {
 
   members     OrganizationMember[]
   jobOffers   JobOffer[]
+  evaluations Evaluation[]
   sites       Site[]
   departments Department[]
 
@@ -681,4 +683,51 @@ model JobOffer {
 
   @@index([organizationId])
   @@map("job_offers")
+}
+
+// Tests created by an organization. Questions and settings are validated by Zod (src/schemas/evaluation.ts)
+// and stored as JSON: they are always read and written together with the test.
+model Evaluation {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  createdById     String?   @map("created_by_id") @db.Uuid
+  title           String
+  description     String    @default("")
+  skill           String    @default("")
+  type            String    @default("TECHNICAL")
+  difficulty      String    @default("INTERMEDIATE")
+  durationMinutes Int       @default(45) @map("duration_minutes")
+  language        String    @default("Français")
+  questions       Json      @default("[]")
+  settings        Json      @default("{}")
+  status          String    @default("DRAFT")
+  publishAt       DateTime? @map("publish_at")
+  shareToken      String    @unique @default(uuid()) @map("share_token")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  attempts     EvaluationAttempt[]
+
+  @@index([organizationId])
+  @@map("evaluations")
+}
+
+model EvaluationAttempt {
+  id           String    @id @default(uuid()) @db.Uuid
+  evaluationId String    @map("evaluation_id") @db.Uuid
+  profileId    String    @map("profile_id") @db.Uuid
+  answers      Json      @default("{}")
+  score        Int?
+  passed       Boolean?
+  // IN_PROGRESS, SUBMITTED (waiting for a person to read open answers) or GRADED
+  status       String    @default("IN_PROGRESS")
+  startedAt    DateTime  @default(now()) @map("started_at")
+  submittedAt  DateTime? @map("submitted_at")
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  profile    Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([evaluationId])
+  @@index([profileId])
+  @@map("evaluation_attempts")
 }
