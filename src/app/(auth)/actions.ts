@@ -88,7 +88,8 @@ export async function registerAction(values: unknown): Promise<ActionState> {
     console.error("registerAction: profile creation failed", err);
   }
 
-  redirect("/verify-email");
+  // With "Confirm email" turned off in Supabase, signUp already returns a session: go straight in.
+  redirect(signUp.session ? "/dashboard" : "/verify-email");
 }
 
 export async function forgotPasswordAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
