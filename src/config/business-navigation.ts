@@ -38,7 +38,6 @@ export const BUSINESS_SECONDARY_NAV: BusinessNavItem[] = [
 
 /** Sections whose screens ship in a later step: they show a short notice until then. */
 export const BUSINESS_PLACEHOLDERS = [
-  "talents",
   "matching",
   "competences",
   "evaluations",
