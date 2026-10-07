@@ -41,7 +41,18 @@ Décisions : pas de base disponible localement → repositories derrière une in
 
 ## Phase 4 — Business
 
-Entreprises multi-tenant, offres, recherche de talents, matching, skill gap.
+Entreprises multi-tenant, offres, recherche de talents, matching, skill gap. Maquettes : `src/maquettes/skillpass_business/`.
+
+### Étape 1 — Organisation et équipes ✅ (code complet, repositories Prisma non validés sur une vraie base)
+
+- [x] Modèle multi-tenant : organisations, membres (rôles, permissions détaillées, invitations à usage unique valables 7 jours), départements, sites ; toutes les méthodes du repository prennent l'identifiant de l'organisation
+- [x] Coque Business (`/business`) : barre latérale, recherche Ctrl K, menu de l'organisation, onboarding (création d'organisation) et page d'invitation `/business/join/[token]`
+- [x] Organisation : vue d'ensemble, informations, départements, sites, logo (upload)
+- [x] Équipes : membres (filtres, pagination, rôle, désactivation, retrait, relance), équipes, rôles et permissions, invitations
+- [x] Assistants « Ajouter un département » et « Ajouter un membre » (4 étapes, aperçu en direct)
+- [x] Plan Starter/Pro/Business/Enterprise : limite de membres appliquée à l'invitation
+- [ ] Tableau de bord complet, Talents, Offres d'emploi (+ création), Compétences, Évaluations (+ création), Analytics, Abonnement, Paramètres — étapes suivantes
+- [ ] Envoi réel des invitations par e-mail — reporté (le lien est à copier)
 
 ## Phase 5 — AI
 

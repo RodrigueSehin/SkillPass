@@ -78,6 +78,7 @@ model Profile {
   recommendations Recommendation[]
   savedOpportunities SavedOpportunity[]
   applications    Application[]
+  orgMemberships  OrganizationMember[]
   jobAlerts       JobAlert[]
   contacts        Contact[]
 
@@ -511,4 +512,127 @@ model Application {
   @@id([profileId, opportunityId])
   @@index([opportunityId])
   @@map("applications")
+}
+
+// ---------- SkillPass Business: organizations ----------
+
+model Organization {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String   @unique
+  description String?
+  industry    String?
+  size        String?
+  website     String?
+  address     String?
+  phone       String?
+  email       String?
+  timezone    String   @default("Africa/Abidjan")
+  language    String   @default("fr")
+  verified    Boolean  @default(false)
+  plan        String   @default("BUSINESS")
+  logoPath    String?  @map("logo_path")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  members     OrganizationMember[]
+  sites       Site[]
+  departments Department[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id                String    @id @default(uuid()) @db.Uuid
+  organizationId    String    @map("organization_id") @db.Uuid
+  profileId         String?   @map("profile_id") @db.Uuid
+  firstName         String    @map("first_name")
+  lastName          String    @map("last_name")
+  email             String
+  phone             String?
+  jobTitle          String?   @map("job_title")
+  role              String    @default("VIEWER")
+  permissions       String[]  @default([])
+  status            String    @default("INVITED")
+  siteId            String?   @map("site_id") @db.Uuid
+  managerId         String?   @map("manager_id") @db.Uuid
+  invitationMessage String?   @map("invitation_message")
+  inviteToken       String?   @unique @map("invite_token")
+  inviteExpiresAt   DateTime? @map("invite_expires_at")
+  invitedAt         DateTime? @map("invited_at")
+  lastActiveAt      DateTime? @map("last_active_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  profile      Profile?           @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  departments  DepartmentMember[]
+  deputyOf     DepartmentDeputy[]
+
+  @@unique([organizationId, email])
+  @@unique([organizationId, profileId])
+  @@index([profileId])
+  @@map("organization_members")
+}
+
+model Site {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  name           String
+  address        String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("sites")
+}
+
+model Department {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  name           String
+  description    String?
+  look           String   @default("users")
+  parentId       String?  @map("parent_id") @db.Uuid
+  mainSiteId     String?  @map("main_site_id") @db.Uuid
+  siteIds        String[] @default([]) @map("site_ids")
+  objectives     String[] @default([])
+  status         String   @default("ACTIVE")
+  accessLevel    String   @default("LIMITED") @map("access_level")
+  headId         String?  @map("head_id") @db.Uuid
+  replacementId  String?  @map("replacement_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      DepartmentMember[]
+  deputies     DepartmentDeputy[]
+
+  @@index([organizationId])
+  @@map("departments")
+}
+
+model DepartmentMember {
+  departmentId String  @map("department_id") @db.Uuid
+  memberId     String  @map("member_id") @db.Uuid
+  isPrimary    Boolean @default(false) @map("is_primary")
+  role         String  @default("Membre")
+
+  department Department         @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  member     OrganizationMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([departmentId, memberId])
+  @@index([memberId])
+  @@map("department_members")
+}
+
+model DepartmentDeputy {
+  departmentId String @map("department_id") @db.Uuid
+  memberId     String @map("member_id") @db.Uuid
+  level        String @default("DEPUTY")
+
+  department Department         @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  member     OrganizationMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([departmentId, memberId])
+  @@index([memberId])
+  @@map("department_deputies")
 }

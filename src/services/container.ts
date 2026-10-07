@@ -5,6 +5,7 @@ import {
   getContactRepository,
   getJobAlertRepository,
   getOpportunityRepository,
+  getOrganizationRepository,
   getSavedOpportunityRepository,
   getAttemptRepository,
   getCredentialRepository,
@@ -21,6 +22,8 @@ import { EvidenceService } from "./evidence.service";
 import { CertificationDocumentService } from "./certification-document.service";
 import { ExperienceDocumentService } from "./experience-document.service";
 import { OpportunityService } from "./opportunity.service";
+import { OrganizationLogoService } from "./organization-logo.service";
+import { OrganizationService } from "./organization.service";
 import { ProjectCoverService } from "./project-cover.service";
 import { AssessmentService } from "./assessment.service";
 import { CredentialService } from "./credential.service";
@@ -80,3 +83,7 @@ export const getOpportunityService = () =>
     getJobAlertRepository(),
     getApplicationRepository(),
   );
+
+export const getOrganizationService = () => new OrganizationService(getOrganizationRepository());
+export const getOrganizationLogoService = () =>
+  new OrganizationLogoService(getOrganizationRepository(), getStorage);
