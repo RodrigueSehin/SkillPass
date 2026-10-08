@@ -86,7 +86,7 @@ Entreprises multi-tenant, offres, recherche de talents, matching, skill gap. Maq
 ### Étape 8 — Tableau de bord ✅
 
 - [x] Accueil (texte de bienvenue et couverture réglables), indicateurs, activité des évaluations, répartition des niveaux, actions rapides, talents à découvrir, offres récentes, activités récentes. « Matches IA » et « Taux de correspondance » du mockup attendent le Matching IA (phase 5) : remplacés par des chiffres réels.
-- [ ] Matching IA — phase 5
+- [x] Matching par compétences ✅ : `/business/matching` classe les profils publics selon les compétences, certifications, expérience, lieu et disponibilité de chaque offre (seuil 50 %), et alimente « Talents proposés ». Calcul à la volée, sans SQL, sans LLM (réservé au plan Pro et plus). Reste pour la phase 5 : explications et classement par IA générative, shortlist, contact, export.
 
 - [ ] Envoi réel des invitations par e-mail — reporté (le lien est à copier)
 

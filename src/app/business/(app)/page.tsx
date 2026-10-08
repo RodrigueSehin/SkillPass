@@ -260,7 +260,7 @@ export default async function BusinessDashboardPage() {
             )}
             <p className="text-muted mt-2 text-[11px]">
               Sélection selon la vérification des compétences, les certifications et l&apos;expérience. Le
-              Matching IA personnalisé arrive bientôt.
+              Pour les talents proposés par offre, ouvrez le Matching.
             </p>
           </Panel>
         ) : (

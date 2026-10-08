@@ -81,6 +81,9 @@ export const PLANS: Record<PlanCode, PlanDef> = {
 };
 
 /** How many more people the plan lets the organization hold, or null when unlimited. */
+/** Matches the "Matching IA" row of the plan comparison: every plan but Starter. */
+export const planHasMatching = (plan: PlanCode) => plan !== "STARTER";
+
 export function remainingSeats(plan: PlanCode, used: number) {
   const max = PLANS[plan].maxMembers;
   return max === null ? null : Math.max(0, max - used);

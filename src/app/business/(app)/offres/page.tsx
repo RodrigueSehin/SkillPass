@@ -19,7 +19,10 @@ import {
   tabCounts,
   topOffers,
 } from "@/lib/business/job-offer-view";
+import { proposedTalentCount } from "@/lib/business/matching";
+import { planHasMatching } from "@/lib/business/plans";
 import { paginate } from "@/lib/project-view";
+import { getTalentDirectoryRepository } from "@/repositories";
 import { cn } from "@/lib/utils/cn";
 import { buttonVariants } from "@/components/ui/button";
 import { getJobOfferService, getOrganizationService } from "@/services/container";
@@ -57,6 +60,13 @@ export default async function JobOffersPage({ searchParams }: PageProps<"/busine
   const { page, pages, items } = paginate(filtered, Number(first(raw.page)), OFFERS_PER_PAGE);
   const counts = tabCounts(offers);
   const stats = offerStats(offers);
+  const proposed =
+    planHasMatching(ctx.organization.plan) && ctx.can("talents.view")
+      ? proposedTalentCount(
+          offers.filter((o) => o.displayStatus === "PUBLISHED"),
+          await getTalentDirectoryRepository().listPublic(500),
+        )
+      : null;
   const canCreate = ctx.can("jobs.create");
   const canEdit = ctx.can("jobs.edit");
 
@@ -141,9 +151,9 @@ export default async function JobOffersPage({ searchParams }: PageProps<"/busine
             <StatCard
               icon={Target}
               tone="bg-blue-50 text-brand"
-              value="—"
+              value={proposed === null ? "—" : proposed.toLocaleString("fr-FR")}
               label="Talents proposés"
-              caption="avec le Matching IA"
+              caption={proposed === null ? "avec le plan Pro" : "pour vos offres ouvertes"}
             />
           </div>
 
