@@ -83,7 +83,11 @@ Entreprises multi-tenant, offres, recherche de talents, matching, skill gap. Maq
 - [x] Paramètres, 7 sections : Général (infos, logo, mode maintenance), Notifications (préférences enregistrées), Personnalisation (couleurs appliquées à l'interface Business, texte de bienvenue, logo/nom), Conformité (déclaratif), Zone de danger (export JSON, désactivation/réactivation, suppression avec confirmation, départ)
 - [ ] Marqués « Bientôt » dans l'interface : 2FA, SSO, restrictions par réseau/département, sessions, journaux, intégrations, clés API, webhooks, envoi des notifications, thème sombre, favicon, e-mails personnalisés, suppression automatique des données
 
-- [ ] Tableau de bord complet, Évaluations (+ création), Analytics, Abonnement, Paramètres — étapes suivantes
+### Étape 8 — Tableau de bord ✅
+
+- [x] Accueil (texte de bienvenue et couverture réglables), indicateurs, activité des évaluations, répartition des niveaux, actions rapides, talents à découvrir, offres récentes, activités récentes. « Matches IA » et « Taux de correspondance » du mockup attendent le Matching IA (phase 5) : remplacés par des chiffres réels.
+- [ ] Matching IA — phase 5
+
 - [ ] Envoi réel des invitations par e-mail — reporté (le lien est à copier)
 
 ## Phase 5 — AI
