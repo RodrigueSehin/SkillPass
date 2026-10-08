@@ -12,7 +12,14 @@ export interface TalentRecord {
   yearsOfExperience: number;
   availability: Availability;
   updatedAt: string;
-  skills: { name: string; level: SkillLevel; score: number; verified: boolean; evidenceCount: number }[];
+  skills: {
+    name: string;
+    category: string | null;
+    level: SkillLevel;
+    score: number;
+    verified: boolean;
+    evidenceCount: number;
+  }[];
   certifications: { name: string; issuer: string; date: string; verified: boolean; expired: boolean }[];
   projectCount: number;
   recommendationCount: number;

@@ -5,7 +5,7 @@ import { NoAccess } from "@/components/business/ui";
 import { requireBusiness } from "@/lib/business/context";
 import { appUrl } from "@/lib/utils/app-url";
 import { NotFoundError } from "@/lib/errors";
-import { getEvaluationService } from "@/services/container";
+import { getEvaluationService, getOrgSkillService } from "@/services/container";
 
 export const metadata: Metadata = { title: "Modifier l'évaluation" };
 export const dynamic = "force-dynamic";
@@ -23,5 +23,11 @@ export default async function EditEvaluationPage({
     if (err instanceof NotFoundError) notFound();
     throw err;
   }
-  return <EvaluationWizard evaluation={evaluation} origin={appUrl()} />;
+  return (
+    <EvaluationWizard
+      evaluation={evaluation}
+      origin={appUrl()}
+      orgSkills={(await getOrgSkillService().list(ctx.organization.id)).map((s) => s.name)}
+    />
+  );
 }

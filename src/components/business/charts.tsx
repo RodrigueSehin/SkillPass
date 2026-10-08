@@ -78,3 +78,60 @@ export function RateBar({
     </span>
   );
 }
+
+const SERIES_COLORS = ["#8B5CF6", "#2563EB", "#F59E0B", "#10B981", "#EC4899"];
+export const seriesColor = (i: number) => SERIES_COLORS[i % SERIES_COLORS.length]!;
+
+/** Lines over a few labelled steps, drawn as one SVG: no chart library for four short series. */
+export function LineChart({
+  labels,
+  series,
+  label,
+}: {
+  labels: string[];
+  series: { name: string; values: number[] }[];
+  label: string;
+}) {
+  const width = 360;
+  const height = 150;
+  const pad = { top: 8, right: 8, bottom: 22, left: 28 };
+  const peak = Math.max(1, ...series.flatMap((s) => s.values));
+  const top = peak <= 4 ? peak : Math.ceil(peak / 4) * 4;
+  const x = (i: number) =>
+    pad.left + (labels.length <= 1 ? 0 : (i / (labels.length - 1)) * (width - pad.left - pad.right));
+  const y = (v: number) => pad.top + (1 - v / top) * (height - pad.top - pad.bottom);
+  const ticks = [0, 1, 2, 3, 4].map((i) => Math.round((top / 4) * i * 10) / 10);
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} className="w-full">
+      {ticks.map((t) => (
+        <g key={t}>
+          <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} stroke="#E2E8F0" strokeWidth="1" />
+          <text x={pad.left - 6} y={y(t) + 3} textAnchor="end" fontSize="9" fill="#64748B">
+            {t}
+          </text>
+        </g>
+      ))}
+      {labels.map((l, i) => (
+        <text key={`${l}-${i}`} x={x(i)} y={height - 6} textAnchor="middle" fontSize="9" fill="#64748B">
+          {l}
+        </text>
+      ))}
+      {series.map((s, si) => (
+        <polyline
+          key={s.name}
+          fill="none"
+          stroke={seriesColor(si)}
+          strokeWidth="2"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          points={s.values.map((v, i) => `${x(i)},${y(v)}`).join(" ")}
+        />
+      ))}
+      {series.map((s, si) =>
+        s.values.map((v, i) => (
+          <circle key={`${s.name}-${i}`} cx={x(i)} cy={y(v)} r="2.5" fill={seriesColor(si)} />
+        )),
+      )}
+    </svg>
+  );
+}

@@ -4,7 +4,7 @@ import { JobOfferWizard } from "@/components/business/job-offer-wizard";
 import { NoAccess } from "@/components/business/ui";
 import { requireBusiness } from "@/lib/business/context";
 import { NotFoundError } from "@/lib/errors";
-import { getJobOfferService, getOrganizationService } from "@/services/container";
+import { getJobOfferService, getOrganizationService, getOrgSkillService } from "@/services/container";
 
 export const metadata: Metadata = { title: "Modifier l'offre d'emploi" };
 export const dynamic = "force-dynamic";
@@ -21,13 +21,17 @@ export default async function EditJobOfferPage({ params }: PageProps<"/business/
     if (err instanceof NotFoundError) notFound();
     throw err;
   }
-  const departments = await getOrganizationService().listDepartments(ctx.organization.id);
+  const [departments, orgSkills] = await Promise.all([
+    getOrganizationService().listDepartments(ctx.organization.id),
+    getOrgSkillService().list(ctx.organization.id),
+  ]);
   const { name, industry, address, logoVersion } = ctx.organization;
   return (
     <JobOfferWizard
       offer={offer}
       organization={{ name, industry, address, logoVersion }}
       departments={departments.map((d) => ({ id: d.id, name: d.name }))}
+      orgSkills={orgSkills.map((s) => ({ name: s.name, kind: s.kind }))}
     />
   );
 }

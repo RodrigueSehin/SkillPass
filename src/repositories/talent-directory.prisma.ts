@@ -4,7 +4,9 @@ import type { TalentDetail, TalentRecord } from "@/types/talent";
 import type { TalentDirectoryRepository } from "./talent-directory.repository";
 
 const include = {
-  talentSkills: { include: { skill: true, _count: { select: { evidence: true } } } },
+  talentSkills: {
+    include: { skill: { include: { category: true } }, _count: { select: { evidence: true } } },
+  },
   certifications: true,
   _count: {
     select: {
@@ -30,6 +32,7 @@ function toRecord(row: Row, today = day(new Date())): TalentRecord {
     updatedAt: row.updatedAt.toISOString(),
     skills: row.talentSkills.map((s) => ({
       name: s.skill.name,
+      category: s.skill.category?.name ?? null,
       level: s.level,
       score: s.score,
       verified: s.verificationStatus === "VERIFIED",

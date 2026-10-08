@@ -58,7 +58,22 @@ Entreprises multi-tenant, offres, recherche de talents, matching, skill gap. Maq
 - [x] SQL : `supabase/update-0013-job-offers.sql` (à lancer après 0012)
 - [ ] Diffusion LinkedIn / e-mail / site carrière : choix enregistré, pas d'envoi réel
 
-- [ ] Tableau de bord complet, Talents, Compétences, Évaluations (+ création), Analytics, Abonnement, Paramètres — étapes suivantes
+### Étape 3 — Talents ✅ (repository Prisma non validé sur une vraie base)
+
+- [x] Recherche dans les profils publics (compétences, niveau, lieu, expérience, certifications, disponibilité), pourcentage de correspondance, panneau de profil (score, compétences, projets, expériences). Aucune coordonnée n'est exposée : le contact passe par le profil public.
+- [ ] Contact direct, shortlist et export des profils — à construire avec le Matching IA
+
+### Étape 4 — Évaluations ✅ (repositories Prisma non validés sur une vraie base)
+
+- [x] Liste, bibliothèque de modèles, résultats et statistiques ; assistant de création en 4 étapes (9 types de questions, paramètres, programmation) ; SQL `supabase/update-0014-evaluations.sql`
+- [x] Passage par lien de partage `/e/[token]` (minuteur, questions mélangées, plein écran, copier-coller limité, tentatives) ; correction des questions ouvertes par l'équipe ; seuil de réussite appliqué
+- [ ] Certificat et badge délivrés au talent, surveillance webcam, dépôt de fichiers — non disponibles
+
+### Étape 5 — Compétences ✅ (repository Prisma non validé sur une vraie base)
+
+- [x] Catalogue calculé sur les profils publics et les offres publiées (talents, niveau moyen, demande, tendance sur 6 mois) ; référentiel propre à l'organisation (ajout, modification, suppression) proposé dans les offres et évaluations ; SQL `supabase/update-0015-organization-skills.sql`
+
+- [ ] Tableau de bord complet, Évaluations (+ création), Analytics, Abonnement, Paramètres — étapes suivantes
 - [ ] Envoi réel des invitations par e-mail — reporté (le lien est à copier)
 
 ## Phase 5 — AI

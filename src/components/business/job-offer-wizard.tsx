@@ -227,11 +227,14 @@ export function JobOfferWizard({
   offer,
   organization,
   departments,
+  orgSkills = [],
 }: {
   /** Set when editing an existing offer. */
   offer?: JobOfferDTO;
   organization: { name: string; industry: string | null; address: string | null; logoVersion: string | null };
   departments: { id: string; name: string }[];
+  /** Skills from the organization's own referential, offered next to the shared catalog. */
+  orgSkills?: { name: string; kind: "TECHNICAL" | "TRANSVERSAL" }[];
 }) {
   const router = useRouter();
   const editing = Boolean(offer);
@@ -573,7 +576,10 @@ export function JobOfferWizard({
                   label="Compétences techniques"
                   value={v.skills}
                   onChange={(s) => set("skills", s)}
-                  catalog={TECH_SKILLS}
+                  catalog={[
+                    ...orgSkills.filter((s) => s.kind === "TECHNICAL").map((s) => s.name),
+                    ...TECH_SKILLS,
+                  ]}
                   placeholder="Rechercher et sélectionner des compétences…"
                 />
                 {errors.skills && (
@@ -595,7 +601,10 @@ export function JobOfferWizard({
                   label="Compétences comportementales"
                   value={v.softSkills}
                   onChange={(s) => set("softSkills", s)}
-                  catalog={SOFT_SKILLS}
+                  catalog={[
+                    ...orgSkills.filter((s) => s.kind === "TRANSVERSAL").map((s) => s.name),
+                    ...SOFT_SKILLS,
+                  ]}
                   placeholder="Ajouter une qualité…"
                 />
               </div>

@@ -16,6 +16,32 @@ interface Seed {
   recos: number;
 }
 
+const CATEGORIES: Record<string, string> = {
+  "Power Apps": "Power Platform",
+  "Power Automate": "Power Platform",
+  Dataverse: "Power Platform",
+  "Power Platform": "Power Platform",
+  "Power BI": "Data & Analytics",
+  DAX: "Data & Analytics",
+  SQL: "Base de données",
+  "Data Analysis": "Data & Analytics",
+  Excel: "Productivité",
+  Azure: "Cloud",
+  DevOps: "Cloud",
+  "CI/CD": "Cloud",
+  Git: "Développement",
+  SharePoint: "Collaboration",
+  TypeScript: "Développement",
+  React: "Développement",
+  "Node.js": "Développement",
+  Python: "Développement",
+  PostgreSQL: "Base de données",
+  "Process Mining": "Data & Analytics",
+  Agile: "Gestion de projet",
+  "Change Management": "Gestion de projet",
+  "UI/UX": "Design",
+};
+
 const SCORES: Record<SkillLevel, number> = { BEGINNER: 35, INTERMEDIATE: 62, ADVANCED: 82, EXPERT: 94 };
 
 const SEEDS: Seed[] = [
@@ -189,6 +215,7 @@ function build(seed: Seed): TalentRecord {
     updatedAt: new Date().toISOString(),
     skills: seed.skills.map(([name, level, verified]) => ({
       name,
+      category: CATEGORIES[name] ?? null,
       level,
       score: SCORES[level],
       verified: Boolean(verified),

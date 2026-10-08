@@ -3,6 +3,7 @@ import { EvaluationWizard } from "@/components/business/evaluation-wizard";
 import { NoAccess } from "@/components/business/ui";
 import { EVALUATION_TEMPLATES, templateInput } from "@/config/evaluation-templates";
 import { requireBusiness } from "@/lib/business/context";
+import { getOrgSkillService } from "@/services/container";
 import { appUrl } from "@/lib/utils/app-url";
 
 export const metadata: Metadata = { title: "Créer une évaluation" };
@@ -17,5 +18,11 @@ export default async function NewEvaluationPage({
   const id = Array.isArray(raw.modele) ? raw.modele[0] : raw.modele;
   const found = EVALUATION_TEMPLATES.find((t) => t.id === id);
   const template = found ? templateInput(found, () => crypto.randomUUID()) : undefined;
-  return <EvaluationWizard template={template} origin={appUrl()} />;
+  return (
+    <EvaluationWizard
+      template={template}
+      origin={appUrl()}
+      orgSkills={(await getOrgSkillService().list(ctx.organization.id)).map((s) => s.name)}
+    />
+  );
 }

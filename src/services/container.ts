@@ -5,6 +5,7 @@ import {
   getContactRepository,
   getJobAlertRepository,
   getEvaluationRepository,
+  getOrgSkillRepository,
   getJobOfferRepository,
   getOpportunityRepository,
   getOrganizationRepository,
@@ -23,6 +24,7 @@ import { getStorage } from "@/lib/storage/storage";
 import { EvidenceService } from "./evidence.service";
 import { CertificationDocumentService } from "./certification-document.service";
 import { ExperienceDocumentService } from "./experience-document.service";
+import { OrgSkillService } from "./org-skill.service";
 import { EvaluationAttemptService } from "./evaluation-attempt.service";
 import { EvaluationService } from "./evaluation.service";
 import { JobOfferService } from "./job-offer.service";
@@ -97,3 +99,4 @@ export const getJobOfferService = () =>
 export const getEvaluationService = () => new EvaluationService(getEvaluationRepository());
 export const getEvaluationAttemptService = () =>
   new EvaluationAttemptService(getEvaluationRepository(), getOrganizationRepository());
+export const getOrgSkillService = () => new OrgSkillService(getOrgSkillRepository());

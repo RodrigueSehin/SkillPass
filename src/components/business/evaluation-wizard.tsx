@@ -277,12 +277,15 @@ export function EvaluationWizard({
   evaluation,
   template,
   origin,
+  orgSkills = [],
 }: {
   /** Set when editing an existing test. */
   evaluation?: EvaluationDTO;
   /** Library model used as the starting point of a new test. */
   template?: EvaluationInput;
   origin: string;
+  /** Names of the skills of the organization's own referential, offered next to the shared catalog. */
+  orgSkills?: string[];
 }) {
   const router = useRouter();
   const editing = Boolean(evaluation);
@@ -491,7 +494,7 @@ export function EvaluationWizard({
                       className={cn(field, "pl-12")}
                     />
                     <datalist id="eval-skill-list">
-                      {SKILL_CATALOG.map((s) => (
+                      {[...new Set([...orgSkills, ...SKILL_CATALOG])].map((s) => (
                         <option key={s} value={s} />
                       ))}
                     </datalist>
