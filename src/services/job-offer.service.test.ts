@@ -13,6 +13,7 @@ import { InMemoryOpportunityRepository } from "@/repositories/opportunity.memory
 import { InMemoryOrganizationRepository } from "@/repositories/organization.memory";
 import { jobOfferSchema, publishableJobOfferSchema } from "@/schemas/job-offer";
 import type { JobOfferInput } from "@/types/job-offer";
+import { DEFAULT_ORG_SETTINGS } from "@/types/org-settings";
 import { JobOfferService } from "./job-offer.service";
 import { OrganizationService, type OrgScope } from "./organization.service";
 
@@ -127,6 +128,8 @@ describe("job offer mapping", () => {
         language: "fr",
         plan: "BUSINESS",
         logoVersion: null,
+        settings: DEFAULT_ORG_SETTINGS,
+        deactivated: false,
         createdAt: NOW.toISOString(),
       },
       NOW,

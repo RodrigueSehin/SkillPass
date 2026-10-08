@@ -25,6 +25,7 @@ import { EvidenceService } from "./evidence.service";
 import { CertificationDocumentService } from "./certification-document.service";
 import { ExperienceDocumentService } from "./experience-document.service";
 import { OrgSkillService } from "./org-skill.service";
+import { OrganizationLifecycleService } from "./organization-lifecycle.service";
 import { EvaluationAttemptService } from "./evaluation-attempt.service";
 import { EvaluationService } from "./evaluation.service";
 import { JobOfferService } from "./job-offer.service";
@@ -100,3 +101,13 @@ export const getEvaluationService = () => new EvaluationService(getEvaluationRep
 export const getEvaluationAttemptService = () =>
   new EvaluationAttemptService(getEvaluationRepository(), getOrganizationRepository());
 export const getOrgSkillService = () => new OrgSkillService(getOrgSkillRepository());
+export const getOrganizationLifecycleService = () =>
+  new OrganizationLifecycleService(
+    getOrganizationService(),
+    getJobOfferRepository(),
+    getJobOfferService(),
+    getOpportunityRepository(),
+    getEvaluationRepository(),
+    getOrgSkillRepository(),
+    getStorage,
+  );

@@ -12,6 +12,8 @@ import type {
   UpdateOrganizationInput,
 } from "@/schemas/business";
 import type { DepartmentDTO, MemberDTO, MemberInvite, OrganizationDTO } from "@/types/business";
+import type { OrgSettings } from "@/types/org-settings";
+import type { PlanCode } from "@/types/business";
 
 export const INVITE_DAYS = 7;
 const DAY_MS = 86_400_000;
@@ -368,5 +370,59 @@ export class OrganizationService {
 
   async deleteDepartment(orgId: string, id: string) {
     if (!(await this.repo.deleteDepartment(orgId, id))) throw new NotFoundError("Département introuvable");
+  }
+
+  // ---------------------------------------------------------------- settings
+
+  /** Replaces whole sections of the settings; what the patch leaves out stays as it was. */
+  async saveSettings(orgId: string, patch: Partial<OrgSettings>) {
+    const org = await this.repo.getOrganization(orgId);
+    if (!org) throw new NotFoundError("Organisation introuvable");
+    const updated = await this.repo.updateOrganization(orgId, { settings: { ...org.settings, ...patch } });
+    if (!updated) throw new NotFoundError("Organisation introuvable");
+    return updated;
+  }
+
+  async setDeactivated(orgId: string, deactivated: boolean) {
+    const updated = await this.repo.setDeactivated(orgId, deactivated);
+    if (!updated) throw new NotFoundError("Organisation introuvable");
+    return updated;
+  }
+
+  /** The signed-in member leaves; someone else must remain to run the organization. */
+  async leave(scope: OrgScope) {
+    if (await this.isLastAdmin(scope.organization.id, scope.member)) {
+      throw new ForbiddenError("Nommez un autre administrateur avant de quitter l'organisation.");
+    }
+    await this.repo.removeMember(scope.organization.id, scope.member.id);
+  }
+
+  /** Deletes the organization for good. The administrator must type its exact name. */
+  async deleteOrganization(scope: OrgScope, typedName: string) {
+    if (scope.member.role !== "ADMIN")
+      throw new ForbiddenError("Seul un administrateur peut supprimer l'organisation.");
+    if (typedName.trim() !== scope.organization.name) {
+      throw new ConflictError("Le nom saisi ne correspond pas au nom de l'organisation.");
+    }
+    const removed = await this.repo.deleteOrganization(scope.organization.id);
+    if (!removed) throw new NotFoundError("Organisation introuvable");
+    return removed;
+  }
+
+  /**
+   * Moves the organization to another plan. Never to one that cannot hold today's members: a downgrade must
+   * not leave an organization over its limit.
+   */
+  async changePlan(orgId: string, plan: PlanCode) {
+    const members = (await this.repo.listMembers(orgId)).length;
+    const max = PLANS[plan].maxMembers;
+    if (max !== null && members > max) {
+      throw new ConflictError(
+        `Le plan ${PLANS[plan].name} accepte ${max} membres et votre organisation en compte ${members}. Retirez des membres avant de changer de plan.`,
+      );
+    }
+    const updated = await this.repo.updateOrganization(orgId, { plan });
+    if (!updated) throw new NotFoundError("Organisation introuvable");
+    return updated;
   }
 }

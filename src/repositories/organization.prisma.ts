@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db/prisma";
 import type { Prisma } from "@/generated/prisma/client";
+import { withDefaults } from "@/types/org-settings";
 import type {
   AccessLevel,
   DepartmentDTO,
@@ -43,6 +44,8 @@ const toOrganization = (r: Prisma.OrganizationGetPayload<object>): OrganizationD
   verified: r.verified,
   plan: r.plan as PlanCode,
   logoVersion: r.logoPath ? createHash("sha1").update(r.logoPath).digest("hex").slice(0, 8) : null,
+  settings: withDefaults(r.settings),
+  deactivated: r.deactivatedAt !== null,
   createdAt: r.createdAt.toISOString(),
 });
 
@@ -181,8 +184,27 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   }
 
   async updateOrganization(id: string, patch: OrganizationPatch) {
-    const { count } = await prisma.organization.updateMany({ where: { id }, data: patch });
+    const { settings, ...rest } = patch;
+    const { count } = await prisma.organization.updateMany({
+      where: { id },
+      data: { ...rest, ...(settings ? { settings: settings as unknown as Prisma.InputJsonValue } : {}) },
+    });
     return count === 0 ? null : this.getOrganization(id);
+  }
+
+  async setDeactivated(orgId: string, deactivated: boolean) {
+    const { count } = await prisma.organization.updateMany({
+      where: { id: orgId },
+      data: { deactivatedAt: deactivated ? new Date() : null },
+    });
+    return count === 0 ? null : this.getOrganization(orgId);
+  }
+
+  async deleteOrganization(orgId: string) {
+    const row = await prisma.organization.findUnique({ where: { id: orgId }, select: { logoPath: true } });
+    if (!row) return null;
+    await prisma.organization.delete({ where: { id: orgId } });
+    return { logoPath: row.logoPath };
   }
 
   // ---------------------------------------------------------------- members

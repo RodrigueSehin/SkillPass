@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { ROLE_PRESETS } from "@/lib/business/permissions";
+import { DEFAULT_ORG_SETTINGS } from "@/types/org-settings";
 import type {
   DepartmentDTO,
   MemberDTO,
@@ -115,6 +116,8 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
       verified: input.verified ?? false,
       plan: input.plan ?? "BUSINESS",
       logoVersion: null,
+      settings: structuredClone(DEFAULT_ORG_SETTINGS),
+      deactivated: false,
       createdAt: new Date().toISOString(),
     };
     this.orgs.set(organization.id, organization);
@@ -142,8 +145,29 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   async updateOrganization(id: string, patch: OrganizationPatch) {
     const org = this.orgs.get(id);
     if (!org) return null;
-    Object.assign(org, patch);
+    Object.assign(org, structuredClone(patch));
     return this.orgView(org);
+  }
+
+  async setDeactivated(orgId: string, deactivated: boolean) {
+    const org = this.orgs.get(orgId);
+    if (!org) return null;
+    org.deactivated = deactivated;
+    return this.orgView(org);
+  }
+
+  async deleteOrganization(orgId: string) {
+    if (!this.orgs.has(orgId)) return null;
+    const logoPath = this.logos.get(orgId) ?? null;
+    const memberIds = new Set(this.members.filter((m) => m.orgId === orgId).map((m) => m.id));
+    this.orgs.delete(orgId);
+    this.logos.delete(orgId);
+    this.members = this.members.filter((m) => m.orgId !== orgId);
+    this.sites = this.sites.filter((s) => s.orgId !== orgId);
+    const departmentIds = new Set(this.departments.filter((d) => d.orgId === orgId).map((d) => d.id));
+    this.departments = this.departments.filter((d) => d.orgId !== orgId);
+    this.rows = this.rows.filter((r) => !memberIds.has(r.memberId) && !departmentIds.has(r.departmentId));
+    return { logoPath };
   }
 
   // ---------------------------------------------------------------- members
@@ -344,6 +368,8 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
       verified: true,
       plan: "BUSINESS",
       logoVersion: null,
+      settings: structuredClone(DEFAULT_ORG_SETTINGS),
+      deactivated: false,
       createdAt: ago(700),
     });
 

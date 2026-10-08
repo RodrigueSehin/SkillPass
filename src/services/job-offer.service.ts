@@ -85,7 +85,7 @@ export class JobOfferService {
   }
 
   /** Offers that went live this calendar month: what the plan limits. */
-  private async publishedThisMonth(orgId: string) {
+  async publishedThisMonth(orgId: string) {
     const prefix = this.now().toISOString().slice(0, 7);
     return (await this.offers.list(orgId)).filter((o) => o.publishedAt?.startsWith(prefix)).length;
   }
@@ -174,5 +174,17 @@ export class JobOfferService {
     const removed = await this.offers.delete(scope.organization.id, id);
     if (!removed) throw new NotFoundError("Offre introuvable");
     await this.opportunities.deactivateFromOffer(removed.id);
+  }
+
+  /** Hides every offer of the organization from the talent job board, as when it is suspended. */
+  async takeOffBoard(orgId: string) {
+    for (const offer of await this.offers.list(orgId)) await this.opportunities.deactivateFromOffer(offer.id);
+  }
+
+  /** Puts the published offers back on the job board once the organization is reactivated. */
+  async putBackOnBoard(scope: OrgScope) {
+    for (const offer of await this.offers.list(scope.organization.id)) {
+      if (offer.status === "PUBLISHED") await this.sync(scope, offer);
+    }
   }
 }

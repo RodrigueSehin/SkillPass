@@ -23,6 +23,8 @@ export type OrganizationPatch = Partial<
     | "email"
     | "timezone"
     | "language"
+    | "settings"
+    | "plan"
   >
 >;
 
@@ -85,6 +87,10 @@ export interface OrganizationRepository {
     creator: NewMember,
   ): Promise<{ organization: OrganizationDTO; member: MemberDTO }>;
   getOrganization(id: string): Promise<OrganizationDTO | null>;
+  /** Suspends or reactivates the organization. */
+  setDeactivated(orgId: string, deactivated: boolean): Promise<OrganizationDTO | null>;
+  /** Deletes the organization and everything under it. Returns its logo path so the file can be removed too. */
+  deleteOrganization(orgId: string): Promise<{ logoPath: string | null } | null>;
   updateOrganization(id: string, patch: OrganizationPatch): Promise<OrganizationDTO | null>;
 
   /** Stores (or clears, with null) the storage key of the logo. Returns the previous key. */

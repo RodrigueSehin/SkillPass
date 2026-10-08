@@ -1,3 +1,4 @@
+import type { OrgSettings } from "./org-settings";
 /** Roles of a member inside an organization (SkillPass Business). */
 export const ORG_ROLES = ["ADMIN", "MANAGER", "RECRUITER", "EVALUATOR", "VIEWER"] as const;
 export type OrgRole = (typeof ORG_ROLES)[number];
@@ -112,6 +113,10 @@ export interface OrganizationDTO {
   plan: PlanCode;
   /** Changes with every new logo, so browsers do not keep showing the old one. Null when there is none. */
   logoVersion: string | null;
+  /** Preferences edited in Settings, completed with the defaults. */
+  settings: OrgSettings;
+  /** Suspended by an administrator: nobody can use the organization until it is reactivated. */
+  deactivated: boolean;
   createdAt: string;
 }
 

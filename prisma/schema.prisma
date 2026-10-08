@@ -537,6 +537,9 @@ model Organization {
   verified    Boolean  @default(false)
   plan        String   @default("BUSINESS")
   logoPath    String?  @map("logo_path")
+  // Preferences edited in Settings (src/types/org-settings.ts), stored as one document.
+  settings    Json     @default("{}")
+  deactivatedAt DateTime? @map("deactivated_at")
   createdAt   DateTime @default(now()) @map("created_at")
 
   members     OrganizationMember[]

@@ -73,6 +73,16 @@ Entreprises multi-tenant, offres, recherche de talents, matching, skill gap. Maq
 
 - [x] Catalogue calculé sur les profils publics et les offres publiées (talents, niveau moyen, demande, tendance sur 6 mois) ; référentiel propre à l'organisation (ajout, modification, suppression) proposé dans les offres et évaluations ; SQL `supabase/update-0015-organization-skills.sql`
 
+### Étape 6 — Analytics ✅
+
+- [x] Indicateurs avec comparaison à la période précédente, évolution, répartition des résultats, compétences les plus évaluées, réussite par type, top talents, candidatures par offre, derniers passages. « Talents recrutés » et « Sources des talents » du mockup n'ont pas de donnée : remplacés par « Candidatures reçues » et « Candidatures par offre ».
+
+### Étape 7 — Abonnement et Paramètres ✅ (repositories Prisma non validés sur une vraie base)
+
+- [x] Abonnement : plans, comparatif, utilisation (membres, offres du mois), changement de plan gratuit **hors production** uniquement ; SQL `supabase/update-0016-organization-settings.sql`
+- [x] Paramètres, 7 sections : Général (infos, logo, mode maintenance), Notifications (préférences enregistrées), Personnalisation (couleurs appliquées à l'interface Business, texte de bienvenue, logo/nom), Conformité (déclaratif), Zone de danger (export JSON, désactivation/réactivation, suppression avec confirmation, départ)
+- [ ] Marqués « Bientôt » dans l'interface : 2FA, SSO, restrictions par réseau/département, sessions, journaux, intégrations, clés API, webhooks, envoi des notifications, thème sombre, favicon, e-mails personnalisés, suppression automatique des données
+
 - [ ] Tableau de bord complet, Évaluations (+ création), Analytics, Abonnement, Paramètres — étapes suivantes
 - [ ] Envoi réel des invitations par e-mail — reporté (le lien est à copier)
 

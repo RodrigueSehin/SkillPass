@@ -87,3 +87,44 @@ export function remainingSeats(plan: PlanCode, used: number) {
 }
 
 export const formatFcfa = (amount: number) => `${amount.toLocaleString("fr-FR").replace(/ | /g, " ")} FCFA`;
+
+/** The comparison table of the subscription page. Numbers come from the plans themselves. */
+export const PLAN_COMPARISON: { label: string; values: Record<PlanCode, string | boolean> }[] = [
+  {
+    label: "Membres de l'organisation",
+    values: Object.fromEntries(
+      (Object.keys(PLANS) as PlanCode[]).map((code) => [
+        code,
+        PLANS[code].maxMembers?.toString() ?? "Illimité",
+      ]),
+    ) as Record<PlanCode, string>,
+  },
+  {
+    label: "Offres d'emploi / mois",
+    values: Object.fromEntries(
+      (Object.keys(PLANS) as PlanCode[]).map((code) => [
+        code,
+        PLANS[code].maxJobsPerMonth?.toString() ?? "Illimité",
+      ]),
+    ) as Record<PlanCode, string>,
+  },
+  {
+    label: "Accès à la base de talents",
+    values: { STARTER: true, PRO: true, BUSINESS: true, ENTERPRISE: true },
+  },
+  { label: "Matching IA", values: { STARTER: false, PRO: true, BUSINESS: true, ENTERPRISE: true } },
+  {
+    label: "Évaluations de compétences",
+    values: { STARTER: false, PRO: true, BUSINESS: true, ENTERPRISE: true },
+  },
+  { label: "Analytics avancés", values: { STARTER: false, PRO: true, BUSINESS: true, ENTERPRISE: true } },
+  {
+    label: "Intégrations (API, SIRH, …)",
+    values: { STARTER: false, PRO: false, BUSINESS: true, ENTERPRISE: true },
+  },
+  { label: "Support dédié", values: { STARTER: false, PRO: false, BUSINESS: true, ENTERPRISE: true } },
+];
+
+/** Yearly billing takes 20 % off the monthly price. */
+export const YEARLY_DISCOUNT = 0.2;
+export const yearlyMonthlyPrice = (monthly: number) => Math.round(monthly * (1 - YEARLY_DISCOUNT));

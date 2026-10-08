@@ -44,7 +44,7 @@ function NavLink({ item }: { item: BusinessNavItem }) {
 
 export function BusinessSidebar({ planName }: { planName: string }) {
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-gradient-to-b from-[#0a1d4d] to-[#0e2a6b] p-4 lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-gradient-to-b from-[var(--sidebar-from,#0a1d4d)] to-[var(--sidebar-to,#0e2a6b)] p-4 lg:flex">
       <div className="px-2 py-3">
         <BusinessLogo />
       </div>
@@ -132,11 +132,16 @@ export function BusinessTopbar({
   roleLabel,
   logoVersion,
   pendingInvites,
+  showLogo = true,
+  showName = true,
 }: {
   organizationName: string;
   roleLabel: string;
   logoVersion: string | null;
   pendingInvites: number;
+  /** Branding choices of the organization (Settings > Personalization). */
+  showLogo?: boolean;
+  showName?: boolean;
 }) {
   return (
     <header className="border-border/70 sticky top-0 z-20 flex h-[4.5rem] items-center gap-3 border-b bg-white/85 px-4 backdrop-blur sm:px-6">
@@ -175,9 +180,13 @@ export function BusinessTopbar({
           triggerClassName="gap-3 py-1 pr-2 pl-1"
           trigger={
             <>
-              <OrgLogo name={organizationName} version={logoVersion} className="size-10 text-sm" />
+              {showLogo && (
+                <OrgLogo name={organizationName} version={logoVersion} className="size-10 text-sm" />
+              )}
               <span className="hidden text-left leading-tight md:block">
-                <span className="text-foreground block text-sm font-semibold">{organizationName}</span>
+                {showName && (
+                  <span className="text-foreground block text-sm font-semibold">{organizationName}</span>
+                )}
                 <span className="text-muted block text-xs">{roleLabel}</span>
               </span>
               <ChevronDown className="hidden size-4 text-slate-500 md:block" aria-hidden />
