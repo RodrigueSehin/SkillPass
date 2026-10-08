@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { EvaluationWizard } from "@/components/business/evaluation-wizard";
 import { NoAccess } from "@/components/business/ui";
 import { requireBusiness } from "@/lib/business/context";
+import { appUrl } from "@/lib/utils/app-url";
 import { NotFoundError } from "@/lib/errors";
 import { getEvaluationService } from "@/services/container";
 
@@ -23,8 +23,5 @@ export default async function EditEvaluationPage({
     if (err instanceof NotFoundError) notFound();
     throw err;
   }
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return <EvaluationWizard evaluation={evaluation} origin={`${proto}://${host}`} />;
+  return <EvaluationWizard evaluation={evaluation} origin={appUrl()} />;
 }

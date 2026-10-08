@@ -1,4 +1,5 @@
 import type {
+  PublicQuestion,
   EvaluationDTO,
   EvaluationDisplayStatus,
   EvaluationRow,
@@ -123,21 +124,81 @@ export function questionMix(questions: EvaluationDTO["questions"]) {
 export const totalPoints = (questions: EvaluationDTO["questions"]) =>
   questions.reduce((n, q) => n + q.points, 0);
 
-/** Score of a set of answers: `given[questionId]` holds the chosen option indexes. Open questions are skipped. */
-export function gradeChoices(
+export interface AttemptScore {
+  /** Null while an open question still waits for a person. */
+  percent: number | null;
+  /** Open questions nobody has scored yet. */
+  pending: number;
+  passed: boolean | null;
+}
+
+/**
+ * Final score of an attempt: choice questions are marked by the machine, open ones by the points a person gave.
+ * Each question weighs 1 (equal weighting) or its points.
+ */
+export function scoreAttempt(
   questions: EvaluationDTO["questions"],
-  given: Record<string, number[]>,
-  weighting: "EQUAL" | "BY_POINTS",
-) {
+  responses: Record<string, { choices?: number[] }>,
+  review: Record<string, number>,
+  settings: Pick<EvaluationDTO["settings"], "weighting" | "passScore">,
+): AttemptScore {
   let earned = 0;
   let possible = 0;
+  let pending = 0;
   for (const q of questions) {
-    if (q.type !== "SINGLE" && q.type !== "MULTIPLE" && q.type !== "TRUE_FALSE") continue;
-    const weight = weighting === "BY_POINTS" ? q.points : 1;
+    const weight = settings.weighting === "BY_POINTS" ? q.points : 1;
     possible += weight;
-    const answer = [...new Set(given[q.id] ?? [])].sort();
-    const right = [...q.correct].sort();
-    if (answer.length === right.length && answer.every((v, i) => v === right[i])) earned += weight;
+    if (q.type === "SINGLE" || q.type === "MULTIPLE" || q.type === "TRUE_FALSE") {
+      const answer = [...new Set(responses[q.id]?.choices ?? [])].sort();
+      const right = [...q.correct].sort();
+      if (answer.length === right.length && answer.every((v, i) => v === right[i])) earned += weight;
+    } else if (review[q.id] === undefined) {
+      pending += 1;
+    } else {
+      earned += weight * (Math.min(Math.max(review[q.id]!, 0), q.points) / q.points);
+    }
   }
-  return { earned, possible, percent: possible === 0 ? null : Math.round((earned / possible) * 100) };
+  if (pending > 0 || possible === 0) return { percent: null, pending, passed: null };
+  const percent = Math.round((earned / possible) * 100);
+  return { percent, pending: 0, passed: percent >= settings.passScore };
+}
+
+/** Deterministic pseudo-random order: the same attempt always sees the same shuffle. */
+export function seededShuffle<T>(items: readonly T[], seed: string): T[] {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+  let a = h >>> 0;
+  const random = () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
+
+/** What a candidate may see of the questions: no right answers; order and options shuffled per attempt. */
+export function publicQuestions(evaluation: EvaluationDTO, attemptId: string): PublicQuestion[] {
+  const { shuffleQuestions, shuffleAnswers } = evaluation.settings;
+  const ordered = shuffleQuestions
+    ? seededShuffle(evaluation.questions, `${attemptId}:q`)
+    : evaluation.questions;
+  return ordered.map((q) => {
+    const options = q.options.map((label, index) => ({ index, label }));
+    return {
+      id: q.id,
+      type: q.type,
+      prompt: q.prompt,
+      points: q.points,
+      // True/false keeps its natural order.
+      options:
+        shuffleAnswers && q.type !== "TRUE_FALSE" ? seededShuffle(options, `${attemptId}:${q.id}`) : options,
+    };
+  });
 }

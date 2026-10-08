@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { EVALUATION_TEMPLATES, templateInput } from "@/config/evaluation-templates";
 import type {
-  EvaluationAttemptRow,
+  EvaluationAttemptDTO,
   EvaluationDTO,
   EvaluationInput,
   EvaluationStatus,
@@ -11,7 +11,7 @@ import type { AttemptTotals, EvaluationRepository } from "./evaluation.repositor
 
 const DAY_MS = 86_400_000;
 type Stored = EvaluationDTO & { orgId: string };
-type StoredAttempt = EvaluationAttemptRow & { orgId: string };
+type StoredAttempt = EvaluationAttemptDTO & { candidateName: string };
 
 const CANDIDATES = [
   "Aïcha Koné",
@@ -70,16 +70,20 @@ export class InMemoryEvaluationRepository implements EvaluationRepository {
       const passedCount = Math.round((candidates * rate) / 100);
       for (let i = 0; i < candidates; i++) {
         const passed = i < passedCount;
+        const submittedAt = new Date(now - ((i % 25) + 1) * DAY_MS).toISOString();
         this.attempts.push({
           id: randomUUID(),
-          orgId: scope.organization.id,
           evaluationId: evaluation.id,
+          profileId: `demo-candidate-${index}-${i}`,
           candidateName: CANDIDATES[(i + index) % CANDIDATES.length]!,
-          candidateUsername: null,
+          responses: {},
+          review: {},
+          released: true,
           score: passed ? 70 + ((i * 7) % 30) : 35 + ((i * 11) % 34),
           passed,
           status: "GRADED",
-          submittedAt: new Date(now - ((i % 25) + 1) * DAY_MS).toISOString(),
+          startedAt: submittedAt,
+          submittedAt,
         });
       }
     });
@@ -89,6 +93,15 @@ export class InMemoryEvaluationRepository implements EvaluationRepository {
     void orgId;
     return structuredClone(evaluation);
   };
+
+  private attemptView = ({ candidateName, ...attempt }: StoredAttempt): EvaluationAttemptDTO => {
+    void candidateName;
+    return structuredClone(attempt);
+  };
+
+  private orgOf(evaluationId: string) {
+    return this.rows.find((e) => e.id === evaluationId)?.orgId;
+  }
 
   async list(orgId: string) {
     await this.ready;
@@ -148,10 +161,12 @@ export class InMemoryEvaluationRepository implements EvaluationRepository {
     await this.ready;
     const totals = new Map<string, AttemptTotals>();
     const people = new Map<string, Set<string>>();
-    for (const a of this.attempts.filter((x) => x.orgId === orgId && x.status !== "IN_PROGRESS")) {
+    for (const a of this.attempts.filter(
+      (x) => this.orgOf(x.evaluationId) === orgId && x.status !== "IN_PROGRESS",
+    )) {
       const t = totals.get(a.evaluationId) ?? { candidates: 0, graded: 0, passed: 0 };
       const who = people.get(a.evaluationId) ?? new Set<string>();
-      who.add(a.id);
+      who.add(a.profileId);
       people.set(a.evaluationId, who);
       t.candidates = who.size;
       if (a.status === "GRADED") {
@@ -166,12 +181,84 @@ export class InMemoryEvaluationRepository implements EvaluationRepository {
   async listAttempts(orgId: string, limit: number) {
     await this.ready;
     return this.attempts
-      .filter((a) => a.orgId === orgId && a.status !== "IN_PROGRESS")
+      .filter((a) => this.orgOf(a.evaluationId) === orgId && a.status !== "IN_PROGRESS")
       .sort((a, b) => (b.submittedAt ?? "").localeCompare(a.submittedAt ?? ""))
       .slice(0, limit)
-      .map(({ orgId: _orgId, ...row }) => {
-        void _orgId;
-        return row;
-      });
+      .map((a) => ({
+        id: a.id,
+        evaluationId: a.evaluationId,
+        candidateName: a.candidateName,
+        candidateUsername: null,
+        score: a.score,
+        passed: a.passed,
+        status: a.status,
+        submittedAt: a.submittedAt,
+      }));
+  }
+
+  async findByToken(token: string) {
+    await this.ready;
+    const row = this.rows.find((e) => e.shareToken === token);
+    return row ? { orgId: row.orgId, evaluation: this.view(row) } : null;
+  }
+
+  async getEvaluationById(id: string) {
+    await this.ready;
+    const row = this.rows.find((e) => e.id === id);
+    return row ? this.view(row) : null;
+  }
+
+  async profileAttempts(evaluationId: string, profileId: string) {
+    await this.ready;
+    return this.attempts
+      .filter((a) => a.evaluationId === evaluationId && a.profileId === profileId)
+      .map(this.attemptView)
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  }
+
+  async createAttempt(evaluationId: string, profile: { id: string; fullName: string }, startedAt: string) {
+    await this.ready;
+    const attempt: StoredAttempt = {
+      id: randomUUID(),
+      evaluationId,
+      profileId: profile.id,
+      candidateName: profile.fullName,
+      responses: {},
+      review: {},
+      released: false,
+      score: null,
+      passed: null,
+      status: "IN_PROGRESS",
+      startedAt,
+      submittedAt: null,
+    };
+    this.attempts.push(attempt);
+    return this.attemptView(attempt);
+  }
+
+  async getAttempt(id: string) {
+    await this.ready;
+    const attempt = this.attempts.find((a) => a.id === id);
+    return attempt ? this.attemptView(attempt) : null;
+  }
+
+  async saveAttempt(id: string, patch: Parameters<EvaluationRepository["saveAttempt"]>[1]) {
+    await this.ready;
+    const attempt = this.attempts.find((a) => a.id === id);
+    if (!attempt) return null;
+    Object.assign(attempt, structuredClone(patch));
+    return this.attemptView(attempt);
+  }
+
+  async getAttemptForOrg(orgId: string, attemptId: string) {
+    await this.ready;
+    const attempt = this.attempts.find((a) => a.id === attemptId);
+    const evaluation = attempt && this.rows.find((e) => e.id === attempt.evaluationId && e.orgId === orgId);
+    if (!attempt || !evaluation) return null;
+    return {
+      attempt: this.attemptView(attempt),
+      evaluation: this.view(evaluation),
+      candidate: { name: attempt.candidateName, username: null },
+    };
   }
 }

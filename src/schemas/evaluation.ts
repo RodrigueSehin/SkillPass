@@ -92,9 +92,6 @@ export const settingsSchema = z
     limitCopyPaste: z.boolean().default(true),
     windowStart: nullableLocal,
     windowEnd: nullableLocal,
-    certificate: z.boolean().default(true),
-    badge: z.string().trim().max(80).default(""),
-    shareWithOrg: z.boolean().default(true),
   })
   .refine((s) => (s.windowStart === null) === (s.windowEnd === null), {
     message: "Indiquez le début et la fin de la plage de passage",

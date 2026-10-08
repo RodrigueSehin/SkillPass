@@ -277,7 +277,14 @@ function ResultsTable({
         <tbody className="divide-y divide-slate-100">
           {attempts.map((a) => (
             <tr key={a.id}>
-              <td className="text-navy px-4 py-3 font-medium">{a.candidateName}</td>
+              <td className="text-navy px-4 py-3 font-medium">
+                <Link
+                  href={`/business/evaluations/resultats/${a.id}`}
+                  className="hover:text-brand hover:underline"
+                >
+                  {a.candidateName}
+                </Link>
+              </td>
               <td className="text-muted px-3 py-3">{titles.get(a.evaluationId) ?? "—"}</td>
               <td className="text-navy px-3 py-3 font-medium">{a.score === null ? "—" : `${a.score}%`}</td>
               <td className="px-3 py-3">

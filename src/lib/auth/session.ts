@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured, supabaseUrl } from "./env";
 import { isRemembered, REMEMBER_COOKIE, withRememberPolicy } from "./remember";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/business", "/admin"];
+const PROTECTED_PREFIXES = ["/dashboard", "/business", "/admin", "/e/"];
 const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 
 /** Refreshes the Supabase session cookie and enforces route protection. Used by proxy.ts. */

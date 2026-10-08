@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { DEFAULT_SETTINGS } from "@/types/evaluation";
 import type {
+  AttemptResponse,
+  EvaluationAttemptDTO,
   EvaluationAttemptRow,
   EvaluationDTO,
   EvaluationInput,
@@ -36,6 +38,29 @@ const toEvaluation = (r: Row): EvaluationDTO => {
   };
 };
 
+type AttemptRow = Prisma.EvaluationAttemptGetPayload<object>;
+interface StoredAnswers {
+  responses?: Record<string, AttemptResponse>;
+  review?: Record<string, number>;
+  released?: boolean;
+}
+
+const toAttempt = (r: AttemptRow): EvaluationAttemptDTO => {
+  const stored = (r.answers ?? {}) as StoredAnswers;
+  return {
+    id: r.id,
+    evaluationId: r.evaluationId,
+    profileId: r.profileId,
+    responses: stored.responses ?? {},
+    review: stored.review ?? {},
+    released: stored.released ?? false,
+    score: r.score,
+    passed: r.passed,
+    status: r.status as EvaluationAttemptDTO["status"],
+    startedAt: r.startedAt.toISOString(),
+    submittedAt: r.submittedAt ? r.submittedAt.toISOString() : null,
+  };
+};
 const data = (i: EvaluationInput) => ({
   title: i.title,
   description: i.description,
@@ -130,5 +155,75 @@ export class PrismaEvaluationRepository implements EvaluationRepository {
       status: r.status as EvaluationAttemptRow["status"],
       submittedAt: r.submittedAt ? r.submittedAt.toISOString() : null,
     }));
+  }
+
+  async findByToken(token: string) {
+    const row = await prisma.evaluation.findUnique({ where: { shareToken: token } });
+    return row ? { orgId: row.organizationId, evaluation: toEvaluation(row) } : null;
+  }
+
+  async getEvaluationById(id: string) {
+    const row = await prisma.evaluation.findUnique({ where: { id } });
+    return row ? toEvaluation(row) : null;
+  }
+
+  async profileAttempts(evaluationId: string, profileId: string) {
+    const rows = await prisma.evaluationAttempt.findMany({
+      where: { evaluationId, profileId },
+      orderBy: { startedAt: "desc" },
+    });
+    return rows.map(toAttempt);
+  }
+
+  async createAttempt(evaluationId: string, profile: { id: string }, startedAt: string) {
+    const row = await prisma.evaluationAttempt.create({
+      data: {
+        evaluationId,
+        profileId: profile.id,
+        status: "IN_PROGRESS",
+        startedAt: new Date(startedAt),
+        answers: {},
+      },
+    });
+    return toAttempt(row);
+  }
+
+  async getAttempt(id: string) {
+    const row = await prisma.evaluationAttempt.findUnique({ where: { id } });
+    return row ? toAttempt(row) : null;
+  }
+
+  async saveAttempt(id: string, patch: Parameters<EvaluationRepository["saveAttempt"]>[1]) {
+    const current = await this.getAttempt(id);
+    if (!current) return null;
+    const next = { ...current, ...patch };
+    const row = await prisma.evaluationAttempt.update({
+      where: { id },
+      data: {
+        answers: {
+          responses: next.responses,
+          review: next.review,
+          released: next.released,
+        } as unknown as Prisma.InputJsonValue,
+        score: next.score,
+        passed: next.passed,
+        status: next.status,
+        submittedAt: next.submittedAt ? new Date(next.submittedAt) : null,
+      },
+    });
+    return toAttempt(row);
+  }
+
+  async getAttemptForOrg(orgId: string, attemptId: string) {
+    const row = await prisma.evaluationAttempt.findFirst({
+      where: { id: attemptId, evaluation: { organizationId: orgId } },
+      include: { evaluation: true, profile: { select: { fullName: true, username: true, isPublic: true } } },
+    });
+    if (!row) return null;
+    return {
+      attempt: toAttempt(row),
+      evaluation: toEvaluation(row.evaluation),
+      candidate: { name: row.profile.fullName, username: row.profile.isPublic ? row.profile.username : null },
+    };
   }
 }

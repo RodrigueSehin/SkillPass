@@ -98,9 +98,6 @@ export interface EvaluationSettings {
   /** Passage window (ISO local date-times), or null for no window. */
   windowStart: string | null;
   windowEnd: string | null;
-  certificate: boolean;
-  badge: string;
-  shareWithOrg: boolean;
 }
 
 export const DEFAULT_SETTINGS: EvaluationSettings = {
@@ -118,9 +115,6 @@ export const DEFAULT_SETTINGS: EvaluationSettings = {
   limitCopyPaste: true,
   windowStart: null,
   windowEnd: null,
-  certificate: true,
-  badge: "",
-  shareWithOrg: true,
 };
 
 export const EVALUATION_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
@@ -178,4 +172,36 @@ export interface EvaluationRow extends Omit<EvaluationDTO, "questions"> {
   candidates: number;
   /** Share of graded attempts that passed, 0-100; null before any graded attempt. */
   successRate: number | null;
+}
+
+/** One answer: the chosen option indexes of a choice question, or the text of an open one. */
+export interface AttemptResponse {
+  choices?: number[];
+  text?: string;
+}
+
+export interface EvaluationAttemptDTO {
+  id: string;
+  evaluationId: string;
+  profileId: string;
+  responses: Record<string, AttemptResponse>;
+  /** Points a person gave to each open question. */
+  review: Record<string, number>;
+  /** True once the result may be shown to the candidate. */
+  released: boolean;
+  score: number | null;
+  passed: boolean | null;
+  status: EvaluationAttemptRow["status"];
+  startedAt: string;
+  submittedAt: string | null;
+}
+
+/** A question as the candidate sees it: no right answers, options possibly in another order. */
+export interface PublicQuestion {
+  id: string;
+  type: QuestionType;
+  prompt: string;
+  points: number;
+  /** index is the position in the stored question, whatever the display order. */
+  options: { index: number; label: string }[];
 }

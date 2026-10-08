@@ -96,7 +96,7 @@ const TIPS = [
       "Définissez une durée adaptée au niveau de difficulté",
       "Activez les options de sécurité pour des résultats fiables",
       "Définissez un score de réussite réaliste",
-      "Utilisez un badge pour valoriser les compétences",
+      "Testez l'évaluation vous-même avant de l'envoyer",
     ],
   },
 ];
@@ -311,8 +311,6 @@ export function EvaluationWizard({
   const points = totalPoints(v.questions);
   const mix = questionMix(v.questions);
   const previewQuestion = v.questions.find((q) => q.id === selected) ?? v.questions[0];
-  const badge =
-    st.badge.trim() || (v.skill ? `${v.skill} ${SKILL_LEVEL_LABELS[v.difficulty]}` : "Badge de réussite");
   const typeLabel = EVALUATION_TYPE_LABELS[v.type].title;
 
   function payload() {
@@ -1088,31 +1086,12 @@ export function EvaluationWizard({
                 <SectionTitle n={4}>Certificat et badges</SectionTitle>
                 <div className="grid items-start gap-x-8 gap-y-4 md:grid-cols-2">
                   <SwitchRow
-                    title="Délivrer un certificat"
-                    text="Attribue un certificat en cas de réussite"
-                    checked={st.certificate}
-                    onChange={(on) => setting("certificate", on)}
+                    title="Délivrer un certificat et un badge"
+                    text="Bientôt disponible : le badge sera ajouté au profil du talent qui réussit"
+                    checked={false}
+                    onChange={() => undefined}
+                    disabled
                   />
-                  <SwitchRow
-                    title="Partager les résultats avec l'entreprise"
-                    text="Les résultats seront visibles dans votre espace entreprise"
-                    checked={st.shareWithOrg}
-                    onChange={(on) => setting("shareWithOrg", on)}
-                  />
-                  {st.certificate && (
-                    <div className="space-y-2">
-                      <Label htmlFor="set-badge">Badge associé</Label>
-                      <input
-                        id="set-badge"
-                        value={st.badge}
-                        maxLength={80}
-                        onChange={(e) => setting("badge", e.target.value)}
-                        placeholder={badge}
-                        className={field}
-                      />
-                      <p className="text-muted text-[11px]">Le badge sera affiché sur le profil du talent</p>
-                    </div>
-                  )}
                 </div>
               </section>
             </div>
@@ -1464,7 +1443,6 @@ export function EvaluationWizard({
                       .filter(Boolean)
                       .join(", ") || "Aucune",
                   ],
-                  ["Certificat", st.certificate ? badge : "Aucun"],
                 ].map(([k, val]) => (
                   <div key={k} className="grid grid-cols-[1fr_1.4fr] gap-3 py-2.5">
                     <dt className="text-navy font-medium">{k}</dt>
@@ -1473,21 +1451,6 @@ export function EvaluationWizard({
                 ))}
               </dl>
             </PreviewPanel>
-            {st.certificate && (
-              <Panel className="p-5">
-                <h2 className="text-navy font-bold">Aperçu du badge</h2>
-                <div className="border-border/70 mt-4 flex items-center gap-4 rounded-xl border p-4">
-                  <SkillTile skill={v.skill} className="size-16" />
-                  <div>
-                    <p className="text-navy font-bold">{badge}</p>
-                    <p className="text-muted text-xs">Délivré lors de la réussite de cette évaluation</p>
-                    <span className="text-brand mt-2 inline-block rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-medium">
-                      Niveau {SKILL_LEVEL_LABELS[v.difficulty].toLowerCase()}
-                    </span>
-                  </div>
-                </div>
-              </Panel>
-            )}
           </>
         )}
 

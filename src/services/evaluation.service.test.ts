@@ -3,7 +3,9 @@ import { EVALUATION_TEMPLATES, templateInput } from "@/config/evaluation-templat
 import {
   evaluationStats,
   filterEvaluations,
-  gradeChoices,
+  publicQuestions,
+  scoreAttempt,
+  seededShuffle,
   successBySkill,
   typeDistribution,
 } from "@/lib/business/evaluation-view";
@@ -206,14 +208,59 @@ describe("evaluation view", () => {
     expect(successBySkill(rows).map((s) => s.skill)).toEqual(["Power Apps", "PL"]);
   });
 
-  it("marks choice questions only, by points or equally", () => {
-    const [t] = EVALUATION_TEMPLATES.filter((x) => x.id === "it-project-management");
+  const projectTest = () => {
+    const [template] = EVALUATION_TEMPLATES.filter((x) => x.id === "it-project-management");
+    // q0 single (2 pts), q1 true/false (1 pt), q2 short (4 pts), q3 scenario (6 pts)
+    return template!.questions.map((q, i) => ({ ...q, id: `q${i}` }));
+  };
+  const rules = { weighting: "EQUAL", passScore: 70 } as const;
+
+  it("waits for a person to score open questions", () => {
+    const result = scoreAttempt(projectTest(), { q0: { choices: [0] }, q1: { choices: [0] } }, {}, rules);
+    expect(result).toEqual({ percent: null, pending: 2, passed: null });
+  });
+
+  it("weighs questions equally or by points, and caps a review at the question's points", () => {
+    const answers = { q0: { choices: [0] }, q1: { choices: [1] } };
+    const review = { q2: 4, q3: 0 };
+    expect(scoreAttempt(projectTest(), answers, review, rules)).toMatchObject({ percent: 50, passed: false });
+    expect(
+      scoreAttempt(projectTest(), answers, review, { weighting: "BY_POINTS", passScore: 40 }),
+    ).toMatchObject({ percent: 46, passed: true });
+    expect(
+      scoreAttempt(projectTest(), { q0: { choices: [0] }, q1: { choices: [0] } }, { q2: 99, q3: 99 }, rules)
+        .percent,
+    ).toBe(100);
+  });
+
+  it("scores a choice-only test at once and an empty one at zero", () => {
+    const [t] = EVALUATION_TEMPLATES.filter((x) => x.id === "power-apps-beginner");
     const questions = t!.questions.map((q, i) => ({ ...q, id: `q${i}` }));
-    const right = { q0: [0], q1: [0] };
-    expect(gradeChoices(questions, right, "EQUAL")).toMatchObject({ earned: 2, possible: 2, percent: 100 });
-    expect(gradeChoices(questions, { q0: [0], q1: [1] }, "EQUAL").percent).toBe(50);
-    expect(gradeChoices(questions, { q0: [0], q1: [1] }, "BY_POINTS").percent).toBe(67);
-    expect(gradeChoices(questions, {}, "EQUAL").percent).toBe(0);
-    expect(gradeChoices([], {}, "EQUAL").percent).toBeNull();
+    expect(scoreAttempt(questions, {}, {}, rules)).toEqual({ percent: 0, pending: 0, passed: false });
+    const right = Object.fromEntries(questions.map((q) => [q.id, { choices: q.correct }]));
+    expect(scoreAttempt(questions, right, {}, rules)).toMatchObject({ percent: 100, passed: true });
+    expect(scoreAttempt([], {}, {}, rules).percent).toBeNull();
+  });
+
+  it("shuffles the same way for the same attempt, and never leaks the right answers", () => {
+    expect(seededShuffle([1, 2, 3, 4, 5, 6], "a")).toEqual(seededShuffle([1, 2, 3, 4, 5, 6], "a"));
+    expect(seededShuffle([1, 2, 3, 4, 5, 6], "a")).not.toEqual(seededShuffle([1, 2, 3, 4, 5, 6], "b"));
+    const evaluation = {
+      ...templateInput(EVALUATION_TEMPLATES[0]!, () => crypto.randomUUID()),
+      id: "e",
+      status: "PUBLISHED",
+      shareToken: "t",
+      createdById: null,
+      createdAt: "",
+    } as never;
+    const shown = publicQuestions(evaluation, "attempt-1");
+    expect(JSON.stringify(shown)).not.toContain("correct");
+    // Whatever the display order, `index` points back to the stored option.
+    for (const q of shown) {
+      const stored = (evaluation as { questions: { id: string; options: string[] }[] }).questions.find(
+        (x) => x.id === q.id,
+      )!;
+      for (const option of q.options) expect(stored.options[option.index]).toBe(option.label);
+    }
   });
 });

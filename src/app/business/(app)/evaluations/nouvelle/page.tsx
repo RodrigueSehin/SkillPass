@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { EvaluationWizard } from "@/components/business/evaluation-wizard";
 import { NoAccess } from "@/components/business/ui";
 import { EVALUATION_TEMPLATES, templateInput } from "@/config/evaluation-templates";
 import { requireBusiness } from "@/lib/business/context";
+import { appUrl } from "@/lib/utils/app-url";
 
 export const metadata: Metadata = { title: "Créer une évaluation" };
 export const dynamic = "force-dynamic";
@@ -17,8 +17,5 @@ export default async function NewEvaluationPage({
   const id = Array.isArray(raw.modele) ? raw.modele[0] : raw.modele;
   const found = EVALUATION_TEMPLATES.find((t) => t.id === id);
   const template = found ? templateInput(found, () => crypto.randomUUID()) : undefined;
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return <EvaluationWizard template={template} origin={`${proto}://${host}`} />;
+  return <EvaluationWizard template={template} origin={appUrl()} />;
 }
