@@ -148,6 +148,7 @@ export class PrismaEvaluationRepository implements EvaluationRepository {
     return rows.map((r) => ({
       id: r.id,
       evaluationId: r.evaluationId,
+      candidateId: r.profileId,
       candidateName: r.profile.fullName,
       candidateUsername: r.profile.isPublic ? r.profile.username : null,
       score: r.score,

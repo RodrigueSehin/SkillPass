@@ -135,3 +135,127 @@ export function LineChart({
     </svg>
   );
 }
+
+/** Bars for one series with a line over them for another: created versus evaluated, month after month. */
+export function ComboChart({
+  labels,
+  bars,
+  line,
+  label,
+}: {
+  labels: string[];
+  bars: number[];
+  line: number[];
+  label: string;
+}) {
+  const width = 460;
+  const height = 190;
+  const pad = { top: 10, right: 10, bottom: 24, left: 30 };
+  const peak = Math.max(1, ...bars, ...line);
+  const top = peak <= 4 ? 4 : Math.ceil(peak / 4) * 4;
+  const inner = width - pad.left - pad.right;
+  const step = inner / Math.max(labels.length, 1);
+  const x = (i: number) => pad.left + step * i + step / 2;
+  const y = (v: number) => pad.top + (1 - v / top) * (height - pad.top - pad.bottom);
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} className="w-full">
+      {[0, 1, 2, 3, 4].map((i) => {
+        const v = (top / 4) * i;
+        return (
+          <g key={i}>
+            <line x1={pad.left} x2={width - pad.right} y1={y(v)} y2={y(v)} stroke="#E2E8F0" />
+            <text x={pad.left - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="#64748B">
+              {Math.round(v * 10) / 10}
+            </text>
+          </g>
+        );
+      })}
+      {bars.map((v, i) => (
+        <rect
+          key={`b-${i}`}
+          x={x(i) - step * 0.28}
+          y={y(v)}
+          width={step * 0.56}
+          height={Math.max(y(0) - y(v), 0)}
+          rx="3"
+          fill="#BFDBFE"
+        />
+      ))}
+      <polyline
+        fill="none"
+        stroke="#16A34A"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        points={line.map((v, i) => `${x(i)},${y(v)}`).join(" ")}
+      />
+      {line.map((v, i) => (
+        <circle key={`l-${i}`} cx={x(i)} cy={y(v)} r="3" fill="#16A34A" />
+      ))}
+      {labels.map((l, i) => (
+        <text key={`t-${i}`} x={x(i)} y={height - 7} textAnchor="middle" fontSize="9" fill="#64748B">
+          {l}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
+/** Vertical bars on a 0–100 scale, each with its value above and its own colour. */
+export function RateBars({
+  items,
+  label,
+}: {
+  items: { label: string; value: number | null }[];
+  label: string;
+}) {
+  const width = 360;
+  const height = 190;
+  const pad = { top: 18, right: 8, bottom: 24, left: 28 };
+  const inner = width - pad.left - pad.right;
+  const step = inner / Math.max(items.length, 1);
+  const y = (v: number) => pad.top + (1 - v / 100) * (height - pad.top - pad.bottom);
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label} className="w-full">
+      {[0, 25, 50, 75, 100].map((v) => (
+        <g key={v}>
+          <line x1={pad.left} x2={width - pad.right} y1={y(v)} y2={y(v)} stroke="#E2E8F0" />
+          <text x={pad.left - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="#64748B">
+            {v}
+          </text>
+        </g>
+      ))}
+      {items.map((it, i) => {
+        const cx = pad.left + step * i + step / 2;
+        const h = it.value === null ? 0 : y(0) - y(it.value);
+        return (
+          <g key={it.label}>
+            {it.value !== null && (
+              <rect
+                x={cx - step * 0.3}
+                y={y(it.value)}
+                width={step * 0.6}
+                height={Math.max(h, 0)}
+                rx="3"
+                fill={seriesColor(i)}
+              />
+            )}
+            <text
+              x={cx}
+              y={it.value === null ? y(0) - 4 : y(it.value) - 4}
+              textAnchor="middle"
+              fontSize="10"
+              fontWeight="600"
+              fill="#0F172A"
+            >
+              {it.value === null ? "—" : `${it.value}%`}
+            </text>
+            <text x={cx} y={height - 7} textAnchor="middle" fontSize="9" fill="#64748B">
+              {it.label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}

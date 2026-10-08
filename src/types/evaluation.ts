@@ -156,6 +156,8 @@ export type EvaluationInput = Omit<
 export interface EvaluationAttemptRow {
   id: string;
   evaluationId: string;
+  /** Profile id: tells two attempts of the same person from two people. */
+  candidateId: string;
   candidateName: string;
   candidateUsername: string | null;
   score: number | null;

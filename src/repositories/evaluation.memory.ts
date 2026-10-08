@@ -187,6 +187,7 @@ export class InMemoryEvaluationRepository implements EvaluationRepository {
       .map((a) => ({
         id: a.id,
         evaluationId: a.evaluationId,
+        candidateId: a.profileId,
         candidateName: a.candidateName,
         candidateUsername: null,
         score: a.score,
