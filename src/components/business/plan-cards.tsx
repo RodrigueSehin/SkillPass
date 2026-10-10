@@ -2,18 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Check, Crown, User, Users, UsersRound } from "lucide-react";
+import { Check, Crown } from "lucide-react";
 import { changePlanAction } from "@/app/business/abonnements/actions";
 import { PLANS, formatFcfa, yearlyMonthlyPrice } from "@/lib/business/plans";
 import { cn } from "@/lib/utils/cn";
 import type { PlanCode } from "@/types/business";
+import { PLAN_ICONS, PLAN_TINTS } from "./plan-icons";
 
-const ICONS: Record<PlanCode, typeof User> = {
-  STARTER: User,
-  PRO: UsersRound,
-  BUSINESS: Building2,
-  ENTERPRISE: Users,
-};
 const ORDER: PlanCode[] = ["STARTER", "PRO", "BUSINESS", "ENTERPRISE"];
 
 /** Monthly/yearly switch and the four plans. Choosing a plan only works where payment is not needed (demo). */
@@ -21,7 +16,10 @@ export function PlanCards({
   current,
   canSwitch,
   canEdit,
+  header,
 }: {
+  /** Title and subtitle of the page, shown on the left of the billing switch. */
+  header: React.ReactNode;
   current: PlanCode;
   canSwitch: boolean;
   canEdit: boolean;
@@ -42,41 +40,47 @@ export function PlanCards({
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        <div
-          className="border-border flex rounded-xl border bg-white p-1 text-sm font-semibold"
-          role="group"
-          aria-label="Période de facturation"
-        >
-          <button
-            type="button"
-            aria-pressed={!yearly}
-            onClick={() => setYearly(false)}
-            className={cn("rounded-lg px-5 py-2", !yearly ? "text-brand bg-blue-50" : "text-muted")}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        {header}
+        <div className="flex items-start gap-3">
+          <p className="text-brand mt-0.5 hidden max-w-36 text-right text-xs leading-tight italic sm:block">
+            Économisez 20 % avec l&apos;abonnement annuel !
+          </p>
+          <div
+            className="border-border flex rounded-xl border bg-white p-1 text-sm font-semibold"
+            role="group"
+            aria-label="Période de facturation"
           >
-            Mensuel
-          </button>
-          <button
-            type="button"
-            aria-pressed={yearly}
-            onClick={() => setYearly(true)}
-            className={cn(
-              "flex items-center gap-2 rounded-lg px-4 py-2",
-              yearly ? "text-brand bg-blue-50" : "text-muted",
-            )}
-          >
-            Annuel{" "}
-            <span className="rounded-md bg-green-100 px-1.5 py-0.5 text-xs font-bold text-green-700">
-              -20%
-            </span>
-          </button>
+            <button
+              type="button"
+              aria-pressed={!yearly}
+              onClick={() => setYearly(false)}
+              className={cn("rounded-lg px-5 py-2", !yearly ? "text-brand bg-blue-50" : "text-muted")}
+            >
+              Mensuel
+            </button>
+            <button
+              type="button"
+              aria-pressed={yearly}
+              onClick={() => setYearly(true)}
+              className={cn(
+                "flex items-center gap-2 rounded-lg px-4 py-2",
+                yearly ? "text-brand bg-blue-50" : "text-muted",
+              )}
+            >
+              Annuel{" "}
+              <span className="rounded-md bg-green-100 px-1.5 py-0.5 text-xs font-bold text-green-700">
+                -20%
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
       <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {ORDER.map((code) => {
           const plan = PLANS[code];
-          const Icon = ICONS[code];
+          const Icon = PLAN_ICONS[code];
           const featured = code === "BUSINESS";
           const isCurrent = code === current;
           const price = plan.price === null ? null : yearly ? yearlyMonthlyPrice(plan.price) : plan.price;
@@ -99,7 +103,7 @@ export function PlanCards({
                 <span
                   className={cn(
                     "flex size-12 shrink-0 items-center justify-center rounded-xl",
-                    featured ? "bg-white/15" : "text-brand bg-blue-50",
+                    featured ? "bg-white/15" : PLAN_TINTS[code].tile,
                   )}
                 >
                   <Icon className="size-6" aria-hidden />

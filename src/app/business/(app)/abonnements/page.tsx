@@ -1,6 +1,22 @@
 import type { Metadata } from "next";
-import { Briefcase, Check, ChevronDown, CircleCheck, Minus, Users } from "lucide-react";
+import {
+  BarChart3,
+  Briefcase,
+  Check,
+  ChevronDown,
+  CircleCheck,
+  ClipboardCheck,
+  Headset,
+  Plug,
+  Settings,
+  Sparkles,
+  UserSearch,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { PlanCards } from "@/components/business/plan-cards";
+import { PLAN_ICONS, PLAN_TINTS } from "@/components/business/plan-icons";
+import { SoonBadge } from "@/components/business/settings/rows";
 import { Panel } from "@/components/business/ui";
 import { requireBusiness } from "@/lib/business/context";
 import { formatFcfa, PLAN_COMPARISON, PLANS } from "@/lib/business/plans";
@@ -12,6 +28,16 @@ export const metadata: Metadata = { title: "Abonnement" };
 export const dynamic = "force-dynamic";
 
 const ORDER: PlanCode[] = ["STARTER", "PRO", "BUSINESS", "ENTERPRISE"];
+const ROW_ICONS: Record<string, LucideIcon> = {
+  "Membres de l'organisation": Users,
+  "Offres d'emploi / mois": Briefcase,
+  "Accès à la base de talents": UserSearch,
+  "Matching IA": Sparkles,
+  "Évaluations de compétences": ClipboardCheck,
+  "Analytics avancés": BarChart3,
+  "Intégrations (API, SIRH, …)": Plug,
+  "Support dédié": Headset,
+};
 const FAQ = [
   {
     q: "Puis-je changer de plan à tout moment ?",
@@ -40,15 +66,20 @@ export default async function SubscriptionPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-navy text-2xl font-bold tracking-tight sm:text-3xl">Abonnement</h1>
-        <p className="text-muted mt-1">
-          Choisissez le plan qui correspond aux besoins de votre organisation et accédez aux meilleurs
-          talents.
-        </p>
-      </div>
-
-      <PlanCards current={code} canSwitch={process.env.NODE_ENV !== "production"} canEdit={canEdit} />
+      <PlanCards
+        header={
+          <div>
+            <h1 className="text-navy text-2xl font-bold tracking-tight sm:text-3xl">Abonnement</h1>
+            <p className="text-muted mt-1">
+              Choisissez le plan qui correspond aux besoins de votre organisation et accédez aux meilleurs
+              talents.
+            </p>
+          </div>
+        }
+        current={code}
+        canSwitch={process.env.NODE_ENV !== "production"}
+        canEdit={canEdit}
+      />
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Panel className="min-w-0 p-5">
@@ -75,7 +106,13 @@ export default async function SubscriptionPage() {
                 {PLAN_COMPARISON.map((row) => (
                   <tr key={row.label}>
                     <th scope="row" className="text-navy px-3 py-2.5 font-medium">
-                      {row.label}
+                      <span className="flex items-center gap-3">
+                        {(() => {
+                          const RowIcon = ROW_ICONS[row.label] ?? CircleCheck;
+                          return <RowIcon className="text-muted size-4 shrink-0" aria-hidden />;
+                        })()}
+                        {row.label}
+                      </span>
                     </th>
                     {ORDER.map((c) => {
                       const v = row.values[c];
@@ -84,9 +121,18 @@ export default async function SubscriptionPage() {
                           {typeof v === "string" ? (
                             <span className="text-navy font-medium">{v}</span>
                           ) : v ? (
-                            <Check className="text-brand mx-auto size-4" aria-label="Inclus" />
+                            <span
+                              className={cn(
+                                "mx-auto flex size-5 items-center justify-center rounded-full text-white",
+                                PLAN_TINTS[c].check,
+                              )}
+                            >
+                              <Check className="size-3" strokeWidth={3} aria-label="Inclus" />
+                            </span>
                           ) : (
-                            <Minus className="mx-auto size-4 text-slate-300" aria-label="Non inclus" />
+                            <span className="block text-center text-slate-300" aria-label="Non inclus">
+                              —
+                            </span>
                           )}
                         </td>
                       );
@@ -106,8 +152,13 @@ export default async function SubscriptionPage() {
           <Panel className="p-5">
             <h2 className="text-navy font-bold">Votre abonnement actuel</h2>
             <div className="mt-3 flex items-center gap-3">
-              <span className="text-brand flex size-12 items-center justify-center rounded-xl bg-blue-50">
-                <Users className="size-6" aria-hidden />
+              <span
+                className={cn("flex size-12 items-center justify-center rounded-xl", PLAN_TINTS[code].tile)}
+              >
+                {(() => {
+                  const PlanIcon = PLAN_ICONS[code];
+                  return <PlanIcon className="size-6" aria-hidden />;
+                })()}
               </span>
               <div>
                 <p className="text-navy flex items-center gap-2 font-bold">
@@ -137,7 +188,16 @@ export default async function SubscriptionPage() {
                 incluses
               </li>
             </ul>
-            <p className="text-muted mt-3 text-xs">La facturation en ligne n&apos;est pas encore ouverte.</p>
+            <button
+              type="button"
+              disabled
+              className="border-brand/40 text-brand mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-xl border bg-white text-sm font-semibold opacity-60"
+            >
+              <Settings className="size-4" aria-hidden /> Gérer mon abonnement <SoonBadge />
+            </button>
+            <p className="text-muted mt-3 text-xs">
+              La facturation en ligne n&apos;est pas encore ouverte : aucune date de prochaine facturation.
+            </p>
           </Panel>
 
           <Panel className="p-5">
