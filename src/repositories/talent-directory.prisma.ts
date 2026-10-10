@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import type { Prisma } from "@/generated/prisma/client";
+import { profileSettingsWithDefaults } from "@/types/profile-settings";
 import type { TalentDetail, TalentRecord } from "@/types/talent";
 import type { TalentDirectoryRepository } from "./talent-directory.repository";
 
@@ -17,6 +18,11 @@ const include = {
 } satisfies Prisma.ProfileInclude;
 type Row = Prisma.ProfileGetPayload<{ include: typeof include }>;
 
+/** Talents who turned off "appear in company search" in their settings. */
+const NOT_LISTED = {
+  settings: { path: ["privacy", "inDirectory"], equals: false },
+} satisfies Prisma.ProfileWhereInput;
+
 const day = (d: Date) => d.toISOString().slice(0, 10);
 
 function toRecord(row: Row, today = day(new Date())): TalentRecord {
@@ -26,7 +32,7 @@ function toRecord(row: Row, today = day(new Date())): TalentRecord {
     fullName: row.fullName,
     headline: row.headline,
     profession: row.profession,
-    location: row.location,
+    location: profileSettingsWithDefaults(row.settings).privacy.showLocation ? row.location : null,
     yearsOfExperience: row.yearsOfExperience,
     availability: row.availability,
     updatedAt: row.updatedAt.toISOString(),
@@ -53,7 +59,7 @@ function toRecord(row: Row, today = day(new Date())): TalentRecord {
 export class PrismaTalentDirectoryRepository implements TalentDirectoryRepository {
   async listPublic(limit: number) {
     const rows = await prisma.profile.findMany({
-      where: { isPublic: true, role: "TALENT" },
+      where: { isPublic: true, role: "TALENT", NOT: NOT_LISTED },
       include,
       orderBy: { updatedAt: "desc" },
       take: limit,
@@ -63,7 +69,7 @@ export class PrismaTalentDirectoryRepository implements TalentDirectoryRepositor
 
   async detail(username: string): Promise<TalentDetail | null> {
     const row = await prisma.profile.findFirst({
-      where: { username, isPublic: true, role: "TALENT" },
+      where: { username, isPublic: true, role: "TALENT", NOT: NOT_LISTED },
       include: {
         ...include,
         projects: {

@@ -111,3 +111,7 @@ Academy, API publique, PWA, Enterprise, White label.
 - Les repositories Prisma (compétences, projets, expériences, certifications) ne sont pas testés contre une vraie base.
 - Projet Supabase + `DATABASE_URL`/`DIRECT_URL` pour valider les repositories Prisma, RLS et uploads.
 - Docker Desktop (non démarré) permettrait une base Postgres locale.
+
+### Paramètres du talent ✅
+
+- [x] `/dashboard/settings` refondu sur le modèle des Paramètres Business : 7 sections (Profil, Sécurité, Notifications, Intégrations, Profil public, Confidentialité, Zone de danger). Réels : formulaire de profil, profil public / visible par les entreprises / ville affichée (appliqués au profil public et à la recherche Business), changement de mot de passe, déconnexion de tous les appareils, préférences de notification (enregistrées), export JSON de ses données, mise en pause du profil. « Bientôt » : envoi des notifications, 2FA, liste des sessions, intégrations, clés API, thème et langue, suppression du compte. SQL : `supabase/update-0018-profile-settings.sql`.

@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { ensureProfile } from "@/services/profile.service";
 import type { UpdateProfileInput } from "@/schemas/profile";
 import type { AccountIdentity, ProfileDTO } from "@/types/profile";
+import { profileSettingsWithDefaults, type ProfileSettings } from "@/types/profile-settings";
 import type { ProfileRepository } from "./profile.repository";
 
 type Row = Prisma.ProfileGetPayload<object>;
@@ -19,6 +20,7 @@ const toDTO = (r: Row): ProfileDTO => ({
   careerGoal: r.careerGoal,
   availability: r.availability,
   isPublic: r.isPublic,
+  settings: profileSettingsWithDefaults(r.settings),
   role: r.role,
   updatedAt: r.updatedAt.toISOString(),
 });
@@ -57,6 +59,26 @@ export class PrismaProfileRepository implements ProfileRepository {
         if (err.code === "P2002") return "username_taken" as const;
         if (err.code === "P2025") return null;
       }
+      throw err;
+    }
+  }
+
+  async saveSettings(id: string, patch: Partial<ProfileSettings>) {
+    const row = await prisma.profile.findUnique({ where: { id } });
+    if (!row) return null;
+    const next = { ...profileSettingsWithDefaults(row.settings), ...patch };
+    const saved = await prisma.profile.update({
+      where: { id },
+      data: { settings: next as unknown as Prisma.InputJsonValue },
+    });
+    return toDTO(saved);
+  }
+
+  async setPublic(id: string, isPublic: boolean) {
+    try {
+      return toDTO(await prisma.profile.update({ where: { id }, data: { isPublic } }));
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") return null;
       throw err;
     }
   }

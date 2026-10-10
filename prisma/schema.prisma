@@ -65,6 +65,8 @@ model Profile {
   availability      Availability @default(IMMEDIATE)
   role              UserRole     @default(TALENT)
   isPublic          Boolean      @default(true) @map("is_public")
+  // Preferences edited in Settings (src/types/profile-settings.ts), stored as one document.
+  settings          Json         @default("{}")
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")
 

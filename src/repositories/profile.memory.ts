@@ -1,6 +1,7 @@
 import { slugifyUsername } from "@/lib/utils/username";
 import type { UpdateProfileInput } from "@/schemas/profile";
 import type { AccountIdentity, ProfileDTO } from "@/types/profile";
+import { DEFAULT_PROFILE_SETTINGS, type ProfileSettings } from "@/types/profile-settings";
 import type { ProfileRepository } from "./profile.repository";
 
 const DEMO: ProfileDTO = {
@@ -15,6 +16,7 @@ const DEMO: ProfileDTO = {
   careerGoal: "Concevoir des solutions métiers à fort impact.",
   availability: "IMMEDIATE",
   isPublic: true,
+  settings: DEFAULT_PROFILE_SETTINGS,
   role: "TALENT",
   updatedAt: new Date().toISOString(),
 };
@@ -41,6 +43,7 @@ export class InMemoryProfileRepository implements ProfileRepository {
         careerGoal: null,
         availability: "IMMEDIATE",
         isPublic: true,
+        settings: structuredClone(DEFAULT_PROFILE_SETTINGS),
         role: "TALENT",
         updatedAt: new Date().toISOString(),
       };
@@ -80,5 +83,21 @@ export class InMemoryProfileRepository implements ProfileRepository {
       updatedAt: new Date().toISOString(),
     });
     return { ...profile };
+  }
+
+  async saveSettings(id: string, patch: Partial<ProfileSettings>) {
+    const profile = this.profiles.get(id);
+    if (!profile) return null;
+    profile.settings = structuredClone({ ...profile.settings, ...patch });
+    profile.updatedAt = new Date().toISOString();
+    return structuredClone(profile);
+  }
+
+  async setPublic(id: string, isPublic: boolean) {
+    const profile = this.profiles.get(id);
+    if (!profile) return null;
+    profile.isPublic = isPublic;
+    profile.updatedAt = new Date().toISOString();
+    return structuredClone(profile);
   }
 }

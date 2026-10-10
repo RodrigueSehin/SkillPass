@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateProfileAction } from "@/app/dashboard/settings/actions";
@@ -111,59 +110,57 @@ export function ProfileSettingsForm({ profile }: { profile: ProfileDTO }) {
   );
 
   return (
-    <form onSubmit={submit} noValidate className="max-w-2xl">
-      <Card>
-        <CardContent className="space-y-5">
-          {TEXT_FIELDS.map((f) => field(f.name, f.label, f.type, f.placeholder))}
-          {field("username", "Nom d'utilisateur (URL publique)")}
-          <p className="text-muted -mt-3 text-xs">Votre profil public : /{values.username || "…"}</p>
-          {area("bio", "À propos")}
-          {area("careerGoal", "Objectif professionnel (privé)")}
-          <div className="space-y-2">
-            <Label htmlFor="profile-availability">Disponibilité</Label>
-            <select
-              id="profile-availability"
-              value={values.availability}
-              onChange={(e) => set("availability", e.target.value)}
-              className="border-border bg-surface h-11 w-full rounded-xl border px-4 text-sm"
-            >
-              {AVAILABILITIES.map((a) => (
-                <option key={a} value={a}>
-                  {AVAILABILITY_LABELS[a]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <label className="flex items-start gap-3 text-sm">
-            <input
-              type="checkbox"
-              checked={values.isPublic}
-              onChange={(e) => set("isPublic", e.target.checked)}
-              className="mt-1 size-4"
-            />
-            <span>
-              <span className="font-medium">Profil public</span>
-              <span className="text-muted block">
-                Visible par tous à l&apos;adresse /{values.username || "…"}. Décochez pour le masquer.
-              </span>
+    <form onSubmit={submit} noValidate>
+      <div className="space-y-5">
+        {TEXT_FIELDS.map((f) => field(f.name, f.label, f.type, f.placeholder))}
+        {field("username", "Nom d'utilisateur (URL publique)")}
+        <p className="text-muted -mt-3 text-xs">Votre profil public : /{values.username || "…"}</p>
+        {area("bio", "À propos")}
+        {area("careerGoal", "Objectif professionnel (privé)")}
+        <div className="space-y-2">
+          <Label htmlFor="profile-availability">Disponibilité</Label>
+          <select
+            id="profile-availability"
+            value={values.availability}
+            onChange={(e) => set("availability", e.target.value)}
+            className="border-border bg-surface h-11 w-full rounded-xl border px-4 text-sm"
+          >
+            {AVAILABILITIES.map((a) => (
+              <option key={a} value={a}>
+                {AVAILABILITY_LABELS[a]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <label className="flex items-start gap-3 text-sm">
+          <input
+            type="checkbox"
+            checked={values.isPublic}
+            onChange={(e) => set("isPublic", e.target.checked)}
+            className="mt-1 size-4"
+          />
+          <span>
+            <span className="font-medium">Profil public</span>
+            <span className="text-muted block">
+              Visible par tous à l&apos;adresse /{values.username || "…"}. Décochez pour le masquer.
             </span>
-          </label>
+          </span>
+        </label>
 
-          {serverError && (
-            <p role="alert" className="text-danger rounded-lg bg-red-50 px-3 py-2 text-sm">
-              {serverError}
-            </p>
-          )}
-          {saved && (
-            <p role="status" className="text-success rounded-lg bg-green-50 px-3 py-2 text-sm">
-              Profil enregistré.
-            </p>
-          )}
-          <Button type="submit" disabled={pending}>
-            {pending ? "Enregistrement…" : "Enregistrer"}
-          </Button>
-        </CardContent>
-      </Card>
+        {serverError && (
+          <p role="alert" className="text-danger rounded-lg bg-red-50 px-3 py-2 text-sm">
+            {serverError}
+          </p>
+        )}
+        {saved && (
+          <p role="status" className="text-success rounded-lg bg-green-50 px-3 py-2 text-sm">
+            Profil enregistré.
+          </p>
+        )}
+        <Button type="submit" disabled={pending}>
+          {pending ? "Enregistrement…" : "Enregistrer"}
+        </Button>
+      </div>
     </form>
   );
 }

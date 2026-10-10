@@ -1,3 +1,5 @@
+import type { ProfileSettings } from "./profile-settings";
+
 export const AVAILABILITIES = ["IMMEDIATE", "ONE_MONTH", "THREE_MONTHS", "NOT_AVAILABLE"] as const;
 export type Availability = (typeof AVAILABILITIES)[number];
 
@@ -46,13 +48,15 @@ export interface ProfileDTO {
   careerGoal: string | null;
   availability: Availability;
   isPublic: boolean;
+  /** Preferences edited in Settings (src/types/profile-settings.ts), stored as one document. */
+  settings: ProfileSettings;
   role: UserRole;
   /** ISO timestamp of the last profile update, used as the activity signal in the score. */
   updatedAt: string;
 }
 
 /** What anyone may see on /[username]. No id, e-mail, career goal or visibility flag. */
-export type PublicProfileDTO = Omit<ProfileDTO, "id" | "careerGoal" | "isPublic" | "updatedAt" | "role">;
+export type PublicProfileDTO = Omit<ProfileDTO, "id" | "careerGoal" | "isPublic" | "settings" | "updatedAt" | "role">;
 
 export interface AccountIdentity {
   id: string;
