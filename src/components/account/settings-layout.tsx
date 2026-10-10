@@ -22,8 +22,12 @@ export const ACCOUNT_TABS = [
   { key: "danger", title: "Zone de danger", text: "Actions sensibles", icon: Trash2 },
 ] as const satisfies readonly { key: string; title: string; text: string; icon: LucideIcon }[];
 export type AccountTab = (typeof ACCOUNT_TABS)[number]["key"];
-export const parseAccountTab = (v: string | undefined): AccountTab =>
-  ACCOUNT_TABS.find((t) => t.key === v)?.key ?? "general";
+/** Sections reserved to the general administrator of SkillPass. */
+export const PLATFORM_ACCOUNT_TABS: readonly AccountTab[] = ["integrations"];
+export const visibleAccountTabs = (platformAdmin: boolean) =>
+  ACCOUNT_TABS.filter((t) => platformAdmin || !PLATFORM_ACCOUNT_TABS.includes(t.key));
+export const parseAccountTab = (v: string | undefined, platformAdmin: boolean): AccountTab =>
+  visibleAccountTabs(platformAdmin).find((t) => t.key === v)?.key ?? "general";
 
 const PAGE_TEXT: Record<Exclude<AccountTab, "general">, string> = {
   security: "Protégez votre compte et gérez votre mot de passe et vos sessions.",
@@ -35,7 +39,15 @@ const PAGE_TEXT: Record<Exclude<AccountTab, "general">, string> = {
 };
 
 /** Header with breadcrumb, then the list of sections on the left and the section itself on the right. */
-export function AccountSettingsLayout({ tab, children }: { tab: AccountTab; children: React.ReactNode }) {
+export function AccountSettingsLayout({
+  tab,
+  platformAdmin,
+  children,
+}: {
+  tab: AccountTab;
+  platformAdmin: boolean;
+  children: React.ReactNode;
+}) {
   const current = ACCOUNT_TABS.find((t) => t.key === tab)!;
   return (
     <div className="space-y-6">
@@ -74,7 +86,7 @@ export function AccountSettingsLayout({ tab, children }: { tab: AccountTab; chil
           className="border-border/60 shadow-soft rounded-2xl border bg-white p-2 lg:sticky lg:top-24"
         >
           <ul className="flex gap-1 overflow-x-auto lg:flex-col">
-            {ACCOUNT_TABS.map((t) => (
+            {visibleAccountTabs(platformAdmin).map((t) => (
               <li key={t.key} className="shrink-0">
                 <Link
                   href={t.key === "general" ? "/dashboard/settings" : `/dashboard/settings?tab=${t.key}`}

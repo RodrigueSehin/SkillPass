@@ -31,7 +31,7 @@ const DATE = new Intl.DateTimeFormat("fr-FR", {
 export default async function SettingsPage({ searchParams }: PageProps<"/business/parametres">) {
   const ctx = await requireBusiness();
   const raw = await searchParams;
-  const tab = parseSettingsTab(first(raw.tab));
+  const tab = parseSettingsTab(first(raw.tab), ctx.platformAdmin);
   const org = ctx.organization;
   const canEdit = ctx.can("org.manage");
   const isAdmin = ctx.member.role === "ADMIN";
@@ -58,7 +58,11 @@ export default async function SettingsPage({ searchParams }: PageProps<"/busines
           </div>
         </Panel>
         <aside className="space-y-6">
-          <QuickSettings maintenance={org.settings.maintenance} canEdit={canEdit} />
+          <QuickSettings
+            maintenance={org.settings.maintenance}
+            canEdit={ctx.platformAdmin}
+            showMaintenance={ctx.platformAdmin}
+          />
           {admin && (
             <Panel className="p-5">
               <h2 className="text-navy font-bold">Contact administrateur</h2>
@@ -164,8 +168,12 @@ export default async function SettingsPage({ searchParams }: PageProps<"/busines
       />
     );
   else if (tab === "compliance")
-    content = <ComplianceTab initial={org.settings.compliance} canEdit={canEdit} />;
+    content = <ComplianceTab initial={org.settings.compliance} canEdit={ctx.platformAdmin} />;
   else content = <DangerTab organizationName={org.name} isAdmin={isAdmin} />;
 
-  return <SettingsLayout tab={tab}>{content}</SettingsLayout>;
+  return (
+    <SettingsLayout tab={tab} platformAdmin={ctx.platformAdmin}>
+      {content}
+    </SettingsLayout>
+  );
 }

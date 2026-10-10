@@ -15,6 +15,12 @@ import { getOrganizationLifecycleService, getOrganizationService } from "@/servi
 
 const refresh = () => revalidatePath("/business", "layout");
 const ADMIN_ONLY = "Seul un administrateur peut effectuer cette action.";
+const PLATFORM_ONLY = "Ce réglage est réservé à l'administrateur de SkillPass.";
+
+/** Platform-level settings: the organization's own administrators cannot change them. */
+function requirePlatformAdmin(ctx: { platformAdmin: boolean }) {
+  if (!ctx.platformAdmin) throw new ForbiddenError(PLATFORM_ONLY);
+}
 
 export async function saveBrandingAction(values: unknown) {
   const result = await businessAction("org.manage", (ctx) =>
@@ -35,21 +41,23 @@ export async function saveNotificationsAction(values: unknown) {
 }
 
 export async function saveComplianceAction(values: unknown) {
-  const result = await businessAction("org.manage", (ctx) =>
-    getOrganizationService().saveSettings(ctx.organization.id, {
+  const result = await businessAction(null, (ctx) => {
+    requirePlatformAdmin(ctx);
+    return getOrganizationService().saveSettings(ctx.organization.id, {
       compliance: complianceSchema.parse(values),
-    }),
-  );
+    });
+  });
   refresh();
   return result.error ? { error: result.error } : {};
 }
 
 export async function setMaintenanceAction(values: unknown) {
-  const result = await businessAction("org.manage", (ctx) =>
-    getOrganizationService().saveSettings(ctx.organization.id, {
+  const result = await businessAction(null, (ctx) => {
+    requirePlatformAdmin(ctx);
+    return getOrganizationService().saveSettings(ctx.organization.id, {
       maintenance: maintenanceSchema.parse(values).maintenance,
-    }),
-  );
+    });
+  });
   refresh();
   return result.error ? { error: result.error } : {};
 }

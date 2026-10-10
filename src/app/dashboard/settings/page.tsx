@@ -8,6 +8,7 @@ import { PrivacyTab } from "@/components/account/privacy-tab";
 import { PublicProfileTab } from "@/components/account/public-tab";
 import { SecurityTab } from "@/components/account/security-tab";
 import { requireUser } from "@/lib/auth/current-user";
+import { isPlatformAdmin } from "@/lib/auth/platform-admin";
 import { isSupabaseConfigured } from "@/lib/auth/env";
 import { getProfileAccountService } from "@/services/container";
 
@@ -17,11 +18,12 @@ export const dynamic = "force-dynamic";
 export default async function SettingsPage({ searchParams }: PageProps<"/dashboard/settings">) {
   const user = await requireUser();
   const raw = await searchParams;
-  const tab = parseAccountTab(Array.isArray(raw.tab) ? raw.tab[0] : raw.tab);
   const profile = await getProfileAccountService().get(user);
+  const platformAdmin = isPlatformAdmin(profile);
+  const tab = parseAccountTab(Array.isArray(raw.tab) ? raw.tab[0] : raw.tab, platformAdmin);
 
   return (
-    <AccountSettingsLayout tab={tab}>
+    <AccountSettingsLayout tab={tab} platformAdmin={platformAdmin}>
       {tab === "general" && <GeneralTab profile={profile} email={user.email} />}
       {tab === "security" && <SecurityTab canChange={isSupabaseConfigured()} />}
       {tab === "notifications" && <NotificationsTab initial={profile.settings.notifications} />}

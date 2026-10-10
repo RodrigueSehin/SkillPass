@@ -9,7 +9,16 @@ import { SettingRow } from "./rows";
 import { Switch } from "./controls";
 
 /** The switches of the "Paramètres rapides" card. Only maintenance mode does anything today. */
-export function QuickSettings({ maintenance, canEdit }: { maintenance: boolean; canEdit: boolean }) {
+export function QuickSettings({
+  maintenance,
+  canEdit,
+  showMaintenance,
+}: {
+  maintenance: boolean;
+  canEdit: boolean;
+  /** Maintenance mode is a platform setting: only the general administrator of SkillPass gets the switch. */
+  showMaintenance: boolean;
+}) {
   const router = useRouter();
   const [on, setOn] = useState(maintenance);
   const [error, setError] = useState<string>();
@@ -64,9 +73,11 @@ export function QuickSettings({ maintenance, canEdit }: { maintenance: boolean; 
         >
           <Switch checked={false} label="Rapports automatiques" disabled />
         </SettingRow>
-        <SettingRow icon={Wrench} title="Mode maintenance" text="Réserver l'accès aux administrateurs">
-          <Switch checked={on} onChange={toggle} label="Mode maintenance" disabled={!canEdit || pending} />
-        </SettingRow>
+        {showMaintenance && (
+          <SettingRow icon={Wrench} title="Mode maintenance" text="Réserver l'accès aux administrateurs">
+            <Switch checked={on} onChange={toggle} label="Mode maintenance" disabled={!canEdit || pending} />
+          </SettingRow>
+        )}
       </div>
       {error && (
         <p role="alert" className="text-danger mt-2 text-sm">

@@ -22,11 +22,24 @@ export const SETTINGS_TABS = [
   { key: "danger", title: "Zone de danger", text: "Actions sensibles", icon: Trash2 },
 ] as const satisfies readonly { key: string; title: string; text: string; icon: LucideIcon }[];
 export type SettingsTab = (typeof SETTINGS_TABS)[number]["key"];
-export const parseSettingsTab = (v: string | undefined): SettingsTab =>
-  SETTINGS_TABS.find((t) => t.key === v)?.key ?? "general";
+
+/** Advanced, platform-level sections: only the general administrator of SkillPass sees and uses them. */
+export const PLATFORM_TABS: readonly SettingsTab[] = ["security", "integrations", "compliance"];
+export const visibleSettingsTabs = (platformAdmin: boolean) =>
+  SETTINGS_TABS.filter((t) => platformAdmin || !PLATFORM_TABS.includes(t.key));
+export const parseSettingsTab = (v: string | undefined, platformAdmin: boolean): SettingsTab =>
+  visibleSettingsTabs(platformAdmin).find((t) => t.key === v)?.key ?? "general";
 
 /** Header with breadcrumb, then the list of sections on the left and the section itself on the right. */
-export function SettingsLayout({ tab, children }: { tab: SettingsTab; children: React.ReactNode }) {
+export function SettingsLayout({
+  tab,
+  platformAdmin,
+  children,
+}: {
+  tab: SettingsTab;
+  platformAdmin: boolean;
+  children: React.ReactNode;
+}) {
   const current = SETTINGS_TABS.find((t) => t.key === tab)!;
   return (
     <div className="space-y-6">
@@ -65,7 +78,7 @@ export function SettingsLayout({ tab, children }: { tab: SettingsTab; children: 
           className="border-border/60 shadow-soft rounded-2xl border bg-white p-2 lg:sticky lg:top-24"
         >
           <ul className="flex gap-1 overflow-x-auto lg:flex-col">
-            {SETTINGS_TABS.map((t) => (
+            {visibleSettingsTabs(platformAdmin).map((t) => (
               <li key={t.key} className="shrink-0">
                 <Link
                   href={t.key === "general" ? "/business/parametres" : `/business/parametres?tab=${t.key}`}
