@@ -6,6 +6,8 @@ import {
   getJobAlertRepository,
   getEvaluationRepository,
   getOrgSkillRepository,
+  getMatchingRepository,
+  getTalentDirectoryRepository,
   getJobOfferRepository,
   getOpportunityRepository,
   getOrganizationRepository,
@@ -25,6 +27,7 @@ import { EvidenceService } from "./evidence.service";
 import { CertificationDocumentService } from "./certification-document.service";
 import { ExperienceDocumentService } from "./experience-document.service";
 import { OrgSkillService } from "./org-skill.service";
+import { MatchingService } from "./matching.service";
 import { OrganizationLifecycleService } from "./organization-lifecycle.service";
 import { EvaluationAttemptService } from "./evaluation-attempt.service";
 import { EvaluationService } from "./evaluation.service";
@@ -111,3 +114,5 @@ export const getOrganizationLifecycleService = () =>
     getOrgSkillRepository(),
     getStorage,
   );
+export const getMatchingService = () =>
+  new MatchingService(getMatchingRepository(), getTalentDirectoryRepository(), getJobOfferRepository());

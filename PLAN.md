@@ -86,7 +86,7 @@ Entreprises multi-tenant, offres, recherche de talents, matching, skill gap. Maq
 ### Étape 8 — Tableau de bord ✅
 
 - [x] Accueil (texte de bienvenue et couverture réglables), indicateurs, activité des évaluations, répartition des niveaux, actions rapides, talents à découvrir, offres récentes, activités récentes. « Matches IA » et « Taux de correspondance » du mockup attendent le Matching IA (phase 5) : remplacés par des chiffres réels.
-- [x] Matching par compétences ✅ : `/business/matching` classe les profils publics selon les compétences, certifications, expérience, lieu et disponibilité de chaque offre (seuil 50 %), et alimente « Talents proposés ». Calcul à la volée, sans SQL, sans LLM (réservé au plan Pro et plus). Reste pour la phase 5 : explications et classement par IA générative, shortlist, contact, export.
+- [x] Matching IA ✅ (refonte sur les 4 maquettes `SkillPass Matching AI *`) : `/business/matching` en 4 onglets — Recherche de talents (filtres, poste recherché, fiche profil), Recommandations par offre (niveaux de pertinence, critères, affinage), Correspondances sauvegardées (statuts, export CSV) et Historique (statistiques, graphiques). Calcul déterministe à la volée, sans LLM : les libellés « IA » des maquettes sont conservés mais la synthèse est générée par règles. Plan Pro et plus. SQL : `supabase/update-0017-matching.sql` (tables `matching_saves` et `matching_events`). Reste : IA générative (résumé, recherche en langage naturel), envoi réel de messages, onglet Évaluations du talent.
 
 - [ ] Envoi réel des invitations par e-mail — reporté (le lien est à copier)
 
