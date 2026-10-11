@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BellRing, CalendarClock, Eye, Globe, IdCard, Mail, MapPin, Search, UserRound } from "lucide-react";
+import { BellRing, CalendarClock, Globe, IdCard, Mail, UserRound } from "lucide-react";
 import { SettingRow } from "@/components/business/settings/rows";
 import { Switch } from "@/components/business/settings/controls";
 import { Panel } from "@/components/business/ui";
@@ -33,14 +33,14 @@ export function GeneralTab({ profile, email }: { profile: ProfileDTO; email: str
           <p className="text-muted text-sm">Configurez rapidement les options essentielles.</p>
           <div className="mt-2 divide-y divide-slate-100">
             <ToggleSetting
-              icon={Eye}
+              icon="eye"
               title="Profil public"
               text={`Visible à l'adresse /${profile.username}`}
               initial={profile.isPublic}
               save={setPublicAction}
             />
             <ToggleSetting
-              icon={Search}
+              icon="search"
               title="Visible par les entreprises"
               text="Apparaître dans la recherche de talents"
               initial={privacy.inDirectory}
@@ -48,7 +48,7 @@ export function GeneralTab({ profile, email }: { profile: ProfileDTO; email: str
               disabled={!profile.isPublic}
             />
             <ToggleSetting
-              icon={MapPin}
+              icon="mapPin"
               title="Afficher ma ville"
               text="Sur votre profil public"
               initial={privacy.showLocation}

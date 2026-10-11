@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Eye, ExternalLink, Info, Languages, MapPin, Moon } from "lucide-react";
+import { ExternalLink, Info, Languages, Moon } from "lucide-react";
 import { Switch } from "@/components/business/settings/controls";
 import { SettingRow } from "@/components/business/settings/rows";
 import { Panel } from "@/components/business/ui";
@@ -42,14 +42,14 @@ export function PublicProfileTab({ profile }: { profile: ProfileDTO }) {
           </p>
           <div className="mt-3 divide-y divide-slate-100">
             <ToggleSetting
-              icon={Eye}
+              icon="eye"
               title="Profil public"
               text="Visible par tous à cette adresse. Désactivé, la page affiche « introuvable »."
               initial={profile.isPublic}
               save={setPublicAction}
             />
             <ToggleSetting
-              icon={MapPin}
+              icon="mapPin"
               title="Afficher ma ville"
               text="Votre ville apparaît sur votre profil et dans la recherche des entreprises."
               initial={showLocation}

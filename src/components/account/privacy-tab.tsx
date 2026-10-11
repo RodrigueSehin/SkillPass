@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, Download, FileSearch, Info, PencilLine, Search, Trash2, X } from "lucide-react";
+import { Check, Download, FileSearch, Info, PencilLine, Trash2, X } from "lucide-react";
 import { Panel } from "@/components/business/ui";
 import { setDirectoryAction } from "@/app/dashboard/settings/actions";
 import type { ProfileDTO } from "@/types/profile";
@@ -28,7 +28,7 @@ export function PrivacyTab({ profile }: { profile: ProfileDTO }) {
           </p>
           <div className="mt-3">
             <ToggleSetting
-              icon={Search}
+              icon="search"
               title="Apparaître dans la recherche de talents"
               text={
                 profile.isPublic

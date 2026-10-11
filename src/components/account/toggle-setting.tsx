@@ -2,10 +2,19 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
+import { Eye, EyeOff, MapPin, Search, type LucideIcon } from "lucide-react";
 import { Switch } from "@/components/business/settings/controls";
 import { SettingRow } from "@/components/business/settings/rows";
 import type { ActionResult } from "@/lib/actions/run";
+
+/**
+ * Icons are chosen by name: a component cannot be passed from a Server Component to this Client Component.
+ */
+const ICONS = { eye: Eye, eyeOff: EyeOff, mapPin: MapPin, search: Search } satisfies Record<
+  string,
+  LucideIcon
+>;
+export type ToggleIcon = keyof typeof ICONS;
 
 /** One switch that saves as soon as it is flipped, and goes back when the save fails. */
 export function ToggleSetting({
@@ -17,7 +26,7 @@ export function ToggleSetting({
   disabled,
   invert,
 }: {
-  icon: LucideIcon;
+  icon: ToggleIcon;
   title: string;
   text: string;
   initial: boolean;
@@ -46,7 +55,7 @@ export function ToggleSetting({
 
   return (
     <div>
-      <SettingRow icon={icon} title={title} text={text}>
+      <SettingRow icon={ICONS[icon]} title={title} text={text}>
         <Switch
           checked={invert ? !value : value}
           onChange={flip}

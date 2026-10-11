@@ -1,4 +1,4 @@
-import { CloudDownload, EyeOff, Trash2 } from "lucide-react";
+import { CloudDownload, Trash2, EyeOff } from "lucide-react";
 import { Panel } from "@/components/business/ui";
 import { SoonBadge } from "@/components/business/settings/rows";
 import { setPublicAction } from "@/app/dashboard/settings/actions";
@@ -43,7 +43,7 @@ export function DangerTab({ profile }: { profile: ProfileDTO }) {
         </div>
         <div className="mt-3 max-w-xl">
           <ToggleSetting
-            icon={EyeOff}
+            icon="eyeOff"
             title="Profil en pause"
             text={profile.isPublic ? "Votre profil est visible." : "Votre profil est masqué."}
             initial={profile.isPublic}
