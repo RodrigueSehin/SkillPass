@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { ensureProfile } from "@/services/profile.service";
 import type { UpdateProfileInput } from "@/schemas/profile";
 import type { AccountIdentity, ProfileDTO } from "@/types/profile";
+import { parseTalentPlan, type TalentPlanCode } from "@/lib/plans/entitlements";
 import { profileSettingsWithDefaults, type ProfileSettings } from "@/types/profile-settings";
 import type { ProfileRepository } from "./profile.repository";
 
@@ -21,6 +22,7 @@ const toDTO = (r: Row): ProfileDTO => ({
   availability: r.availability,
   isPublic: r.isPublic,
   settings: profileSettingsWithDefaults(r.settings),
+  plan: parseTalentPlan(r.plan),
   role: r.role,
   updatedAt: r.updatedAt.toISOString(),
 });
@@ -72,6 +74,15 @@ export class PrismaProfileRepository implements ProfileRepository {
       data: { settings: next as unknown as Prisma.InputJsonValue },
     });
     return toDTO(saved);
+  }
+
+  async setPlan(id: string, plan: TalentPlanCode) {
+    try {
+      return toDTO(await prisma.profile.update({ where: { id }, data: { plan } }));
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") return null;
+      throw err;
+    }
   }
 
   async setPublic(id: string, isPublic: boolean) {

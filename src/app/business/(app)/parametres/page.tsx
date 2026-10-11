@@ -14,6 +14,7 @@ import { SecurityTab } from "@/components/business/settings/security";
 import { MemberAvatar, Panel, RolePill } from "@/components/business/ui";
 import { requireBusiness } from "@/lib/business/context";
 import { PLANS } from "@/lib/business/plans";
+import { businessHas } from "@/lib/plans/entitlements";
 import { getOrganizationService } from "@/services/container";
 import { ORG_ROLE_LABELS } from "@/types/business";
 
@@ -154,7 +155,12 @@ export default async function SettingsPage({ searchParams }: PageProps<"/busines
   } else if (tab === "security") content = <SecurityTab />;
   else if (tab === "notifications")
     content = (
-      <NotificationsTab initial={org.settings.notifications} timezone={org.timezone} canEdit={canEdit} />
+      <NotificationsTab
+        initial={org.settings.notifications}
+        timezone={org.timezone}
+        canEdit={canEdit}
+        hiddenGroups={businessHas(org.plan, "evaluations") ? [] : ["Évaluations"]}
+      />
     );
   else if (tab === "integrations")
     content = <IntegrationsTab category={first(raw.cat) ?? "all"} query={first(raw.q) ?? ""} />;

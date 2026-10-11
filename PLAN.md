@@ -122,3 +122,7 @@ Academy, API publique, PWA, Enterprise, White label.
 
 - [x] `/admin` : vue d'ensemble de la plateforme, Entreprises (file d'attente, détail, validation / refus avec motif / suspension, plan, maintenance, accès des membres), Utilisateurs et rôles, Journal d'audit. Réservée au rôle `SKILLPASS_ADMIN` (404 pour les autres, contrôle refait dans le service).
 - [x] Une entreprise créée démarre « En attente » et ne peut pas utiliser Business tant que l'administrateur ne l'a pas validée (page `/business/verification`, justificatif libre, nouvelle demande après refus). SQL : `supabase/update-0019-platform-admin.sql` (les entreprises existantes passent « Validées »).
+
+### Plans et avantages ✅
+
+- [x] Source unique des avantages : `src/lib/plans/entitlements.ts`. Business : Starter sans Matching, Évaluations ni Analytics (menu, pages en 404, actions refusées, permissions non proposées, widgets du tableau de bord et notifications masqués). Talent : plans Free (5 compétences, 3 projets) et Pro (illimité, Évaluations, Portfolio et badges) ; onglet « Abonnement » dans les Paramètres, limites appliquées à l'ajout, plan modifiable par l'administrateur. SQL : `supabase/update-0020-talent-plan.sql` (les comptes existants passent en Free).

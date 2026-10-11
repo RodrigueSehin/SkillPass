@@ -8,6 +8,7 @@ export default async function DashboardRootLayout({ children }: LayoutProps<"/da
   const profile = await profileFor(user);
   return (
     <DashboardLayout
+      plan={profile.plan}
       user={{
         name: profile.fullName,
         roleLabel: ROLE_LABELS[profile.role],

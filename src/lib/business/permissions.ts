@@ -1,4 +1,5 @@
-import type { MemberDTO, OrgRole } from "@/types/business";
+import { planAllowsPermission } from "@/lib/plans/entitlements";
+import type { MemberDTO, OrgRole, PlanCode } from "@/types/business";
 
 export interface PermissionDef {
   key: string;
@@ -58,6 +59,14 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
 ];
+
+/** The permissions an organization's plan lets it use: the others are not offered at all. */
+export function permissionGroupsFor(plan: PlanCode): PermissionGroup[] {
+  return PERMISSION_GROUPS.map((g) => ({
+    ...g,
+    permissions: g.permissions.filter((p) => planAllowsPermission(plan, p.key)),
+  })).filter((g) => g.permissions.length > 0);
+}
 
 export const ALL_PERMISSIONS = PERMISSION_GROUPS.flatMap((g) => g.permissions.map((p) => p.key));
 export const PERMISSION_LABELS: Record<string, string> = Object.fromEntries(

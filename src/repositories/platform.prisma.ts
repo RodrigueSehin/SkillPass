@@ -19,6 +19,7 @@ import type {
   ProfileAdminRow,
 } from "@/types/platform";
 import type { UserRole } from "@/types/profile";
+import { parseTalentPlan } from "@/lib/plans/entitlements";
 import type { PlatformRepository } from "./platform.repository";
 
 type OrgRow = Prisma.OrganizationGetPayload<object>;
@@ -95,6 +96,7 @@ const toProfile = (r: Prisma.ProfileGetPayload<{ include: typeof profileInclude 
     fullName: r.fullName,
     username: r.username,
     role: r.role,
+    plan: parseTalentPlan(r.plan),
     isPublic: r.isPublic,
     createdAt: r.createdAt.toISOString(),
     organization: membership

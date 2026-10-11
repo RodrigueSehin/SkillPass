@@ -16,11 +16,14 @@ import {
   Target,
   User,
 } from "lucide-react";
+import type { TalentFeature } from "@/lib/plans/entitlements";
 
 export interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
+  /** The plan feature the section belongs to: a plan without it does not show the entry. */
+  feature?: TalentFeature;
 }
 
 export const DASHBOARD_NAV: NavItem[] = [
@@ -28,12 +31,12 @@ export const DASHBOARD_NAV: NavItem[] = [
   { href: "/dashboard/skillpass", label: "Mon SkillPass", icon: IdCard },
   { href: "/dashboard/skills", label: "Compétences", icon: Sparkles },
   { href: "/dashboard/evidence", label: "Preuves", icon: FileCheck2 },
-  { href: "/dashboard/assessments", label: "Évaluations", icon: BookOpenCheck },
-  { href: "/dashboard/badges", label: "Badges", icon: Medal },
+  { href: "/dashboard/assessments", label: "Évaluations", icon: BookOpenCheck, feature: "assessments" },
+  { href: "/dashboard/badges", label: "Badges", icon: Medal, feature: "portfolioBadges" },
   { href: "/dashboard/certifications", label: "Certifications", icon: Award },
   { href: "/dashboard/experiences", label: "Expériences", icon: Briefcase },
   { href: "/dashboard/projects", label: "Projets", icon: FolderKanban },
-  { href: "/dashboard/portfolio", label: "Portfolio", icon: Layers },
+  { href: "/dashboard/portfolio", label: "Portfolio", icon: Layers, feature: "portfolioBadges" },
   { href: "/dashboard/recommendations", label: "Recommandations", icon: MessageSquareQuote },
   { href: "/dashboard/opportunities", label: "Opportunités", icon: Target },
 ];

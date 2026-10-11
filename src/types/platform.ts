@@ -1,4 +1,5 @@
 import type { MemberDTO, OrganizationDTO } from "./business";
+import type { TalentPlanCode } from "@/lib/plans/entitlements";
 import type { UserRole } from "./profile";
 
 /** One company in the administrator's list. */
@@ -22,6 +23,7 @@ export interface ProfileAdminRow {
   fullName: string;
   username: string;
   role: UserRole;
+  plan: TalentPlanCode;
   isPublic: boolean;
   createdAt: string;
   /** The organization the person belongs to, if any. */
@@ -53,6 +55,7 @@ export const AUDIT_ACTIONS = [
   "ORG_MAINTENANCE",
   "MEMBER_ACCESS",
   "ROLE_CHANGED",
+  "TALENT_PLAN",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -66,6 +69,7 @@ export const AUDIT_LABELS: Record<AuditAction, string> = {
   ORG_MAINTENANCE: "Mode maintenance",
   MEMBER_ACCESS: "Accès d'un membre modifié",
   ROLE_CHANGED: "Rôle modifié",
+  TALENT_PLAN: "Plan d'un talent modifié",
 };
 
 export interface AuditEntryDTO {

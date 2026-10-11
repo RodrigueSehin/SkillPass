@@ -37,7 +37,7 @@ export default async function BusinessAppLayout({ children }: LayoutProps<"/busi
       className="to-background min-h-screen bg-gradient-to-b from-[#f3f7ff]"
       style={brandingStyle(branding)}
     >
-      <BusinessSidebar planName={PLANS[ctx.organization.plan].name} />
+      <BusinessSidebar planName={PLANS[ctx.organization.plan].name} plan={ctx.organization.plan} />
       <div className="lg:pl-60">
         <BusinessTopbar
           organizationName={ctx.organization.name}

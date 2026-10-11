@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { runAction, type ActionResult } from "@/lib/actions/run";
-import { AppError } from "@/lib/errors";
+import { AppError, ForbiddenError } from "@/lib/errors";
+import { TALENT_PLAN_CODES, type TalentPlanCode } from "@/lib/plans/entitlements";
 import { requireUser } from "@/lib/auth/current-user";
 import { isSupabaseConfigured } from "@/lib/auth/env";
 import { createSupabaseServerClient } from "@/lib/auth/supabase-server";
@@ -81,4 +82,22 @@ export async function signOutEverywhereAction() {
     await supabase.auth.signOut({ scope: "global" });
   }
   redirect("/login");
+}
+
+/**
+ * Switches plan without paying. Only outside production, like the Business plans: it exists so the limits
+ * can be tried in demo and development, and is closed as soon as real payments are needed.
+ */
+export async function changeTalentPlanAction(plan: string): Promise<ActionResult> {
+  const result = await runAction(async (userId) => {
+    if (process.env.NODE_ENV === "production") {
+      throw new ForbiddenError(
+        "Le paiement en ligne n'est pas encore ouvert : le changement de plan est indisponible.",
+      );
+    }
+    if (!(TALENT_PLAN_CODES as readonly string[]).includes(plan)) throw new ForbiddenError("Plan inconnu.");
+    await getProfileAccountService().setPlan(userId, plan as TalentPlanCode);
+  });
+  if (!result.error) revalidatePath("/dashboard", "layout");
+  return result;
 }

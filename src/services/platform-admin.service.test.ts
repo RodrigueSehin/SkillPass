@@ -107,3 +107,18 @@ describe("PlatformAdminService", () => {
     expect(pending).toHaveLength(1);
   });
 });
+
+describe("talent plan", () => {
+  it("the administrator moves a talent between Free and Pro, and it is logged", async () => {
+    const { service, profiles } = await setup();
+    expect((await profiles.findById("talent-1"))?.plan).toBe("FREE");
+    const saved = await service.setTalentPlan("demo", "talent-1", "PRO");
+    expect(saved.plan).toBe("PRO");
+    await expect(service.setTalentPlan("demo", "talent-1", "GOLD")).rejects.toThrow();
+    await expect(service.setTalentPlan("talent-1", "talent-1", "PRO")).rejects.toThrow();
+    expect((await service.listAudit("demo"))[0]).toMatchObject({
+      action: "TALENT_PLAN",
+      detail: "Free → Pro",
+    });
+  });
+});

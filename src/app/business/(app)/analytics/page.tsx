@@ -8,6 +8,7 @@ import { TalentAvatar } from "@/components/business/talent-cards";
 import { skillVisual } from "@/config/skill-visuals";
 import { ANALYTICS_RANGES, computeAnalytics, parseRange, type Kpi } from "@/lib/business/analytics";
 import { requireBusiness } from "@/lib/business/context";
+import { requireBusinessFeature } from "@/lib/business/features";
 import { cn } from "@/lib/utils/cn";
 import { getEvaluationService, getJobOfferService } from "@/services/container";
 import { EVALUATION_STATUS_LABELS, EVALUATION_TYPE_LABELS } from "@/types/evaluation";
@@ -34,6 +35,7 @@ const chip = (k: Kpi) =>
 
 export default async function AnalyticsPage({ searchParams }: PageProps<"/business/analytics">) {
   const ctx = await requireBusiness();
+  requireBusinessFeature(ctx, "analytics");
   if (!ctx.can("analytics.view")) return <NoAccess what="de consulter les analytics" />;
   const raw = await searchParams;
   const range = parseRange(first(raw.range));

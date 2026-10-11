@@ -18,6 +18,7 @@ export default async function NewMemberPage() {
   ]);
   return (
     <MemberWizard
+      plan={ctx.organization.plan}
       organizationName={ctx.organization.name}
       teams={departments.map((d) => ({ id: d.id, name: d.name, look: d.look, members: d.members.length }))}
       managers={members.filter((m) => m.status === "ACTIVE").map((m) => ({ id: m.id, name: memberName(m) }))}

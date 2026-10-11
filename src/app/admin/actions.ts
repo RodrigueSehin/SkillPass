@@ -58,5 +58,8 @@ export const updateMemberAccessAction = (
     });
   });
 
+export const setProfilePlanAction = (profileId: string, plan: string) =>
+  act((userId) => getPlatformAdminService().setTalentPlan(userId, String(profileId), String(plan)));
+
 export const setProfileRoleAction = (profileId: string, role: string) =>
   act((userId) => getPlatformAdminService().setRole(userId, String(profileId), String(role)));

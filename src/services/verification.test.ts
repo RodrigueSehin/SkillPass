@@ -33,6 +33,7 @@ beforeEach(async () => {
   await profiles.ensure({ id: REVIEWER, email: "r@x.com", name: "Revue Eur" });
   profiles.setRole(REVIEWER, "VERIFIER");
   await profiles.ensure({ id: OTHER, email: "o@x.com", name: "Autre Personne" });
+  await profiles.setPlan(OTHER, "PRO");
   credentials = new CredentialService(new InMemoryCredentialRepository(), profiles, () => clock);
   assessments = new AssessmentService({
     attempts: new InMemoryAttemptRepository(),
@@ -57,6 +58,11 @@ describe("starting an assessment", () => {
     await expect(assessments.start(OTHER, "power-apps")).rejects.toBeInstanceOf(ConflictError);
     const overview = (await assessments.list(OTHER)).find((a) => a.slug === "power-apps")!;
     expect(overview.blockedReason).toMatch(/Ajoutez d'abord/);
+  });
+
+  it("is reserved to the Pro plan", async () => {
+    await profiles.setPlan(OTHER, "FREE");
+    await expect(assessments.start(OTHER, "power-apps")).rejects.toThrow(/plan Pro/);
   });
 
   it("rejects unknown assessments", async () => {

@@ -4,12 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { updateMemberAccessAction } from "@/app/admin/actions";
-import { PERMISSION_GROUPS, ROLE_PRESETS } from "@/lib/business/permissions";
+import { permissionGroupsFor, ROLE_PRESETS } from "@/lib/business/permissions";
 import { cn } from "@/lib/utils/cn";
-import { ORG_ROLES, ORG_ROLE_LABELS, type MemberDTO, type OrgRole } from "@/types/business";
+import { ORG_ROLES, ORG_ROLE_LABELS, type MemberDTO, type OrgRole, type PlanCode } from "@/types/business";
 
 /** One member of a company: role, status and the permissions the administrator ticks. */
-export function MemberAccess({ orgId, member }: { orgId: string; member: MemberDTO }) {
+export function MemberAccess({ orgId, member, plan }: { orgId: string; member: MemberDTO; plan: PlanCode }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<OrgRole>(member.role);
@@ -96,7 +96,7 @@ export function MemberAccess({ orgId, member }: { orgId: string; member: MemberD
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {PERMISSION_GROUPS.map((group) => (
+            {permissionGroupsFor(plan).map((group) => (
               <fieldset key={group.key} disabled={!editable || pending} className="space-y-1.5">
                 <legend className="text-navy mb-1 text-sm font-bold">{group.title}</legend>
                 {group.permissions.map((p) => (

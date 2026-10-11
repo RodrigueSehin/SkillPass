@@ -2,6 +2,7 @@ import { ConflictError, NotFoundError } from "@/lib/errors";
 import type { ProfileRepository } from "@/repositories/profile.repository";
 import type { UpdateProfileInput } from "@/schemas/profile";
 import type { AccountIdentity, PublicProfileDTO } from "@/types/profile";
+import type { TalentPlanCode } from "@/lib/plans/entitlements";
 import type { PrivacySettings, TalentNotificationSettings } from "@/types/profile-settings";
 
 export class ProfileAccountService {
@@ -35,6 +36,13 @@ export class ProfileAccountService {
 
   async setPublic(id: string, isPublic: boolean) {
     const saved = await this.repo.setPublic(id, isPublic);
+    if (!saved) throw new NotFoundError("Profil introuvable");
+    return saved;
+  }
+
+  /** Moves the account to another talent plan. */
+  async setPlan(id: string, plan: TalentPlanCode) {
+    const saved = await this.repo.setPlan(id, plan);
     if (!saved) throw new NotFoundError("Profil introuvable");
     return saved;
   }

@@ -1,3 +1,4 @@
+import type { TalentPlanCode } from "@/lib/plans/entitlements";
 import type { ProfileSettings } from "./profile-settings";
 
 export const AVAILABILITIES = ["IMMEDIATE", "ONE_MONTH", "THREE_MONTHS", "NOT_AVAILABLE"] as const;
@@ -50,13 +51,18 @@ export interface ProfileDTO {
   isPublic: boolean;
   /** Preferences edited in Settings (src/types/profile-settings.ts), stored as one document. */
   settings: ProfileSettings;
+  /** Free or Pro: decides which sections and limits the talent has. */
+  plan: TalentPlanCode;
   role: UserRole;
   /** ISO timestamp of the last profile update, used as the activity signal in the score. */
   updatedAt: string;
 }
 
 /** What anyone may see on /[username]. No id, e-mail, career goal or visibility flag. */
-export type PublicProfileDTO = Omit<ProfileDTO, "id" | "careerGoal" | "isPublic" | "settings" | "updatedAt" | "role">;
+export type PublicProfileDTO = Omit<
+  ProfileDTO,
+  "id" | "careerGoal" | "isPublic" | "settings" | "plan" | "updatedAt" | "role"
+>;
 
 export interface AccountIdentity {
   id: string;

@@ -1,9 +1,15 @@
 "use client";
 
 import { Briefcase, ClipboardList, Eye, Shield, UserCog, Users, type LucideIcon } from "lucide-react";
-import { PERMISSION_GROUPS, ROLE_PRESETS } from "@/lib/business/permissions";
+import { permissionGroupsFor, ROLE_PRESETS } from "@/lib/business/permissions";
 import { cn } from "@/lib/utils/cn";
-import { ORG_ROLES, ORG_ROLE_DESCRIPTIONS, ORG_ROLE_LABELS, type OrgRole } from "@/types/business";
+import {
+  ORG_ROLES,
+  ORG_ROLE_DESCRIPTIONS,
+  ORG_ROLE_LABELS,
+  type OrgRole,
+  type PlanCode,
+} from "@/types/business";
 
 export const ROLE_ICONS: Record<OrgRole, { icon: LucideIcon; tone: string }> = {
   ADMIN: { icon: Shield, tone: "bg-violet-100 text-violet-700" },
@@ -28,7 +34,9 @@ export function PermissionsEditor({
   role,
   permissions,
   onChange,
+  plan,
 }: {
+  plan: PlanCode;
   role: OrgRole;
   permissions: string[];
   onChange: (role: OrgRole, permissions: string[]) => void;
@@ -85,7 +93,7 @@ export function PermissionsEditor({
           </p>
         )}
         <div className="mt-3 space-y-3">
-          {PERMISSION_GROUPS.map((group) => {
+          {permissionGroupsFor(plan).map((group) => {
             const { icon: Icon, tone } = GROUP_ICONS[group.key] ?? GROUP_ICONS.talents;
             return (
               <fieldset key={group.key} className="border-border/70 rounded-xl border p-4">

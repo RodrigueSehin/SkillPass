@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Crown } from "lucide-react";
 
-/** Upsell card pinned at the bottom of the sidebar. Plans are described on the landing page for now. */
+/** Upsell card pinned at the bottom of the sidebar. Only shown on the Free plan. */
 export function ProCard() {
   return (
     <section
@@ -20,10 +20,10 @@ export function ProCard() {
         Débloquez toutes les fonctionnalités et accélérez votre carrière.
       </p>
       <Link
-        href="/#tarifs"
+        href="/dashboard/settings?tab=plan"
         className="text-navy shadow-soft mt-3 flex h-9 w-full items-center justify-center rounded-lg bg-amber-400 text-xs font-bold transition-colors hover:bg-amber-300"
       >
-        Voir les offres
+        Voir mon plan
       </Link>
     </section>
   );

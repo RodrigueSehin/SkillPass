@@ -29,10 +29,13 @@ export function NotificationsTab({
   initial,
   timezone,
   canEdit,
+  hiddenGroups = [],
 }: {
   initial: NotificationSettings;
   timezone: string;
   canEdit: boolean;
+  /** Groups of a feature the plan does not include. */
+  hiddenGroups?: string[];
 }) {
   const router = useRouter();
   const [value, setValue] = useState<NotificationSettings>(initial);
@@ -126,7 +129,7 @@ export function NotificationsTab({
                     })}
                   </tr>
                 </thead>
-                {NOTIFICATION_GROUPS.map((g) => (
+                {NOTIFICATION_GROUPS.filter((g) => !hiddenGroups.includes(g.title)).map((g) => (
                   <tbody key={g.title} className="divide-y divide-slate-100">
                     <tr>
                       <th scope="rowgroup" colSpan={4} className="text-navy px-3 pt-4 pb-1 text-sm font-bold">

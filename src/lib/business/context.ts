@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth/current-user";
 import { isPlatformAdmin } from "@/lib/auth/platform-admin";
 import { profileFor } from "@/lib/auth/profile";
 import { can } from "@/lib/business/permissions";
+import { planAllowsPermission } from "@/lib/plans/entitlements";
 import { getOrganizationService } from "@/services/container";
 import type { OrgScope } from "@/services/organization.service";
 
@@ -49,7 +50,8 @@ export async function requireBusiness(
   return {
     ...scope,
     user,
-    can: (permission) => can(scope.member, permission),
+    can: (permission) =>
+      planAllowsPermission(scope.organization.plan, permission) && can(scope.member, permission),
     platformAdmin: isPlatformAdmin(profile),
   };
 }

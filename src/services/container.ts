@@ -1,4 +1,6 @@
 import { CrudService } from "@/lib/crud";
+import { TALENT_PLANS, talentLimit, type TalentLimit } from "@/lib/plans/entitlements";
+import type { Capacity } from "@/lib/plans/limits";
 import {
   getCertificationRepository,
   getApplicationRepository,
@@ -44,8 +46,23 @@ import { RecommendationService } from "./recommendation.service";
 import { PassportService } from "./passport.service";
 import { ProfileAccountService } from "./profile-account.service";
 
-export const getSkillService = () => new SkillService(getTalentSkillRepository(), getEvidenceRepository());
-export const getProjectService = () => new CrudService(getProjectRepository(), "Projet");
+/** What the talent's plan allows for one kind of item. Looked up when the item is added. */
+const capacityFor =
+  (limit: TalentLimit, noun: [string, string]): Capacity =>
+  async (profileId) => {
+    const profile = await getProfileRepository().findById(profileId);
+    const plan = profile?.plan ?? "FREE";
+    return { max: talentLimit(plan, limit), planName: TALENT_PLANS[plan].name, noun };
+  };
+
+export const getSkillService = () =>
+  new SkillService(
+    getTalentSkillRepository(),
+    getEvidenceRepository(),
+    capacityFor("skills", ["compétence", "compétences"]),
+  );
+export const getProjectService = () =>
+  new CrudService(getProjectRepository(), "Projet", capacityFor("projects", ["projet", "projets"]));
 export const getProjectCoverService = () => new ProjectCoverService(getProjectRepository(), getStorage);
 export const getExperienceService = () => new CrudService(getExperienceRepository(), "Expérience");
 export const getExperienceDocumentService = () =>

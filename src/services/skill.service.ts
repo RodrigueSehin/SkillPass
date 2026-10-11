@@ -1,3 +1,4 @@
+import { assertWithinCapacity, type Capacity } from "@/lib/plans/limits";
 import { ConflictError, NotFoundError } from "@/lib/errors";
 import type { TalentSkillDTO, TalentSkillRepository } from "@/repositories/talent-skill.repository";
 import type { CreateTalentSkillInput, ListTalentSkillsQuery, UpdateTalentSkillInput } from "@/schemas/skill";
@@ -18,6 +19,8 @@ export class SkillService {
     private readonly evidence?: {
       countBySkill(profileId: string): Promise<Record<string, { total: number }>>;
     },
+    /** The plan's limit on how many skills a profile may hold; none when omitted. */
+    private readonly capacity?: Capacity,
   ) {}
 
   private async withEvidence(profileId: string, skills: TalentSkillDTO[]) {
@@ -54,6 +57,11 @@ export class SkillService {
   }
 
   async add(profileId: string, input: CreateTalentSkillInput) {
+    await assertWithinCapacity(
+      this.capacity,
+      profileId,
+      async () => (await this.repo.list(profileId)).length,
+    );
     const created = await this.repo.create(profileId, { ...input, score: DECLARED_SCORE[input.level] });
     if (!created) throw new ConflictError("Cette compétence figure déjà dans votre profil");
     return created;

@@ -1,5 +1,6 @@
 "use client";
 
+import type { PlanCode } from "@/types/business";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Copy } from "lucide-react";
@@ -66,7 +67,9 @@ export function MembersTable({
   canEdit,
   showCheckboxes = true,
   emptyLabel = "Aucun membre ne correspond à vos critères.",
+  plan,
 }: {
+  plan: PlanCode;
   rows: MemberRow[];
   canEdit: boolean;
   showCheckboxes?: boolean;
@@ -266,6 +269,7 @@ export function MembersTable({
       >
         <div className="max-h-[70vh] space-y-5 overflow-y-auto pr-1">
           <PermissionsEditor
+            plan={plan}
             role={draft.role}
             permissions={draft.permissions}
             onChange={(role, permissions) => setDraft({ role, permissions })}

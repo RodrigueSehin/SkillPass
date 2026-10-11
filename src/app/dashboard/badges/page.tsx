@@ -1,3 +1,4 @@
+import { requireTalentFeature } from "@/lib/plans/talent-guard";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Medal } from "lucide-react";
@@ -12,6 +13,7 @@ import { getCredentialService } from "@/services/container";
 export const metadata: Metadata = { title: "Badges" };
 
 export default async function BadgesPage() {
+  await requireTalentFeature("portfolioBadges");
   const user = await requireUser();
   const credentials = await getCredentialService().listForProfile(user.id);
 

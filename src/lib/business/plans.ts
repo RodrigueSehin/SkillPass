@@ -1,3 +1,4 @@
+import { BUSINESS_FEATURES, BUSINESS_FEATURE_LABELS, businessHas } from "@/lib/plans/entitlements";
 import type { PlanCode } from "@/types/business";
 
 export interface PlanDef {
@@ -82,7 +83,7 @@ export const PLANS: Record<PlanCode, PlanDef> = {
 
 /** How many more people the plan lets the organization hold, or null when unlimited. */
 /** Matches the "Matching IA" row of the plan comparison: every plan but Starter. */
-export const planHasMatching = (plan: PlanCode) => plan !== "STARTER";
+export const planHasMatching = (plan: PlanCode) => businessHas(plan, "matching");
 
 export function remainingSeats(plan: PlanCode, used: number) {
   const max = PLANS[plan].maxMembers;
@@ -111,21 +112,12 @@ export const PLAN_COMPARISON: { label: string; values: Record<PlanCode, string |
       ]),
     ) as Record<PlanCode, string>,
   },
-  {
-    label: "Accès à la base de talents",
-    values: { STARTER: true, PRO: true, BUSINESS: true, ENTERPRISE: true },
-  },
-  { label: "Matching IA", values: { STARTER: false, PRO: true, BUSINESS: true, ENTERPRISE: true } },
-  {
-    label: "Évaluations de compétences",
-    values: { STARTER: false, PRO: true, BUSINESS: true, ENTERPRISE: true },
-  },
-  { label: "Analytics avancés", values: { STARTER: false, PRO: true, BUSINESS: true, ENTERPRISE: true } },
-  {
-    label: "Intégrations (API, SIRH, …)",
-    values: { STARTER: false, PRO: false, BUSINESS: true, ENTERPRISE: true },
-  },
-  { label: "Support dédié", values: { STARTER: false, PRO: false, BUSINESS: true, ENTERPRISE: true } },
+  ...BUSINESS_FEATURES.map((feature) => ({
+    label: BUSINESS_FEATURE_LABELS[feature],
+    values: Object.fromEntries(
+      (Object.keys(PLANS) as PlanCode[]).map((code) => [code, businessHas(code, feature)]),
+    ) as Record<PlanCode, boolean>,
+  })),
 ];
 
 /** Yearly billing takes 20 % off the monthly price. */

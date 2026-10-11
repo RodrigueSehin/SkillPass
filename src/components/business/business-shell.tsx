@@ -17,6 +17,8 @@ import {
 import { logoutAction } from "@/app/(auth)/actions";
 import { HeaderMenu } from "@/components/layout/header-menu";
 import { BUSINESS_NAV, BUSINESS_SECONDARY_NAV, type BusinessNavItem } from "@/config/business-navigation";
+import { businessHas } from "@/lib/plans/entitlements";
+import type { PlanCode } from "@/types/business";
 import { cn } from "@/lib/utils/cn";
 import { BusinessLogo } from "./business-logo";
 import { OrgLogo } from "./org-logo";
@@ -42,7 +44,7 @@ function NavLink({ item }: { item: BusinessNavItem }) {
   );
 }
 
-export function BusinessSidebar({ planName }: { planName: string }) {
+export function BusinessSidebar({ planName, plan }: { planName: string; plan: PlanCode }) {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-gradient-to-b from-[var(--sidebar-from,#0a1d4d)] to-[var(--sidebar-to,#0e2a6b)] p-4 lg:flex">
       <div className="px-2 py-3">
@@ -52,7 +54,7 @@ export function BusinessSidebar({ planName }: { planName: string }) {
         aria-label="Navigation principale"
         className="no-scrollbar mt-4 min-h-0 flex-1 space-y-1 overflow-y-auto"
       >
-        {BUSINESS_NAV.map((item) => (
+        {BUSINESS_NAV.filter((item) => !item.feature || businessHas(plan, item.feature)).map((item) => (
           <NavLink key={item.href} item={item} />
         ))}
         <div aria-hidden className="my-3 border-t border-white/10" />

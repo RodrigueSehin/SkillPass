@@ -1,11 +1,12 @@
 "use client";
 
 import { DASHBOARD_NAV, DASHBOARD_SECONDARY_NAV } from "@/config/navigation";
+import { talentHas, type TalentPlanCode } from "@/lib/plans/entitlements";
 import { SidebarLink } from "./nav-link";
 import { Logo } from "./logo";
 import { ProCard } from "./pro-card";
 
-export function Sidebar() {
+export function Sidebar({ plan }: { plan: TalentPlanCode }) {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-gradient-to-b from-[#0a1d4d] to-[#0e2a6b] p-4 lg:flex">
       <div className="px-2 py-3">
@@ -15,7 +16,7 @@ export function Sidebar() {
         aria-label="Navigation principale"
         className="no-scrollbar mt-4 min-h-0 flex-1 space-y-1 overflow-y-auto"
       >
-        {DASHBOARD_NAV.map((item) => (
+        {DASHBOARD_NAV.filter((item) => !item.feature || talentHas(plan, item.feature)).map((item) => (
           <SidebarLink key={item.href} item={item} />
         ))}
       </nav>
@@ -24,9 +25,11 @@ export function Sidebar() {
           <SidebarLink key={item.href} item={item} />
         ))}
       </nav>
-      <div className="mt-4">
-        <ProCard />
-      </div>
+      {plan === "FREE" && (
+        <div className="mt-4">
+          <ProCard />
+        </div>
+      )}
     </aside>
   );
 }

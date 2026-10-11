@@ -23,6 +23,7 @@ import { TalentAvatar } from "@/components/business/talent-cards";
 import { Panel, StatCard } from "@/components/business/ui";
 import { computeAnalytics } from "@/lib/business/analytics";
 import { requireBusiness } from "@/lib/business/context";
+import { businessHas } from "@/lib/plans/entitlements";
 import { activityFeed, levelDistribution, relativeTime } from "@/lib/business/dashboard";
 import { recentOffers } from "@/lib/business/job-offer-view";
 import { parseTalentFilters, searchTalents } from "@/lib/business/talent-search";
@@ -57,6 +58,10 @@ export default async function BusinessDashboardPage() {
   const orgId = ctx.organization.id;
   const now = new Date();
   const canTalents = ctx.can("talents.view");
+  // What the plan includes: the sections of a feature the plan lacks are not shown at all.
+  const plan = ctx.organization.plan;
+  const hasEvaluations = businessHas(plan, "evaluations");
+  const hasMatching = businessHas(plan, "matching");
   const [talents, offers, evaluations, attempts, members] = await Promise.all([
     getTalentDirectoryRepository().listPublic(500),
     getJobOfferService().list(orgId),
@@ -69,7 +74,9 @@ export default async function BusinessDashboardPage() {
   const applications = offers.reduce((n, o) => n + o.applicants, 0);
   const levels = levelDistribution(talents);
   const suggestions = searchTalents(talents, parseTalentFilters({})).slice(0, 3);
-  const feed = activityFeed({ attempts, evaluations, offers, members });
+  const feed = activityFeed({ attempts, evaluations, offers, members }).filter(
+    (f) => hasEvaluations || f.kind !== "evaluation",
+  );
   const { branding } = ctx.organization.settings;
 
   const actions: { href: string; label: string; icon: LucideIcon; show: boolean }[] = [
@@ -141,36 +148,47 @@ export default async function BusinessDashboardPage() {
           label="Candidatures reçues"
           caption="sur vos offres"
         />
-        <StatCard
-          icon={Medal}
-          tone="bg-orange-100 text-orange-600"
-          value={analytics.kpis.successRate.value === null ? "—" : `${analytics.kpis.successRate.value}%`}
-          label="Taux de réussite aux évaluations"
-          caption="6 derniers mois"
-        />
+        {hasEvaluations && (
+          <StatCard
+            icon={Medal}
+            tone="bg-orange-100 text-orange-600"
+            value={analytics.kpis.successRate.value === null ? "—" : `${analytics.kpis.successRate.value}%`}
+            label="Taux de réussite aux évaluations"
+            caption="6 derniers mois"
+          />
+        )}
       </div>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_320px]">
-        <Panel className="p-5">
-          <h2 className="text-navy font-bold">Activité des évaluations</h2>
-          <p className="text-muted text-xs">Évaluations créées et passages terminés, sur 6 mois</p>
-          <ul className="text-muted mt-2 flex gap-4 text-xs">
-            <li className="flex items-center gap-1.5">
-              <span aria-hidden className="size-2.5 rounded-full bg-blue-300" /> Évaluations créées
-            </li>
-            <li className="flex items-center gap-1.5">
-              <span aria-hidden className="size-2.5 rounded-full bg-green-600" /> Passages terminés
-            </li>
-          </ul>
-          <div className="mt-3">
-            <ComboChart
-              labels={analytics.trend.labels}
-              bars={analytics.trend.created}
-              line={analytics.trend.evaluated}
-              label="Évaluations créées et passages terminés, 6 derniers mois"
-            />
-          </div>
-        </Panel>
+      <div
+        className={cn(
+          "grid items-start gap-6",
+          hasEvaluations
+            ? "xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_320px]"
+            : "xl:grid-cols-[minmax(0,1fr)_320px]",
+        )}
+      >
+        {hasEvaluations && (
+          <Panel className="p-5">
+            <h2 className="text-navy font-bold">Activité des évaluations</h2>
+            <p className="text-muted text-xs">Évaluations créées et passages terminés, sur 6 mois</p>
+            <ul className="text-muted mt-2 flex gap-4 text-xs">
+              <li className="flex items-center gap-1.5">
+                <span aria-hidden className="size-2.5 rounded-full bg-blue-300" /> Évaluations créées
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span aria-hidden className="size-2.5 rounded-full bg-green-600" /> Passages terminés
+              </li>
+            </ul>
+            <div className="mt-3">
+              <ComboChart
+                labels={analytics.trend.labels}
+                bars={analytics.trend.created}
+                line={analytics.trend.evaluated}
+                label="Évaluations créées et passages terminés, 6 derniers mois"
+              />
+            </div>
+          </Panel>
+        )}
 
         <Panel className="p-5">
           <h2 className="text-navy font-bold">Répartition par niveau de compétence</h2>
@@ -259,8 +277,8 @@ export default async function BusinessDashboardPage() {
               </ul>
             )}
             <p className="text-muted mt-2 text-[11px]">
-              Sélection selon la vérification des compétences, les certifications et l&apos;expérience. Le
-              Pour les talents proposés par offre, ouvrez le Matching.
+              Sélection selon la vérification des compétences, les certifications et l&apos;expérience.
+              {hasMatching && " Pour les talents proposés par offre, ouvrez le Matching."}
             </p>
           </Panel>
         ) : (

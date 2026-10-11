@@ -1,6 +1,7 @@
 import { slugifyUsername } from "@/lib/utils/username";
 import type { UpdateProfileInput } from "@/schemas/profile";
 import type { AccountIdentity, ProfileDTO } from "@/types/profile";
+import type { TalentPlanCode } from "@/lib/plans/entitlements";
 import { DEFAULT_PROFILE_SETTINGS, type ProfileSettings } from "@/types/profile-settings";
 import type { ProfileRepository } from "./profile.repository";
 
@@ -17,6 +18,7 @@ const DEMO: ProfileDTO = {
   availability: "IMMEDIATE",
   isPublic: true,
   settings: DEFAULT_PROFILE_SETTINGS,
+  plan: "PRO",
   role: "TALENT",
   updatedAt: new Date().toISOString(),
 };
@@ -44,6 +46,7 @@ export class InMemoryProfileRepository implements ProfileRepository {
         availability: "IMMEDIATE",
         isPublic: true,
         settings: structuredClone(DEFAULT_PROFILE_SETTINGS),
+        plan: "FREE",
         role: "TALENT",
         updatedAt: new Date().toISOString(),
       };
@@ -95,6 +98,13 @@ export class InMemoryProfileRepository implements ProfileRepository {
     if (!profile) return null;
     profile.settings = structuredClone({ ...profile.settings, ...patch });
     profile.updatedAt = new Date().toISOString();
+    return structuredClone(profile);
+  }
+
+  async setPlan(id: string, plan: TalentPlanCode) {
+    const profile = this.profiles.get(id);
+    if (!profile) return null;
+    profile.plan = plan;
     return structuredClone(profile);
   }
 

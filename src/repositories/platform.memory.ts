@@ -71,6 +71,7 @@ export class InMemoryPlatformRepository implements PlatformRepository {
         fullName: p.fullName,
         username: p.username,
         role: p.role,
+        plan: p.plan,
         isPublic: p.isPublic,
         createdAt: p.updatedAt,
         organization: found ? { id: found.org.id, name: found.org.name, role: found.m.role } : null,

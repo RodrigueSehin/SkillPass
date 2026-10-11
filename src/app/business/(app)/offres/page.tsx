@@ -148,13 +148,15 @@ export default async function JobOffersPage({ searchParams }: PageProps<"/busine
               value={stats.views.toLocaleString("fr-FR")}
               label="Vues des offres"
             />
-            <StatCard
-              icon={Target}
-              tone="bg-blue-50 text-brand"
-              value={proposed === null ? "—" : proposed.toLocaleString("fr-FR")}
-              label="Talents proposés"
-              caption={proposed === null ? "avec le plan Pro" : "pour vos offres ouvertes"}
-            />
+            {proposed !== null && (
+              <StatCard
+                icon={Target}
+                tone="bg-blue-50 text-brand"
+                value={proposed.toLocaleString("fr-FR")}
+                label="Talents proposés"
+                caption="pour vos offres ouvertes"
+              />
+            )}
           </div>
 
           <Panel>

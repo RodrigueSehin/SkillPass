@@ -1,3 +1,4 @@
+import { TALENT_PLAN_CODES, TALENT_PLANS, type TalentPlanCode } from "@/lib/plans/entitlements";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import type { PlatformRepository } from "@/repositories/platform.repository";
 import type { ProfileRepository } from "@/repositories/profile.repository";
@@ -241,6 +242,23 @@ export class PlatformAdminService {
       `${ROLE_LABELS[target.role]} → ${ROLE_LABELS[role as UserRole]}`,
     );
     return updated;
+  }
+
+  /** Moves a talent to another plan (free or pro), whatever payment says: the administrator can grant it. */
+  async setTalentPlan(userId: string, profileId: string, plan: string) {
+    const actor = await this.admin(userId);
+    if (!(TALENT_PLAN_CODES as readonly string[]).includes(plan)) throw new NotFoundError("Plan inconnu");
+    const target = await this.platform.getProfile(profileId);
+    if (!target) throw new NotFoundError("Compte introuvable");
+    const saved = await this.profiles.setPlan(profileId, plan as TalentPlanCode);
+    if (!saved) throw new NotFoundError("Compte introuvable");
+    await this.audit(
+      actor,
+      "TALENT_PLAN",
+      { type: "PROFILE", id: profileId, label: target.fullName },
+      `${TALENT_PLANS[target.plan].name} → ${TALENT_PLANS[plan as TalentPlanCode].name}`,
+    );
+    return saved;
   }
 
   async listAudit(userId: string, limit = 200) {

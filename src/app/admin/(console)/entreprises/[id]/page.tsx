@@ -78,7 +78,7 @@ export default async function AdminOrganizationPage({ params }: PageProps<"/admi
             </p>
             <ul className="space-y-2">
               {members.map((m) => (
-                <MemberAccess key={m.id} orgId={o.id} member={m} />
+                <MemberAccess key={m.id} orgId={o.id} member={m} plan={o.plan} />
               ))}
             </ul>
           </Panel>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Bell,
+  CreditCard,
   ChevronRight,
   Link2,
   Lock,
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils/cn";
 
 export const ACCOUNT_TABS = [
   { key: "general", title: "Profil", text: "Informations personnelles", icon: UserRound },
+  { key: "plan", title: "Abonnement", text: "Votre plan et ses avantages", icon: CreditCard },
   { key: "security", title: "Sécurité", text: "Mot de passe et sessions", icon: Lock },
   { key: "notifications", title: "Notifications", text: "Préférences de communication", icon: Bell },
   { key: "integrations", title: "Intégrations", text: "Connectez vos outils", icon: Link2 },
@@ -30,6 +32,7 @@ export const parseAccountTab = (v: string | undefined, platformAdmin: boolean): 
   visibleAccountTabs(platformAdmin).find((t) => t.key === v)?.key ?? "general";
 
 const PAGE_TEXT: Record<Exclude<AccountTab, "general">, string> = {
+  plan: "Choisissez le plan qui correspond à vos besoins : chaque plan débloque ses propres avantages.",
   security: "Protégez votre compte et gérez votre mot de passe et vos sessions.",
   notifications: "Choisissez comment et quand SkillPass vous prévient des événements importants.",
   integrations: "Connectez SkillPass à vos outils pour importer vos données et gagner du temps.",

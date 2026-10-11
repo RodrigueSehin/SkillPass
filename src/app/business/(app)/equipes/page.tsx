@@ -16,7 +16,7 @@ import {
   roleDistribution,
   teamDistribution,
 } from "@/lib/business/org-stats";
-import { PERMISSION_GROUPS, ROLE_PRESETS } from "@/lib/business/permissions";
+import { permissionGroupsFor, ROLE_PRESETS } from "@/lib/business/permissions";
 import { paginate } from "@/lib/project-view";
 import { cn } from "@/lib/utils/cn";
 import { getOrganizationService } from "@/services/container";
@@ -147,7 +147,7 @@ export default async function TeamsPage({ searchParams }: PageProps<"/business/e
           {tab === "members" && (
             <>
               <MembersFilters teams={departments.map((d) => ({ id: d.id, name: d.name }))} />
-              <MembersTable rows={items.map(toRow)} canEdit={canEdit} />
+              <MembersTable rows={items.map(toRow)} canEdit={canEdit} plan={ctx.organization.plan} />
               <Pagination
                 page={page}
                 pages={pages}
@@ -217,7 +217,7 @@ export default async function TeamsPage({ searchParams }: PageProps<"/business/e
                   </tr>
                 </thead>
                 <tbody>
-                  {PERMISSION_GROUPS.map((g) => (
+                  {permissionGroupsFor(ctx.organization.plan).map((g) => (
                     <FragmentRows key={g.key} title={g.title} permissions={g.permissions} />
                   ))}
                 </tbody>
@@ -237,6 +237,7 @@ export default async function TeamsPage({ searchParams }: PageProps<"/business/e
               <MembersTable
                 rows={members.filter((m) => m.status === "INVITED").map(toRow)}
                 canEdit={canEdit}
+                plan={ctx.organization.plan}
                 showCheckboxes={false}
                 emptyLabel="Aucune invitation en attente."
               />

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { DATE } from "@/components/admin/pills";
-import { RoleSelect } from "@/components/admin/role-select";
+import { PlanSelect, RoleSelect } from "@/components/admin/role-select";
 import { Panel } from "@/components/business/ui";
 import { requirePlatformAdmin } from "@/lib/auth/platform-admin";
 import { getPlatformAdminService } from "@/services/container";
@@ -75,6 +75,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/admin
                   <th className="px-3 py-3 font-semibold">Entreprise</th>
                   <th className="px-3 py-3 font-semibold">Profil</th>
                   <th className="px-3 py-3 font-semibold">Créé le</th>
+                  <th className="px-3 py-3 font-semibold">Plan</th>
                   <th className="px-5 py-3 font-semibold">Rôle sur la plateforme</th>
                 </tr>
               </thead>
@@ -104,6 +105,9 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/admin
                     </td>
                     <td className="text-muted px-3 py-3 whitespace-nowrap">
                       {DATE.format(new Date(p.createdAt))}
+                    </td>
+                    <td className="px-3 py-3">
+                      <PlanSelect profileId={p.id} plan={p.plan} />
                     </td>
                     <td className="px-5 py-3">
                       <RoleSelect profileId={p.id} role={p.role} disabled={p.id === user.id} />

@@ -1,5 +1,6 @@
 "use client";
 
+import type { PlanCode } from "@/types/business";
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -66,7 +67,9 @@ export function MemberWizard({
   organizationName,
   teams,
   managers,
+  plan,
 }: {
+  plan: PlanCode;
   organizationName: string;
   teams: TeamOption[];
   managers: ManagerOption[];
@@ -353,6 +356,7 @@ export function MemberWizard({
                 </p>
               </div>
               <PermissionsEditor
+                plan={plan}
                 role={v.role}
                 permissions={v.permissions}
                 onChange={(role, permissions) => setV((prev) => ({ ...prev, role, permissions }))}

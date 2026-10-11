@@ -9,6 +9,7 @@ import { RecentProjects } from "@/components/dashboard/recent-projects";
 import { TopSkills } from "@/components/dashboard/top-skills";
 import { UpcomingAssessments } from "@/components/dashboard/upcoming-assessments";
 import { requireUser } from "@/lib/auth/current-user";
+import { talentHas } from "@/lib/plans/entitlements";
 import { profileFor } from "@/lib/auth/profile";
 import { computeCompletion } from "@/lib/completion";
 import { appUrl } from "@/lib/utils/app-url";
@@ -19,10 +20,12 @@ export const metadata: Metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const user = await requireUser();
   const profile = await profileFor(user);
+  const hasAssessments = talentHas(profile.plan, "assessments");
+  const hasBadges = talentHas(profile.plan, "portfolioBadges");
   const [passport, evidence, assessments] = await Promise.all([
     getPassportService().build(user.id, profile),
     getEvidenceService().list(user.id),
-    getAssessmentService().list(user.id),
+    hasAssessments ? getAssessmentService().list(user.id) : Promise.resolve([]),
   ]);
   const { stats } = passport;
 
@@ -63,13 +66,15 @@ export default async function DashboardPage() {
               icon={Sparkles}
               tile="bg-emerald-100 text-emerald-600"
             />
-            <KpiCard
-              href="/dashboard/badges"
-              label="Badges"
-              value={passport.credentials.length}
-              icon={Medal}
-              tile="bg-violet-100 text-violet-600"
-            />
+            {hasBadges && (
+              <KpiCard
+                href="/dashboard/badges"
+                label="Badges"
+                value={passport.credentials.length}
+                icon={Medal}
+                tile="bg-violet-100 text-violet-600"
+              />
+            )}
             <KpiCard
               href="/dashboard/projects"
               label="Projets"
@@ -100,13 +105,13 @@ export default async function DashboardPage() {
             publicUrl={`${appUrl()}/${profile.username}`}
             counts={{ skills: stats.skills, projects: stats.projects, certifications: stats.certifications }}
           />
-          <QuickActions />
+          <QuickActions showAssessments={hasAssessments} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3">
         <RecentProjects projects={passport.projects.slice(0, 4)} />
-        <UpcomingAssessments assessments={available} />
+        {hasAssessments && <UpcomingAssessments assessments={available} />}
         <div className="lg:col-span-2 2xl:col-span-1">
           <OpportunitiesTeaser />
         </div>

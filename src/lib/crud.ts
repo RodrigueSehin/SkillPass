@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { NotFoundError } from "@/lib/errors";
+import { assertWithinCapacity, type Capacity } from "@/lib/plans/limits";
 
 /** Every method is scoped by profileId: a repository never touches another user's rows. */
 export interface CrudRepository<Dto extends { id: string }, Create, Patch = Partial<Create>> {
@@ -14,6 +15,8 @@ export class CrudService<Dto extends { id: string }, Create, Patch = Partial<Cre
   constructor(
     private readonly repo: CrudRepository<Dto, Create, Patch>,
     private readonly label: string,
+    /** The plan's limit on how many items a profile may hold; none when omitted. */
+    private readonly capacity?: Capacity,
   ) {}
 
   list(profileId: string) {
@@ -26,7 +29,12 @@ export class CrudService<Dto extends { id: string }, Create, Patch = Partial<Cre
     return item;
   }
 
-  add(profileId: string, input: Create) {
+  async add(profileId: string, input: Create) {
+    await assertWithinCapacity(
+      this.capacity,
+      profileId,
+      async () => (await this.repo.list(profileId)).length,
+    );
     return this.repo.create(profileId, input);
   }
 

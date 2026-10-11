@@ -1,3 +1,4 @@
+import { talentHas } from "@/lib/plans/entitlements";
 import {
   ASSESSMENT_BANK,
   BANK_VERSION,
@@ -157,6 +158,9 @@ export class AssessmentService {
   }
 
   async start(profileId: string, slug: string): Promise<AttemptDTO> {
+    const owner = await this.deps.profiles.findById(profileId);
+    if (owner && !talentHas(owner.plan, "assessments"))
+      throw new ForbiddenError("Les évaluations font partie du plan Pro.");
     const assessment = this.bank(slug);
     const skills = await this.deps.skills.list(profileId);
     const skill = this.findSkill(skills, assessment);
