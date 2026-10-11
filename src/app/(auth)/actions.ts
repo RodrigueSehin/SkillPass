@@ -2,6 +2,7 @@
 
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { appUrl, isLocalUrl } from "@/lib/utils/app-url";
 import { createSupabaseServerClient } from "@/lib/auth/supabase-server";
 import { isSupabaseConfigured } from "@/lib/auth/env";
 import { REMEMBER_COOKIE } from "@/lib/auth/remember";
@@ -26,7 +27,9 @@ function safeNextPath(next: FormDataEntryValue | null | undefined) {
 
 async function appOrigin() {
   const h = await headers();
-  return process.env.NEXT_PUBLIC_APP_URL ?? `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
+  // The configured site, unless it is localhost: then the address the request came to.
+  const configured = appUrl();
+  return isLocalUrl(configured) ? `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}` : configured;
 }
 
 export async function loginAction(_prev: ActionState, formData: FormData): Promise<ActionState> {

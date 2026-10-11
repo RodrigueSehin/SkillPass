@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { appUrl } from "@/lib/utils/app-url";
 import { Caveat, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
@@ -18,7 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const siteUrl = appUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
