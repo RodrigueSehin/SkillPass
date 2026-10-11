@@ -11,6 +11,8 @@ export interface TopbarUser {
   canReview: boolean;
   avatar?: AvatarRef | null;
   profileId?: string;
+  hasOrganization?: boolean;
+  isPlatformAdmin?: boolean;
 }
 
 export function Topbar({ user }: { user: TopbarUser }) {
@@ -43,6 +45,8 @@ export function Topbar({ user }: { user: TopbarUser }) {
           canReview={user.canReview}
           avatar={user.avatar}
           profileId={user.profileId}
+          hasOrganization={user.hasOrganization}
+          isPlatformAdmin={user.isPlatformAdmin}
         />
       </div>
     </header>

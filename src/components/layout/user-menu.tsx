@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, ClipboardCheck, IdCard, LogOut, Settings } from "lucide-react";
+import { Building2, ChevronDown, ClipboardCheck, IdCard, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/actions";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import type { AvatarRef } from "@/lib/avatars";
@@ -14,12 +14,24 @@ interface UserMenuProps {
   canReview: boolean;
   avatar?: AvatarRef | null;
   profileId?: string;
+  /** Holds a role in a company: the menu offers the switch to SkillPass Business. */
+  hasOrganization?: boolean;
+  /** The general administrator of SkillPass: the menu offers the administration console. */
+  isPlatformAdmin?: boolean;
 }
 
 const itemClass =
   "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground hover:bg-slate-100";
 
-export function UserMenu({ name, roleLabel, canReview, avatar, profileId }: UserMenuProps) {
+export function UserMenu({
+  name,
+  roleLabel,
+  canReview,
+  avatar,
+  profileId,
+  hasOrganization,
+  isPlatformAdmin,
+}: UserMenuProps) {
   return (
     <HeaderMenu
       label="Menu du compte"
@@ -48,6 +60,16 @@ export function UserMenu({ name, roleLabel, canReview, avatar, profileId }: User
       <Link href="/dashboard/settings" role="menuitem" className={itemClass}>
         <Settings className="size-4" aria-hidden /> Paramètres
       </Link>
+      {hasOrganization && (
+        <Link href="/business" role="menuitem" className={itemClass}>
+          <Building2 className="size-4" aria-hidden /> Organisation
+        </Link>
+      )}
+      {isPlatformAdmin && (
+        <Link href="/admin" role="menuitem" className={itemClass}>
+          <ShieldCheck className="size-4" aria-hidden /> Console SkillPass
+        </Link>
+      )}
       {canReview && (
         <Link href="/admin/verifications" role="menuitem" className={itemClass}>
           <ClipboardCheck className="size-4" aria-hidden /> Validations en attente

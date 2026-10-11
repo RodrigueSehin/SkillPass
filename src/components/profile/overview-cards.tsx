@@ -102,27 +102,30 @@ export function TopSkillsCard({ skills, moreHref }: CardProps & { skills: Passpo
           {skills.slice(0, 5).map((s) => {
             const { icon: Icon, tile } = skillVisual(s.name);
             return (
-              <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:flex-nowrap">
-                <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl", tile)}>
-                  <Icon className="size-5" aria-hidden />
-                </span>
-                <span className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:w-40 sm:flex-none sm:shrink-0">
-                  <span className="text-navy text-sm font-semibold">{s.name}</span>
-                  <span className={cn("rounded-md px-2 py-0.5 text-xs font-semibold", LEVEL_CHIP[s.level])}>
-                    {SKILL_LEVEL_LABELS[s.level]}
+              <li key={s.id} className="py-3">
+                {/* Two lines whatever the card width: name and score, then the bar. Nothing can overflow. */}
+                <div className="flex items-center gap-3">
+                  <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl", tile)}>
+                    <Icon className="size-5" aria-hidden />
                   </span>
-                </span>
+                  <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-navy text-sm font-semibold">{s.name}</span>
+                    <span className={cn("rounded-md px-2 py-0.5 text-xs font-semibold", LEVEL_CHIP[s.level])}>
+                      {SKILL_LEVEL_LABELS[s.level]}
+                    </span>
+                  </span>
+                  <span className="text-navy shrink-0 text-sm font-bold">{s.score}%</span>
+                </div>
                 <span
                   role="progressbar"
                   aria-label={`${s.name} : ${s.score}%`}
                   aria-valuenow={s.score}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  className="order-last block h-2 basis-full overflow-hidden rounded-full bg-slate-100 sm:order-none sm:min-w-12 sm:flex-1 sm:basis-0"
+                  className="mt-2 block h-2 overflow-hidden rounded-full bg-slate-100"
                 >
                   <span className="bg-brand block h-full rounded-full" style={{ width: `${s.score}%` }} />
                 </span>
-                <span className="text-navy w-10 shrink-0 text-right text-sm font-bold">{s.score}%</span>
               </li>
             );
           })}

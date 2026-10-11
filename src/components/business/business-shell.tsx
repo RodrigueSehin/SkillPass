@@ -12,6 +12,7 @@ import {
   LogOut,
   MessageSquare,
   Search,
+  ShieldCheck,
   UserRound,
 } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/actions";
@@ -136,6 +137,7 @@ export function BusinessTopbar({
   pendingInvites,
   showLogo = true,
   showName = true,
+  platformAdmin = false,
 }: {
   organizationName: string;
   roleLabel: string;
@@ -144,6 +146,8 @@ export function BusinessTopbar({
   /** Branding choices of the organization (Settings > Personalization). */
   showLogo?: boolean;
   showName?: boolean;
+  /** The general administrator of SkillPass gets a link to the console. */
+  platformAdmin?: boolean;
 }) {
   return (
     <header className="border-border/70 sticky top-0 z-20 flex h-[4.5rem] items-center gap-3 border-b bg-white/85 px-4 backdrop-blur sm:px-6">
@@ -201,6 +205,11 @@ export function BusinessTopbar({
           <Link href="/dashboard" role="menuitem" className={itemClass}>
             <UserRound className="size-4" aria-hidden /> Mon espace Talent
           </Link>
+          {platformAdmin && (
+            <Link href="/admin" role="menuitem" className={itemClass}>
+              <ShieldCheck className="size-4" aria-hidden /> Console SkillPass
+            </Link>
+          )}
           <form action={logoutAction} className="border-border mt-1 border-t pt-1">
             <button type="submit" role="menuitem" className={`${itemClass} text-danger`}>
               <LogOut className="size-4" aria-hidden /> Déconnexion

@@ -46,6 +46,7 @@ export default async function BusinessAppLayout({ children }: LayoutProps<"/busi
           pendingInvites={members.filter((m) => m.status === "INVITED").length}
           showLogo={branding.showLogo}
           showName={branding.showName}
+          platformAdmin={ctx.platformAdmin}
         />
         <main className="mx-auto max-w-[1500px] px-4 py-6 pb-24 sm:px-6 lg:pb-10">
           {ctx.member.status === "ACTIVE" ? (
