@@ -113,7 +113,11 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
       email: null,
       timezone: "Africa/Abidjan",
       language: "fr",
-      verified: input.verified ?? false,
+      verified: input.verificationStatus === "VERIFIED",
+      verificationStatus: input.verificationStatus ?? "PENDING",
+      verificationNote: null,
+      rejectionReason: null,
+      verifiedAt: null,
       plan: input.plan ?? "BUSINESS",
       logoVersion: null,
       settings: structuredClone(DEFAULT_ORG_SETTINGS),
@@ -146,7 +150,13 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     const org = this.orgs.get(id);
     if (!org) return null;
     Object.assign(org, structuredClone(patch));
+    org.verified = org.verificationStatus === "VERIFIED";
     return this.orgView(org);
+  }
+
+  /** Platform administration: every organization, newest first. */
+  allOrganizations(): OrganizationDTO[] {
+    return [...this.orgs.values()].map((o) => this.orgView(o)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
   async setDeactivated(orgId: string, deactivated: boolean) {
@@ -366,6 +376,10 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
       timezone: "Africa/Abidjan",
       language: "fr",
       verified: true,
+      verificationStatus: "VERIFIED",
+      verificationNote: null,
+      rejectionReason: null,
+      verifiedAt: new Date().toISOString(),
       plan: "BUSINESS",
       logoVersion: null,
       settings: structuredClone(DEFAULT_ORG_SETTINGS),

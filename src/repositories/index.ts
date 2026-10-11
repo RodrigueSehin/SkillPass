@@ -47,6 +47,9 @@ import type { OrgSkillRepository } from "./org-skill.repository";
 import { InMemoryMatchingRepository } from "./matching.memory";
 import { PrismaMatchingRepository } from "./matching.prisma";
 import type { MatchingRepository } from "./matching.repository";
+import { InMemoryPlatformRepository } from "./platform.memory";
+import { PrismaPlatformRepository } from "./platform.prisma";
+import type { PlatformRepository } from "./platform.repository";
 import { InMemoryEvaluationRepository } from "./evaluation.memory";
 import { PrismaEvaluationRepository } from "./evaluation.prisma";
 import type { EvaluationRepository } from "./evaluation.repository";
@@ -90,6 +93,7 @@ const g = globalThis as unknown as {
     evaluations: InMemoryEvaluationRepository;
     orgSkills: InMemoryOrgSkillRepository;
     matching: InMemoryMatchingRepository;
+    platform?: InMemoryPlatformRepository;
   };
 };
 
@@ -178,3 +182,8 @@ export const getOrgSkillRepository = (): OrgSkillRepository =>
   hasDatabase() ? new PrismaOrgSkillRepository() : memory().orgSkills;
 export const getMatchingRepository = (): MatchingRepository =>
   hasDatabase() ? new PrismaMatchingRepository() : memory().matching;
+export const getPlatformRepository = (): PlatformRepository => {
+  if (hasDatabase()) return new PrismaPlatformRepository();
+  const m = memory();
+  return (m.platform ??= new InMemoryPlatformRepository(m.organizations, m.profiles, m.jobOffers));
+};

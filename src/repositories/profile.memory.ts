@@ -52,6 +52,11 @@ export class InMemoryProfileRepository implements ProfileRepository {
     return { ...profile };
   }
 
+  /** Platform administration: every profile. */
+  all(): ProfileDTO[] {
+    return [...this.profiles.values()].map((p) => structuredClone(p));
+  }
+
   /** Test/dev helper: roles are granted by administrators, never by user input. */
   setRole(id: string, role: ProfileDTO["role"]) {
     const profile = this.profiles.get(id);

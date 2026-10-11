@@ -13,7 +13,7 @@ import type {
 } from "@/schemas/business";
 import type { DepartmentDTO, MemberDTO, MemberInvite, OrganizationDTO } from "@/types/business";
 import type { OrgSettings } from "@/types/org-settings";
-import type { PlanCode } from "@/types/business";
+import type { OrgVerificationStatus, PlanCode } from "@/types/business";
 
 export const INVITE_DAYS = 7;
 const DAY_MS = 86_400_000;
@@ -379,6 +379,32 @@ export class OrganizationService {
     const org = await this.repo.getOrganization(orgId);
     if (!org) throw new NotFoundError("Organisation introuvable");
     const updated = await this.repo.updateOrganization(orgId, { settings: { ...org.settings, ...patch } });
+    if (!updated) throw new NotFoundError("Organisation introuvable");
+    return updated;
+  }
+
+  async getOrganization(orgId: string) {
+    const org = await this.repo.getOrganization(orgId);
+    if (!org) throw new NotFoundError("Organisation introuvable");
+    return org;
+  }
+
+  /** The SkillPass administrator's decision on a company. Refusing needs a reason the company can read. */
+  async setVerification(orgId: string, status: OrgVerificationStatus, reason: string | null = null) {
+    const updated = await this.repo.updateOrganization(orgId, {
+      verificationStatus: status,
+      rejectionReason: status === "REJECTED" ? reason : null,
+      verifiedAt: status === "VERIFIED" ? this.now().toISOString() : null,
+    });
+    if (!updated) throw new NotFoundError("Organisation introuvable");
+    return updated;
+  }
+
+  /** What the company writes to support its request (registration number, website…). */
+  async saveVerificationNote(orgId: string, note: string) {
+    const updated = await this.repo.updateOrganization(orgId, {
+      verificationNote: note.trim().slice(0, 1000) || null,
+    });
     if (!updated) throw new NotFoundError("Organisation introuvable");
     return updated;
   }

@@ -24,12 +24,22 @@ export const loadBusinessScope = cache(async (profileId: string) =>
  * Server-side gate for every Business page and action. A person without an organization is sent to the
  * onboarding page; the scope returned here is the only source of the organization id used by the services.
  */
-export async function requireBusiness(options: { allowSuspended?: boolean } = {}): Promise<BusinessContext> {
+export async function requireBusiness(
+  options: { allowSuspended?: boolean; allowUnverified?: boolean } = {},
+): Promise<BusinessContext> {
   const user = await requireUser();
   // Makes sure the profile row exists before any foreign key points at it.
   const profile = await profileFor(user);
   const scope = await loadBusinessScope(user.id);
   if (!scope) redirect("/business/onboarding");
+  // A company is checked by the SkillPass administrator before it can use Business.
+  if (
+    !options.allowUnverified &&
+    !isPlatformAdmin(profile) &&
+    scope.organization.verificationStatus !== "VERIFIED"
+  ) {
+    redirect("/business/verification");
+  }
   if (!options.allowSuspended) {
     // A deactivated organization is closed to everyone; maintenance only lets administrators in.
     if (scope.organization.deactivated) redirect("/business/suspendue");

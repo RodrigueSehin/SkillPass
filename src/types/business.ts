@@ -96,6 +96,15 @@ export const ORG_INDUSTRIES = [
   "Autre",
 ] as const;
 
+/** A company is checked by the SkillPass administrator before it can use Business. */
+export const VERIFICATION_STATUSES = ["PENDING", "VERIFIED", "REJECTED"] as const;
+export type OrgVerificationStatus = (typeof VERIFICATION_STATUSES)[number];
+export const VERIFICATION_LABELS: Record<OrgVerificationStatus, string> = {
+  PENDING: "En attente",
+  VERIFIED: "Validée",
+  REJECTED: "Refusée",
+};
+
 export interface OrganizationDTO {
   id: string;
   name: string;
@@ -109,7 +118,14 @@ export interface OrganizationDTO {
   email: string | null;
   timezone: string;
   language: string;
+  /** True once the SkillPass administrator validated the company. */
   verified: boolean;
+  verificationStatus: OrgVerificationStatus;
+  /** What the company wrote to support its request (registration number, website, …). */
+  verificationNote: string | null;
+  /** Why the administrator refused the company, shown to its members. */
+  rejectionReason: string | null;
+  verifiedAt: string | null;
   plan: PlanCode;
   /** Changes with every new logo, so browsers do not keep showing the old one. Null when there is none. */
   logoVersion: string | null;

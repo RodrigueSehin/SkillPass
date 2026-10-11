@@ -538,6 +538,11 @@ model Organization {
   timezone    String   @default("Africa/Abidjan")
   language    String   @default("fr")
   verified    Boolean  @default(false)
+  // Checked by the SkillPass administrator: PENDING, VERIFIED or REJECTED.
+  verificationStatus String    @default("PENDING") @map("verification_status")
+  verificationNote   String?   @map("verification_note")
+  rejectionReason    String?   @map("rejection_reason")
+  verifiedAt         DateTime? @map("verified_at")
   plan        String   @default("BUSINESS")
   logoPath    String?  @map("logo_path")
   // Preferences edited in Settings (src/types/org-settings.ts), stored as one document.
@@ -804,4 +809,20 @@ model MatchingEvent {
 
   @@index([organizationId, createdAt])
   @@map("matching_events")
+}
+
+/// What the SkillPass administrator did on the platform (validations, roles, suspensions…).
+model AdminAuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorId     String?  @map("actor_id") @db.Uuid
+  actorName   String   @map("actor_name")
+  action      String
+  targetType  String   @map("target_type")
+  targetId    String?  @map("target_id")
+  targetLabel String   @default("") @map("target_label")
+  detail      String   @default("")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("admin_audit_log")
 }

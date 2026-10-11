@@ -12,6 +12,7 @@ import type {
   MemberInvite,
   MemberStatus,
   OrganizationDTO,
+  OrgVerificationStatus,
   OrgRole,
   PlanCode,
   SiteDTO,
@@ -41,7 +42,11 @@ const toOrganization = (r: Prisma.OrganizationGetPayload<object>): OrganizationD
   email: r.email,
   timezone: r.timezone,
   language: r.language,
-  verified: r.verified,
+  verified: r.verificationStatus === "VERIFIED",
+  verificationStatus: r.verificationStatus as OrgVerificationStatus,
+  verificationNote: r.verificationNote,
+  rejectionReason: r.rejectionReason,
+  verifiedAt: r.verifiedAt?.toISOString() ?? null,
   plan: r.plan as PlanCode,
   logoVersion: r.logoPath ? createHash("sha1").update(r.logoPath).digest("hex").slice(0, 8) : null,
   settings: withDefaults(r.settings),
@@ -152,7 +157,8 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
           size: input.size,
           website: input.website,
           plan: input.plan ?? "BUSINESS",
-          verified: input.verified ?? false,
+          verificationStatus: input.verificationStatus ?? "PENDING",
+          verified: input.verificationStatus === "VERIFIED",
         },
       });
       const member = await tx.organizationMember.create({
@@ -184,10 +190,15 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   }
 
   async updateOrganization(id: string, patch: OrganizationPatch) {
-    const { settings, ...rest } = patch;
+    const { settings, verifiedAt, ...rest } = patch;
     const { count } = await prisma.organization.updateMany({
       where: { id },
-      data: { ...rest, ...(settings ? { settings: settings as unknown as Prisma.InputJsonValue } : {}) },
+      data: {
+        ...rest,
+        ...(rest.verificationStatus ? { verified: rest.verificationStatus === "VERIFIED" } : {}),
+        ...(verifiedAt !== undefined ? { verifiedAt: verifiedAt ? new Date(verifiedAt) : null } : {}),
+        ...(settings ? { settings: settings as unknown as Prisma.InputJsonValue } : {}),
+      },
     });
     return count === 0 ? null : this.getOrganization(id);
   }

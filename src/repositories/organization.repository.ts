@@ -8,11 +8,17 @@ import type {
 } from "@/types/business";
 
 export type NewOrganization = Pick<OrganizationDTO, "name" | "slug"> &
-  Partial<Pick<OrganizationDTO, "industry" | "size" | "website" | "description" | "plan" | "verified">>;
+  Partial<
+    Pick<OrganizationDTO, "industry" | "size" | "website" | "description" | "plan" | "verificationStatus">
+  >;
 
 export type OrganizationPatch = Partial<
   Pick<
     OrganizationDTO,
+    | "verificationStatus"
+    | "verificationNote"
+    | "rejectionReason"
+    | "verifiedAt"
     | "name"
     | "description"
     | "industry"
