@@ -21,6 +21,11 @@ export default function RegisterPage() {
         <Link href="/login" className="text-brand font-semibold hover:underline">
           Se connecter
         </Link>
+        <br />
+        Vous représentez une entreprise ?{" "}
+        <Link href="/register/entreprise" className="text-brand font-semibold hover:underline">
+          Créer un espace entreprise
+        </Link>
       </p>
     </AuthCard>
   );

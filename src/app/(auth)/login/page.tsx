@@ -36,6 +36,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <Link href="/register" className="text-brand font-semibold hover:underline">
           Créer un compte
         </Link>
+        <br />
+        Vous recrutez ?{" "}
+        <Link href="/register/entreprise" className="text-brand font-semibold hover:underline">
+          Créer un espace entreprise
+        </Link>
       </p>
     </AuthCard>
   );

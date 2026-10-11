@@ -91,6 +91,12 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <Link
+            href="/register/entreprise"
+            className="text-foreground hover:text-brand hidden text-sm font-medium transition-colors xl:inline"
+          >
+            Espace entreprise
+          </Link>
           <Button asChild variant="outline" size="sm" className="hidden rounded-full px-5 sm:inline-flex">
             <Link href="/login">Se connecter</Link>
           </Button>
@@ -132,7 +138,14 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <Link
+            href="/register/entreprise"
+            onClick={closeAll}
+            className="text-brand mt-3 block rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-blue-50"
+          >
+            Espace entreprise
+          </Link>
+          <div className="mt-2 grid grid-cols-2 gap-3">
             <Button asChild variant="outline" className="rounded-full">
               <Link href="/login" onClick={closeAll}>
                 Se connecter

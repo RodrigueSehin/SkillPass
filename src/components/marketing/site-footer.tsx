@@ -53,6 +53,11 @@ export function SiteFooter() {
                 Créer mon SkillPass
               </Link>
             </li>
+            <li>
+              <Link href="/register/entreprise" className="hover:text-white">
+                Espace entreprise
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>

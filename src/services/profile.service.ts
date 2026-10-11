@@ -11,6 +11,8 @@ export interface EnsureProfileInput {
   yearsOfExperience?: number;
   careerGoal?: string;
   availability?: Availability;
+  /** False for company accounts: they are never listed as talents. Defaults to true. */
+  isPublic?: boolean;
 }
 
 export function slugifyUsername(fullName: string) {
@@ -42,6 +44,7 @@ export async function ensureProfile(input: EnsureProfileInput) {
       yearsOfExperience: input.yearsOfExperience ?? 0,
       careerGoal: input.careerGoal,
       availability: input.availability,
+      isPublic: input.isPublic,
     },
   });
 }

@@ -36,6 +36,19 @@ export const registerGoalsSchema = z.object({
 
 export const registerSchema = registerAccountSchema.merge(registerProfileSchema).merge(registerGoalsSchema);
 
+/** Company sign-up: the person who opens the account, then the organization. */
+export const registerCompanySchema = registerAccountSchema.extend({
+  organization: z.string().trim().min(2, "Nom de l'organisation trop court").max(120),
+  industry: z.string().trim().max(80).optional(),
+  size: z.string().trim().max(60).optional(),
+  website: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .refine((v) => !v || /^https?:\/\/\S+\.\S+$/.test(v), "Adresse du site invalide (https://…)"),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 /** Form values before Zod coercion (yearsOfExperience arrives as a string). */

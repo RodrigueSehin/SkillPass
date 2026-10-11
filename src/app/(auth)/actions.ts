@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/auth/supabase-server";
 import { isSupabaseConfigured } from "@/lib/auth/env";
 import { REMEMBER_COOKIE } from "@/lib/auth/remember";
-import { forgotPasswordSchema, loginSchema, registerSchema } from "@/schemas/auth";
+import { createOrganizationSchema } from "@/schemas/business";
+import { forgotPasswordSchema, loginSchema, registerCompanySchema, registerSchema } from "@/schemas/auth";
+import { getOrganizationService } from "@/services/container";
 import { ensureProfile } from "@/services/profile.service";
 
 export interface ActionState {
@@ -46,10 +48,19 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
     });
 
   const supabase = await createSupabaseServerClient({ remember });
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data: signedIn, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: "E-mail ou mot de passe incorrect." };
 
-  redirect(safeNextPath(formData.get("next")));
+  // Without an explicit destination, a member of an organization lands in SkillPass Business.
+  const wanted = formData.get("next");
+  if (typeof wanted !== "string" || !wanted) {
+    const isMember = await getOrganizationService()
+      .scopeFor(signedIn.user?.id ?? "")
+      .then(Boolean)
+      .catch(() => false);
+    if (isMember) redirect("/business");
+  }
+  redirect(safeNextPath(wanted));
 }
 
 export async function registerAction(values: unknown): Promise<ActionState> {
@@ -90,6 +101,59 @@ export async function registerAction(values: unknown): Promise<ActionState> {
 
   // With "Confirm email" turned off in Supabase, signUp already returns a session: go straight in.
   redirect(signUp.session ? "/dashboard" : "/verify-email");
+}
+
+/**
+ * Opens a company account: the contact person's login, their (non-public) profile and the organization they
+ * administer, in one go. With e-mail confirmation on, they confirm and then land in Business.
+ */
+export async function registerCompanyAction(values: unknown): Promise<ActionState> {
+  if (!isSupabaseConfigured()) return NOT_CONFIGURED;
+
+  const parsed = registerCompanySchema.safeParse(values);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Données invalides" };
+  const data = parsed.data;
+  const organization = createOrganizationSchema.safeParse({
+    name: data.organization,
+    industry: data.industry,
+    size: data.size,
+    website: data.website,
+  });
+  if (!organization.success) return { error: organization.error.issues[0]?.message ?? "Données invalides" };
+
+  const supabase = await createSupabaseServerClient();
+  const { data: signUp, error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      emailRedirectTo: `${await appOrigin()}/auth/callback?next=/business`,
+      data: { full_name: data.fullName },
+    },
+  });
+  // An address that already has an account comes back without identities: same answer as any failure.
+  if (error || !signUp.user || signUp.user.identities?.length === 0) {
+    return { error: "Impossible de créer le compte. Vérifiez vos informations ou connectez-vous." };
+  }
+
+  try {
+    await ensureProfile({
+      id: signUp.user.id,
+      email: data.email,
+      fullName: data.fullName,
+      isPublic: false,
+    });
+    const [firstName, ...rest] = data.fullName.trim().split(/\s+/);
+    await getOrganizationService().create(
+      { profileId: signUp.user.id, firstName: firstName ?? "", lastName: rest.join(" "), email: data.email },
+      organization.data,
+    );
+  } catch (err) {
+    console.error("registerCompanyAction: setup failed", err);
+    // The login exists: they can sign in and finish from /business/onboarding.
+    redirect(signUp.session ? "/business/onboarding" : "/verify-email");
+  }
+
+  redirect(signUp.session ? "/business" : "/verify-email");
 }
 
 export async function forgotPasswordAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
