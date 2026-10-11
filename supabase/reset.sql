@@ -9,6 +9,8 @@ drop table if exists
   recommendations,
   credentials,
   assessment_attempts,
+  evidence_skills,
+  evidence_files,
   skill_evidence,
   project_skills,
   admin_audit_log,

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, Clock, FileCheck2, Minus } from "lucide-react";
-import { AddEvidenceButton } from "@/components/evidence/add-evidence-button";
+import { ArrowLeft, Check, Clock, FileCheck2, Minus, Plus } from "lucide-react";
 import { EvidenceList } from "@/components/evidence/evidence-list";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SkillPassScore } from "@/components/skills/skillpass-score";
@@ -34,12 +34,13 @@ export default async function SkillDetailPage({ params }: PageProps<"/dashboard/
     throw err;
   }
 
-  const [evidence, allProjects, allSkills, credentials] = await Promise.all([
+  const [allEvidence, allProjects, credentials] = await Promise.all([
     getEvidenceService().list(user.id, skill.id),
     getProjectService().list(user.id),
-    getSkillService().list(user.id, { sort: "name" }),
     getCredentialService().listForProfile(user.id),
   ]);
+  // Drafts are not evidence yet: they do not count towards verification.
+  const evidence = allEvidence.filter((e) => e.published);
   const projects = allProjects.filter((p) => p.skills.includes(skill.name));
   const explanation = explainVerification({
     status: skill.verificationStatus,
@@ -116,11 +117,9 @@ export default async function SkillDetailPage({ params }: PageProps<"/dashboard/
           <h2 id="evidence-title" className="text-lg font-semibold">
             Preuves ({evidence.length})
           </h2>
-          <AddEvidenceButton
-            skillId={skill.id}
-            skills={allSkills.items.map((s) => ({ id: s.id, name: s.name }))}
-            projects={allProjects.map((p) => ({ id: p.id, name: p.name }))}
-          />
+          <Link href={`/dashboard/evidence/new?skill=${skill.id}`} className={buttonVariants()}>
+            <Plus /> Ajouter une preuve
+          </Link>
         </div>
         {evidence.length === 0 ? (
           <EmptyState
@@ -129,7 +128,7 @@ export default async function SkillDetailPage({ params }: PageProps<"/dashboard/
             description="Ajoutez un projet, un certificat ou un lien qui démontre cette compétence."
           />
         ) : (
-          <EvidenceList items={evidence} showSkill={false} />
+          <EvidenceList items={evidence} />
         )}
       </section>
 

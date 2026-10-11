@@ -121,6 +121,7 @@ model TalentSkill {
   credentials        Credential[]
   recommendations    Recommendation[]
   evidence           SkillEvidence[]
+  evidenceLinks      EvidenceSkill[]
   id                 String                  @id @default(uuid()) @db.Uuid
   profileId          String                  @map("profile_id") @db.Uuid
   skillId            String                  @map("skill_id") @db.Uuid
@@ -277,6 +278,8 @@ enum EvidenceType {
   ASSESSMENT
   RECOMMENDATION
   EXPERIENCE
+  DEMO
+  OTHER
 }
 
 enum EvidenceVerificationStatus {
@@ -301,14 +304,57 @@ model SkillEvidence {
   sizeBytes     Int?                       @map("size_bytes")
   status        EvidenceVerificationStatus @default(UNVERIFIED)
   createdAt     DateTime                   @default(now()) @map("created_at")
+  // Evidence wizard (talent "Preuves"). `talentSkillId` is the main skill; the others are in evidence_skills.
+  organization         String?
+  role                 String?
+  startDate            DateTime?                  @map("start_date")
+  endDate              DateTime?                  @map("end_date")
+  technologies         String[]                   @default([])
+  tags                 String[]                   @default([])
+  category             String?
+  // PUBLIC | RECRUITERS | PRIVATE
+  visibility           String                     @default("PUBLIC")
+  published            Boolean                    @default(true)
+  allowContact         Boolean                    @default(true) @map("allow_contact")
+  allowRecommendations Boolean                    @default(false) @map("allow_recommendations")
 
-  profile     Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  talentSkill TalentSkill @relation(fields: [talentSkillId], references: [id], onDelete: Cascade)
-  project     Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  profile     Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  talentSkill TalentSkill    @relation(fields: [talentSkillId], references: [id], onDelete: Cascade)
+  project     Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  files       EvidenceFile[]
+  skills      EvidenceSkill[]
 
   @@index([profileId])
   @@index([talentSkillId])
   @@map("skill_evidence")
+}
+
+model EvidenceFile {
+  id         String   @id @default(uuid()) @db.Uuid
+  evidenceId String   @map("evidence_id") @db.Uuid
+  // Storage object key (never a user-supplied name): "<profileId>/<uuid>.<ext>"
+  filePath   String   @map("file_path")
+  fileName   String   @map("file_name")
+  mimeType   String   @map("mime_type")
+  sizeBytes  Int      @map("size_bytes")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  evidence SkillEvidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  @@index([evidenceId])
+  @@map("evidence_files")
+}
+
+model EvidenceSkill {
+  evidenceId    String @map("evidence_id") @db.Uuid
+  talentSkillId String @map("talent_skill_id") @db.Uuid
+
+  evidence    SkillEvidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  talentSkill TalentSkill   @relation(fields: [talentSkillId], references: [id], onDelete: Cascade)
+
+  @@id([evidenceId, talentSkillId])
+  @@index([talentSkillId])
+  @@map("evidence_skills")
 }
 
 enum AttemptStatus {

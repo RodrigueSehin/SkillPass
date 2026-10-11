@@ -2,8 +2,8 @@ import { NotFoundError } from "@/lib/errors";
 import { newStorageKey, type StorageService } from "@/lib/storage/storage";
 import { sanitizeFileName, UploadError, validateUpload, type UploadedFile } from "@/lib/storage/uploads";
 import type { EvidenceRepository } from "@/repositories/evidence.repository";
-import { requiresFile, type CreateEvidenceInput } from "@/schemas/evidence";
-import { URL_EVIDENCE_TYPES, type NewEvidence } from "@/types/evidence";
+import { MAX_EVIDENCE_FILES, requiresFile, type CreateEvidenceInput } from "@/schemas/evidence";
+import type { NewEvidence } from "@/types/evidence";
 
 interface OwnedLookup {
   get(profileId: string, id: string): Promise<{ id: string; name: string }>;
@@ -26,67 +26,91 @@ export class EvidenceService {
     return this.repo.list(profileId, { talentSkillId });
   }
 
-  async add(profileId: string, input: CreateEvidenceInput, file?: UploadedFile) {
+  async add(profileId: string, input: CreateEvidenceInput, files: UploadedFile[] = []) {
     // Ownership checks first: evidence can only attach to the caller's own skills and projects.
-    const skill = await this.skills.get(profileId, input.talentSkillId);
+    const skillIds = [...new Set(input.talentSkillIds)];
+    const skills = await Promise.all(skillIds.map((id) => this.skills.get(profileId, id)));
     if (input.projectId) await this.projects.get(profileId, input.projectId);
 
-    if (URL_EVIDENCE_TYPES.includes(input.type) && file) {
-      throw new UploadError("Ce type de preuve est un lien : aucun fichier n'est attendu");
+    if (files.length > MAX_EVIDENCE_FILES) {
+      throw new UploadError(`${MAX_EVIDENCE_FILES} fichiers maximum par preuve`);
     }
-    if (requiresFile(input.type) && !file) throw new UploadError("Ajoutez un fichier pour ce type de preuve");
+    if (input.publish && requiresFile(input.type) && files.length === 0) {
+      throw new UploadError("Ajoutez un fichier pour ce type de preuve");
+    }
+    // Validate everything before storing anything, so a bad file leaves nothing behind.
+    const checked = files.map((file) => {
+      const { ext, mimeType } = validateUpload(file);
+      if (input.type === "SCREENSHOT" && !mimeType.startsWith("image/")) {
+        throw new UploadError("Une capture d'écran doit être une image");
+      }
+      return { file, ext, mimeType };
+    });
 
     const record: NewEvidence = {
-      talentSkillId: skill.id,
+      talentSkillId: skills[0].id,
+      skillIds: skills.map((s) => s.id),
       projectId: input.projectId,
       type: input.type,
       title: input.title,
       description: input.description,
       url: input.url,
+      organization: input.organization,
+      role: input.role,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      technologies: input.technologies,
+      tags: input.tags,
+      category: input.category,
+      visibility: input.visibility,
+      published: input.publish,
+      allowContact: input.allowContact,
+      allowRecommendations: input.allowRecommendations,
+      files: [],
     };
 
-    let storedKey: string | undefined;
-    if (file) {
-      const { ext, mimeType } = validateUpload(file);
-      if (input.type === "SCREENSHOT" && !mimeType.startsWith("image/")) {
-        throw new UploadError("Une capture d'écran doit être une image");
-      }
-      storedKey = newStorageKey(profileId, ext);
-      await this.storage().put(storedKey, file.bytes, mimeType);
-      record.file = { path: storedKey, name: sanitizeFileName(file.name), mimeType, sizeBytes: file.size };
-    }
-
+    const storedKeys: string[] = [];
     try {
-      return await this.repo.create(profileId, record, skill.name);
+      for (const { file, ext, mimeType } of checked) {
+        const key = newStorageKey(profileId, ext);
+        await this.storage().put(key, file.bytes, mimeType);
+        storedKeys.push(key);
+        record.files.push({ path: key, name: sanitizeFileName(file.name), mimeType, sizeBytes: file.size });
+      }
+      return await this.repo.create(profileId, record, skills);
     } catch (err) {
-      // Do not leave an orphan object behind if the database write failed.
-      if (storedKey)
-        await this.storage()
-          .remove(storedKey)
-          .catch(() => undefined);
+      // Do not leave orphan objects behind if an upload or the database write failed.
+      await Promise.all(storedKeys.map((key) => this.storage().remove(key).catch(() => undefined)));
       throw err;
     }
+  }
+
+  async publish(profileId: string, id: string) {
+    const evidence = await this.repo.findById(profileId, id);
+    if (!evidence) throw new NotFoundError("Preuve introuvable");
+    if (!evidence.description) throw new UploadError("Complétez la description avant de publier");
+    if (requiresFile(evidence.type) && evidence.files.length === 0) {
+      throw new UploadError("Ajoutez un fichier pour ce type de preuve");
+    }
+    await this.repo.publish(profileId, id);
   }
 
   async remove(profileId: string, id: string) {
     const removed = await this.repo.remove(profileId, id);
     if (!removed) throw new NotFoundError("Preuve introuvable");
-    if (removed.filePath) {
+    for (const key of removed.filePaths) {
       await this.storage()
-        .remove(removed.filePath)
+        .remove(key)
         .catch((err) => console.error("evidence file cleanup failed", err));
     }
   }
 
   /** Authorizes (ownership via profileId) then returns what the route needs to serve the file. */
-  async openFile(profileId: string, id: string) {
+  async openFile(profileId: string, id: string, fileId: string) {
     const evidence = await this.repo.findById(profileId, id);
-    if (!evidence?.filePath) throw new NotFoundError("Fichier introuvable");
-    const content = await this.storage().read(evidence.filePath);
-    return {
-      content,
-      fileName: evidence.fileName ?? "preuve",
-      mimeType: evidence.mimeType ?? "application/octet-stream",
-    };
+    const file = evidence?.files.find((f) => f.id === fileId);
+    if (!file) throw new NotFoundError("Fichier introuvable");
+    const content = await this.storage().read(file.filePath);
+    return { content, fileName: file.name, mimeType: file.mimeType };
   }
 }

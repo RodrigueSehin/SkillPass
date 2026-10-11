@@ -58,9 +58,11 @@ beforeEach(() => {
 
 const input = (over: Record<string, unknown> = {}) =>
   createEvidenceSchema.parse({
-    talentSkillId: "demo-skill-ui-ux",
+    talentSkillIds: ["demo-skill-ui-ux"],
     type: "DOCUMENT",
     title: "Maquettes",
+    description: "Maquettes de l'application",
+    technologies: ["Figma"],
     ...over,
   });
 
@@ -96,89 +98,138 @@ describe("sanitizeFileName", () => {
 });
 
 describe("EvidenceService", () => {
-  it("stores the file under a server-generated, user-scoped key and keeps the key private", async () => {
+  it("stores each file under a server-generated, user-scoped key and keeps the key private", async () => {
     const skillId = await skillIdFor("UI/UX");
-    const created = await service.add(
-      ME,
-      input({ talentSkillId: skillId }),
+    const created = await service.add(ME, input({ talentSkillIds: [skillId] }), [
       file({ name: "../../evil.pdf" }),
-    );
-    expect(created).toMatchObject({ hasFile: true, fileName: "evil.pdf", status: "UNVERIFIED" });
-    expect(created).not.toHaveProperty("filePath");
-    const [key] = [...storage.objects.keys()];
-    expect(key).toMatch(new RegExp(`^${ME}/[0-9a-f-]{36}\\.pdf$`));
+      file({ name: "b.png", type: "image/png", bytes: PNG }),
+    ]);
+    expect(created.files.map((f) => f.name)).toEqual(["evil.pdf", "b.png"]);
+    expect(created.files.map((f) => f.isImage)).toEqual([false, true]);
+    expect(JSON.stringify(created)).not.toContain("filePath");
+    expect(created).toMatchObject({ status: "UNVERIFIED", published: true });
+    const keys = [...storage.objects.keys()];
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).toMatch(new RegExp(`^${ME}/[0-9a-f-]{36}\.pdf$`));
   });
 
-  it("requires a file for documents and refuses files on link evidence", async () => {
+  it("requires a file to publish a document, but a draft can be saved without one", async () => {
     const skillId = await skillIdFor("UI/UX");
-    await expect(service.add(ME, input({ talentSkillId: skillId }))).rejects.toBeInstanceOf(UploadError);
-    await expect(
-      service.add(ME, input({ talentSkillId: skillId, type: "LINK", url: "https://example.com" }), file()),
-    ).rejects.toBeInstanceOf(UploadError);
+    await expect(service.add(ME, input({ talentSkillIds: [skillId] }))).rejects.toBeInstanceOf(UploadError);
+    const draft = await service.add(ME, input({ talentSkillIds: [skillId], publish: false }));
+    expect(draft.published).toBe(false);
     expect(storage.objects.size).toBe(0);
   });
 
   it("requires an image for screenshots", async () => {
     const skillId = await skillIdFor("UI/UX");
     await expect(
-      service.add(ME, input({ talentSkillId: skillId, type: "SCREENSHOT" }), file()),
+      service.add(ME, input({ talentSkillIds: [skillId], type: "SCREENSHOT" }), [file()]),
     ).rejects.toBeInstanceOf(UploadError);
+  });
+
+  it("stores nothing when one of the files is invalid, and caps the number of files", async () => {
+    const skillId = await skillIdFor("UI/UX");
+    await expect(
+      service.add(ME, input({ talentSkillIds: [skillId] }), [file(), file({ bytes: [0x4d, 0x5a, 0x90, 0x00] })]),
+    ).rejects.toBeInstanceOf(UploadError);
+    await expect(
+      service.add(ME, input({ talentSkillIds: [skillId] }), Array.from({ length: 6 }, () => file())),
+    ).rejects.toBeInstanceOf(UploadError);
+    expect(storage.objects.size).toBe(0);
   });
 
   it("refuses to attach evidence to another user's skill or project", async () => {
     const skillId = await skillIdFor("UI/UX");
     await expect(
-      service.add(OTHER, input({ talentSkillId: skillId, type: "LINK", url: "https://example.com" })),
+      service.add(OTHER, input({ talentSkillIds: [skillId], type: "PROJECT", role: "Dev" })),
     ).rejects.toBeInstanceOf(NotFoundError);
     await expect(
-      service.add(
-        ME,
-        input({ talentSkillId: skillId, type: "LINK", url: "https://example.com", projectId: "nope" }),
-      ),
+      service.add(ME, input({ talentSkillIds: [skillId], type: "PROJECT", role: "Dev", projectId: "nope" })),
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  it("serves files only to their owner and deletes the stored object with the record", async () => {
-    const skillId = await skillIdFor("UI/UX");
-    const created = await service.add(ME, input({ talentSkillId: skillId }), file());
+  it("keeps the first skill as the main one and lists evidence under every skill it demonstrates", async () => {
+    const [uiux, other] = [await skillIdFor("UI/UX"), (await skills.list(ME)).items.find((s) => s.name !== "UI/UX")!.id];
+    const created = await service.add(ME, input({ talentSkillIds: [other, uiux], type: "OTHER" }));
+    expect(created.talentSkillId).toBe(other);
+    expect(created.skills.map((s) => s.id)).toEqual([other, uiux]);
+    expect(await service.list(ME, uiux)).toHaveLength(1);
+  });
 
-    const opened = await service.openFile(ME, created.id);
+  it("serves files only to their owner and deletes the stored objects with the record", async () => {
+    const skillId = await skillIdFor("UI/UX");
+    const created = await service.add(ME, input({ talentSkillIds: [skillId] }), [file(), file()]);
+    const [first] = created.files;
+
+    const opened = await service.openFile(ME, created.id, first.id);
     expect("bytes" in opened.content).toBe(true);
-    await expect(service.openFile(OTHER, created.id)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(service.openFile(OTHER, created.id, first.id)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(service.openFile(ME, created.id, "nope")).rejects.toBeInstanceOf(NotFoundError);
     await expect(service.remove(OTHER, created.id)).rejects.toBeInstanceOf(NotFoundError);
 
     await service.remove(ME, created.id);
     expect(storage.objects.size).toBe(0);
   });
 
-  it("derives skill evidence counts from the evidence store", async () => {
+  it("publishes a draft only once it is complete", async () => {
+    const skillId = await skillIdFor("UI/UX");
+    const draft = await service.add(ME, input({ talentSkillIds: [skillId], publish: false }));
+    await expect(service.publish(ME, draft.id)).rejects.toBeInstanceOf(UploadError); // document without file
+    const note = await service.add(ME, input({ talentSkillIds: [skillId], type: "OTHER", publish: false }));
+    await service.publish(ME, note.id);
+    expect((await service.list(ME)).find((e) => e.id === note.id)?.published).toBe(true);
+    await expect(service.publish(OTHER, note.id)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("counts published evidence only, derived from the evidence store", async () => {
     const before = (await skills.list(ME)).items.find((s) => s.name === "UI/UX")!;
     expect(before.evidenceCount).toBe(0);
-    await service.add(ME, input({ talentSkillId: before.id, type: "LINK", url: "https://example.com" }));
+    await service.add(ME, input({ talentSkillIds: [before.id], type: "OTHER", publish: false }));
+    expect((await skills.list(ME)).items.find((s) => s.name === "UI/UX")!.evidenceCount).toBe(0);
+    await service.add(ME, input({ talentSkillIds: [before.id], type: "OTHER" }));
     const after = (await skills.list(ME)).items.find((s) => s.name === "UI/UX")!;
     expect(after.evidenceCount).toBe(1);
   });
 });
 
 describe("createEvidenceSchema", () => {
-  it("requires a URL for link-like evidence", () => {
+  const base = { talentSkillIds: ["x"], type: "OTHER", title: "Preuve" };
+
+  it("asks for a description and a technology to publish, but not for a draft", () => {
+    expect(createEvidenceSchema.safeParse(base).success).toBe(false);
+    expect(createEvidenceSchema.safeParse({ ...base, publish: false }).success).toBe(true);
     expect(
-      createEvidenceSchema.safeParse({ talentSkillId: "x", type: "REPOSITORY", title: "Repo" }).success,
-    ).toBe(false);
-    expect(
-      createEvidenceSchema.safeParse({
-        talentSkillId: "x",
-        type: "REPOSITORY",
-        title: "Repo",
-        url: "https://github.com/a/b",
-      }).success,
+      createEvidenceSchema.safeParse({ ...base, description: "Ok", technologies: ["Power Apps"] }).success,
     ).toBe(true);
   });
 
-  it("does not let users create platform-generated evidence types", () => {
+  it("requires a role for projects and at least one skill", () => {
+    const full = { ...base, description: "Ok", technologies: ["React"] };
+    expect(createEvidenceSchema.safeParse({ ...full, type: "PROJECT" }).success).toBe(false);
+    expect(createEvidenceSchema.safeParse({ ...full, type: "PROJECT", role: "Dev" }).success).toBe(true);
+    expect(createEvidenceSchema.safeParse({ ...full, talentSkillIds: [] }).success).toBe(false);
+  });
+
+  it("validates months and de-duplicates technologies and tags", () => {
+    const ok = createEvidenceSchema.parse({
+      ...base,
+      publish: false,
+      technologies: ["React", "react", "Azure"],
+      startDate: "2024-01",
+      endDate: "2024-06",
+    });
+    expect(ok.technologies).toEqual(["react", "Azure"]);
+    expect(createEvidenceSchema.safeParse({ ...base, publish: false, startDate: "2024-13" }).success).toBe(false);
     expect(
-      createEvidenceSchema.safeParse({ talentSkillId: "x", type: "ASSESSMENT", title: "Fake" }).success,
+      createEvidenceSchema.safeParse({ ...base, publish: false, startDate: "2024-06", endDate: "2024-01" }).success,
     ).toBe(false);
+  });
+
+  it("does not let users create legacy or platform-generated evidence types", () => {
+    for (const type of ["ASSESSMENT", "RECOMMENDATION", "LINK"]) {
+      expect(createEvidenceSchema.safeParse({ ...base, type, publish: false }).success).toBe(false);
+    }
   });
 });
 

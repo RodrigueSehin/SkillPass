@@ -9,3 +9,12 @@ export const DELETE = withUser(
     return new Response(null, { status: 204 });
   },
 );
+
+/** Publishes a draft. */
+export const PATCH = withUser(
+  async (user, _request: NextRequest, ctx: RouteContext<"/api/evidence/[id]">) => {
+    const { id } = await ctx.params;
+    await getEvidenceService().publish(user.id, id);
+    return new Response(null, { status: 204 });
+  },
+);

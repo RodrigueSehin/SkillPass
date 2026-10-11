@@ -7,7 +7,7 @@ import type { TalentDirectoryRepository } from "./talent-directory.repository";
 
 const include = {
   talentSkills: {
-    include: { skill: { include: { category: true } }, _count: { select: { evidence: true } } },
+    include: { skill: { include: { category: true } }, _count: { select: { evidence: { where: { published: true } } } } },
   },
   certifications: true,
   _count: {

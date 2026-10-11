@@ -1,9 +1,29 @@
 import { z } from "zod";
-import { FILE_EVIDENCE_TYPES, URL_EVIDENCE_TYPES, USER_EVIDENCE_TYPES } from "@/types/evidence";
+import {
+  EVIDENCE_VISIBILITIES,
+  FILE_EVIDENCE_TYPES,
+  USER_EVIDENCE_TYPES,
+  type EvidenceType,
+} from "@/types/evidence";
 
 const blankToUndefined = (v: unknown) => (typeof v === "string" && v.trim() === "" ? undefined : v);
+const optionalText = (max: number) => z.preprocess(blankToUndefined, z.string().trim().max(max).optional());
+const month = z.preprocess(
+  blankToUndefined,
+  z
+    .string()
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Date invalide")
+    .optional(),
+);
+const labels = (maxItems: number) =>
+  z
+    .array(z.string().trim().min(1).max(60))
+    .max(maxItems)
+    .default([])
+    .transform((list) => [...new Map(list.map((v) => [v.toLowerCase(), v])).values()]);
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+export const MAX_EVIDENCE_FILES = 5;
 
 /** Allowed uploads with the magic bytes that prove the content matches the declared type. */
 export const ALLOWED_UPLOADS = {
@@ -15,24 +35,45 @@ export const ALLOWED_UPLOADS = {
 
 export const createEvidenceSchema = z
   .object({
-    talentSkillId: z.string().trim().min(1, "Choisissez une compétence"),
+    /** The first one is the main skill (the one counted in skill statistics). */
+    talentSkillIds: z.array(z.string().trim().min(1)).min(1, "Choisissez au moins une compétence").max(10),
     projectId: z.preprocess(blankToUndefined, z.string().trim().min(1).optional()),
     type: z.enum(USER_EVIDENCE_TYPES),
-    title: z.string().trim().min(2, "Titre trop court").max(160),
-    description: z.preprocess(blankToUndefined, z.string().trim().max(1000).optional()),
+    title: z.string().trim().min(2, "Titre trop court").max(100, "100 caractères maximum"),
+    description: optionalText(500),
     url: z.preprocess(blankToUndefined, z.string().trim().url("URL invalide").max(300).optional()),
+    organization: optionalText(120),
+    role: optionalText(120),
+    startDate: month,
+    endDate: month,
+    technologies: labels(30),
+    tags: labels(15),
+    category: optionalText(80),
+    visibility: z.enum(EVIDENCE_VISIBILITIES).default("PUBLIC"),
+    allowContact: z.boolean().default(true),
+    allowRecommendations: z.boolean().default(false),
+    /** false saves a draft: only the title, type and a skill are then required. */
+    publish: z.boolean().default(true),
   })
   .superRefine((v, ctx) => {
-    if (URL_EVIDENCE_TYPES.includes(v.type) && !v.url) {
-      ctx.addIssue({ code: "custom", path: ["url"], message: "Une URL est requise pour ce type de preuve" });
+    const need = (path: string, ok: unknown, message: string) =>
+      ok || ctx.addIssue({ code: "custom", path: [path], message });
+    if (v.startDate && v.endDate && v.endDate < v.startDate) {
+      ctx.addIssue({ code: "custom", path: ["endDate"], message: "La fin précède le début" });
     }
+    if (!v.publish) return;
+    need("description", v.description, "Décrivez votre preuve");
+    need("technologies", v.technologies.length > 0, "Ajoutez au moins une technologie");
+    if (v.type === "PROJECT") need("role", v.role, "Indiquez votre rôle");
   });
 
 export type CreateEvidenceInput = z.infer<typeof createEvidenceSchema>;
+/** What the wizard sends (before defaults are applied). */
+export type CreateEvidenceValues = z.input<typeof createEvidenceSchema>;
 
 export const listEvidenceQuerySchema = z.object({
   skillId: z.preprocess(blankToUndefined, z.string().trim().optional()),
 });
 
-/** Whether this evidence type needs an uploaded file. */
-export const requiresFile = (type: CreateEvidenceInput["type"]) => FILE_EVIDENCE_TYPES.includes(type);
+/** Whether a published evidence of this type needs an uploaded file. */
+export const requiresFile = (type: EvidenceType) => FILE_EVIDENCE_TYPES.includes(type);
