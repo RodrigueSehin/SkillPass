@@ -8,43 +8,53 @@ import { getPlatformAdminService } from "@/services/container";
 import { sanitizePermissions } from "@/lib/business/permissions";
 import { ForbiddenError } from "@/lib/errors";
 
-/** Every action goes through the service, which checks again that the caller is the SkillPass administrator. */
+/**
+ * Every action goes through the service, which checks again that the caller is the SkillPass administrator.
+ * A "use server" file may only export async functions: no arrow constants.
+ */
 async function act(fn: (userId: string) => Promise<unknown>): Promise<ActionResult> {
   const result = await runAction(fn);
   if (!result.error) revalidatePath("/admin", "layout");
   return result;
 }
 
-export const verifyOrganizationAction = (id: string) =>
-  act((userId) => getPlatformAdminService().verify(userId, String(id)));
+export async function verifyOrganizationAction(id: string): Promise<ActionResult> {
+  return act((userId) => getPlatformAdminService().verify(userId, String(id)));
+}
 
-export const rejectOrganizationAction = (id: string, reason: string) =>
-  act((userId) => getPlatformAdminService().reject(userId, String(id), String(reason ?? "")));
+export async function rejectOrganizationAction(id: string, reason: string): Promise<ActionResult> {
+  return act((userId) => getPlatformAdminService().reject(userId, String(id), String(reason ?? "")));
+}
 
-export const reopenOrganizationAction = (id: string) =>
-  act((userId) => getPlatformAdminService().reopen(userId, String(id)));
+export async function reopenOrganizationAction(id: string): Promise<ActionResult> {
+  return act((userId) => getPlatformAdminService().reopen(userId, String(id)));
+}
 
-export const suspendOrganizationAction = (id: string) =>
-  act((userId) => getPlatformAdminService().suspend(userId, String(id)));
+export async function suspendOrganizationAction(id: string): Promise<ActionResult> {
+  return act((userId) => getPlatformAdminService().suspend(userId, String(id)));
+}
 
-export const reactivateOrganizationAction = (id: string) =>
-  act((userId) => getPlatformAdminService().reactivate(userId, String(id)));
+export async function reactivateOrganizationAction(id: string): Promise<ActionResult> {
+  return act((userId) => getPlatformAdminService().reactivate(userId, String(id)));
+}
 
-export const setOrganizationPlanAction = (id: string, plan: string) =>
-  act((userId) => {
+export async function setOrganizationPlanAction(id: string, plan: string): Promise<ActionResult> {
+  return act((userId) => {
     if (!(plan in PLANS)) throw new ForbiddenError("Plan inconnu.");
     return getPlatformAdminService().setPlan(userId, String(id), plan as PlanCode);
   });
+}
 
-export const setOrganizationMaintenanceAction = (id: string, on: boolean) =>
-  act((userId) => getPlatformAdminService().setMaintenance(userId, String(id), Boolean(on)));
+export async function setOrganizationMaintenanceAction(id: string, on: boolean): Promise<ActionResult> {
+  return act((userId) => getPlatformAdminService().setMaintenance(userId, String(id), Boolean(on)));
+}
 
-export const updateMemberAccessAction = (
+export async function updateMemberAccessAction(
   orgId: string,
   memberId: string,
   input: { role?: string; permissions?: string[]; status?: string },
-) =>
-  act((userId) => {
+): Promise<ActionResult> {
+  return act((userId) => {
     const role =
       input.role && (ORG_ROLES as readonly string[]).includes(input.role)
         ? (input.role as OrgRole)
@@ -57,9 +67,12 @@ export const updateMemberAccessAction = (
       status,
     });
   });
+}
 
-export const setProfilePlanAction = (profileId: string, plan: string) =>
-  act((userId) => getPlatformAdminService().setTalentPlan(userId, String(profileId), String(plan)));
+export async function setProfilePlanAction(profileId: string, plan: string): Promise<ActionResult> {
+  return act((userId) => getPlatformAdminService().setTalentPlan(userId, String(profileId), String(plan)));
+}
 
-export const setProfileRoleAction = (profileId: string, role: string) =>
-  act((userId) => getPlatformAdminService().setRole(userId, String(profileId), String(role)));
+export async function setProfileRoleAction(profileId: string, role: string): Promise<ActionResult> {
+  return act((userId) => getPlatformAdminService().setRole(userId, String(profileId), String(role)));
+}
