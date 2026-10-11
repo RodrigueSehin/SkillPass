@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { ChevronDown, ClipboardCheck, IdCard, LogOut, Settings } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/actions";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import type { AvatarRef } from "@/lib/avatars";
 import { HeaderMenu } from "./header-menu";
 
 interface UserMenuProps {
@@ -11,19 +12,14 @@ interface UserMenuProps {
   roleLabel: string;
   /** Reviewer roles get a shortcut to the pending validations. */
   canReview: boolean;
+  avatar?: AvatarRef | null;
+  profileId?: string;
 }
 
 const itemClass =
   "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground hover:bg-slate-100";
 
-export function UserMenu({ name, roleLabel, canReview }: UserMenuProps) {
-  const initials = name
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-
+export function UserMenu({ name, roleLabel, canReview, avatar, profileId }: UserMenuProps) {
   return (
     <HeaderMenu
       label="Menu du compte"
@@ -32,9 +28,12 @@ export function UserMenu({ name, roleLabel, canReview }: UserMenuProps) {
       triggerClassName="gap-3 py-1 pr-2 pl-1"
       trigger={
         <>
-          <Avatar className="size-10">
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
+          <ProfileAvatar
+            name={name}
+            avatar={avatar}
+            profileId={profileId}
+            className="bg-navy size-10 text-sm text-white"
+          />
           <span className="hidden text-left leading-tight md:block">
             <span className="text-foreground block text-sm font-semibold">{name}</span>
             <span className="text-muted block text-xs">{roleLabel}</span>

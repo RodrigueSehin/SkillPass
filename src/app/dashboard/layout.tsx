@@ -13,6 +13,8 @@ export default async function DashboardRootLayout({ children }: LayoutProps<"/da
         name: profile.fullName,
         roleLabel: ROLE_LABELS[profile.role],
         canReview: REVIEWER_ROLES.includes(profile.role),
+        avatar: profile.avatar,
+        profileId: profile.id,
       }}
     >
       {children}

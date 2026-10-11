@@ -1,38 +1,24 @@
 import Link from "next/link";
 import { BadgeCheck, MapPin, Briefcase } from "lucide-react";
+import type { AvatarRef } from "@/lib/avatars";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { cn } from "@/lib/utils/cn";
 import type { Availability } from "@/types/profile";
 import type { TalentHit } from "@/types/talent";
 
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]!.toUpperCase())
-    .join("");
-
-const TONES = [
-  "bg-blue-100 text-brand",
-  "bg-orange-100 text-orange-600",
-  "bg-emerald-100 text-emerald-700",
-  "bg-violet-100 text-violet-700",
-];
-const toneOf = (key: string) => TONES[[...key].reduce((a, c) => a + c.charCodeAt(0), 0) % TONES.length]!;
-
-export function TalentAvatar({ name, className }: { name: string; className?: string }) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "flex shrink-0 items-center justify-center rounded-full font-bold",
-        toneOf(name),
-        className ?? "size-16 text-xl",
-      )}
-    >
-      {initials(name)}
-    </span>
-  );
+/** A talent's picture: their photo or SkillPass avatar when they chose one, else their initials. */
+export function TalentAvatar({
+  name,
+  className,
+  avatar,
+  profileId,
+}: {
+  name: string;
+  className?: string;
+  avatar?: AvatarRef | null;
+  profileId?: string;
+}) {
+  return <ProfileAvatar name={name} avatar={avatar} profileId={profileId} className={className} />;
 }
 
 export const AVAILABILITY_SHORT: Record<Availability, { label: string; tone: string }> = {
@@ -70,7 +56,7 @@ export function TalentCard({
           selected && "border-brand ring-brand/20 ring-2",
         )}
       >
-        <TalentAvatar name={t.fullName} />
+        <TalentAvatar name={t.fullName} avatar={t.avatar} profileId={t.id} />
         <div className="min-w-0 flex-1">
           <h3 className="text-navy flex items-center gap-1.5 text-lg font-bold">
             <span className="truncate">{t.fullName}</span>

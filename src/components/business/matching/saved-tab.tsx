@@ -140,7 +140,12 @@ export async function SavedTab({ ctx, raw }: { ctx: BusinessContext; raw: Raw })
                           className="accent-brand size-4"
                         />
                       )}
-                      <TalentAvatar name={t.fullName} className="size-14 text-lg" />
+                      <TalentAvatar
+                        name={t.fullName}
+                        avatar={t.avatar}
+                        profileId={t.id}
+                        className="size-14 text-lg"
+                      />
                       <div className="min-w-0 flex-1">
                         <h3 className="text-navy truncate font-bold">{t.fullName}</h3>
                         <p className="text-navy/85 truncate text-sm">{t.profession ?? t.headline ?? "—"}</p>

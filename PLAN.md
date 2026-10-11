@@ -126,3 +126,5 @@ Academy, API publique, PWA, Enterprise, White label.
 ### Plans et avantages ✅
 
 - [x] Source unique des avantages : `src/lib/plans/entitlements.ts`. Business : Starter sans Matching, Évaluations ni Analytics (menu, pages en 404, actions refusées, permissions non proposées, widgets du tableau de bord et notifications masqués). Talent : plans Free (5 compétences, 3 projets) et Pro (illimité, Évaluations, Portfolio et badges) ; onglet « Abonnement » dans les Paramètres, limites appliquées à l'ajout, plan modifiable par l'administrateur. SQL : `supabase/update-0020-talent-plan.sql` (les comptes existants passent en Free).
+
+- [x] Photo de profil : import (PNG, JPG, WebP, 2 Mo) ou 12 avatars SkillPass dessinés en SVG, dans Paramètres > Profil ; affichée dans la barre du haut, Mon SkillPass, le profil public et la recherche Business. Colonne `avatar_url` existante : aucun SQL.

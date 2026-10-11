@@ -1,3 +1,4 @@
+import type { AvatarRef } from "@/lib/avatars";
 import type { TalentPlanCode } from "@/lib/plans/entitlements";
 import type { ProfileSettings } from "./profile-settings";
 
@@ -53,6 +54,8 @@ export interface ProfileDTO {
   settings: ProfileSettings;
   /** Free or Pro: decides which sections and limits the talent has. */
   plan: TalentPlanCode;
+  /** The picture: an uploaded photo or a SkillPass avatar. Null shows the initials. */
+  avatar: AvatarRef | null;
   role: UserRole;
   /** ISO timestamp of the last profile update, used as the activity signal in the score. */
   updatedAt: string;

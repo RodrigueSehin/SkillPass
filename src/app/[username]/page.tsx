@@ -72,6 +72,7 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\u003c") }}
         />
         <PassportView
+          profileId={id}
           profile={profile}
           passport={passport}
           tab={parseTab((await searchParams).tab)}

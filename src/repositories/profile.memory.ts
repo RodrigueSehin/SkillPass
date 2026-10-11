@@ -1,6 +1,7 @@
 import { slugifyUsername } from "@/lib/utils/username";
 import type { UpdateProfileInput } from "@/schemas/profile";
 import type { AccountIdentity, ProfileDTO } from "@/types/profile";
+import { parseAvatar } from "@/lib/avatars";
 import type { TalentPlanCode } from "@/lib/plans/entitlements";
 import { DEFAULT_PROFILE_SETTINGS, type ProfileSettings } from "@/types/profile-settings";
 import type { ProfileRepository } from "./profile.repository";
@@ -19,6 +20,7 @@ const DEMO: ProfileDTO = {
   isPublic: true,
   settings: DEFAULT_PROFILE_SETTINGS,
   plan: "PRO",
+  avatar: null,
   role: "TALENT",
   updatedAt: new Date().toISOString(),
 };
@@ -47,6 +49,7 @@ export class InMemoryProfileRepository implements ProfileRepository {
         isPublic: true,
         settings: structuredClone(DEFAULT_PROFILE_SETTINGS),
         plan: "FREE",
+        avatar: null,
         role: "TALENT",
         updatedAt: new Date().toISOString(),
       };
@@ -99,6 +102,22 @@ export class InMemoryProfileRepository implements ProfileRepository {
     profile.settings = structuredClone({ ...profile.settings, ...patch });
     profile.updatedAt = new Date().toISOString();
     return structuredClone(profile);
+  }
+
+  private avatars = new Map<string, string>();
+
+  async getAvatarStored(id: string) {
+    return this.avatars.get(id) ?? null;
+  }
+
+  async setAvatarStored(id: string, stored: string | null) {
+    const profile = this.profiles.get(id);
+    if (!profile) return undefined;
+    const previous = this.avatars.get(id) ?? null;
+    if (stored) this.avatars.set(id, stored);
+    else this.avatars.delete(id);
+    profile.avatar = parseAvatar(stored);
+    return { previous };
   }
 
   async setPlan(id: string, plan: TalentPlanCode) {

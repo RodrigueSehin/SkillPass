@@ -204,6 +204,7 @@ const slug = (s: string) =>
 
 function build(seed: Seed): TalentRecord {
   return {
+    avatar: null,
     id: `demo-talent-${slug(seed.name)}`,
     username: slug(seed.name),
     fullName: seed.name,

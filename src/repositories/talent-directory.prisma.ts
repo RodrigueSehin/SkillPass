@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import type { Prisma } from "@/generated/prisma/client";
+import { parseAvatar } from "@/lib/avatars";
 import { profileSettingsWithDefaults } from "@/types/profile-settings";
 import type { TalentDetail, TalentRecord } from "@/types/talent";
 import type { TalentDirectoryRepository } from "./talent-directory.repository";
@@ -28,6 +29,7 @@ const day = (d: Date) => d.toISOString().slice(0, 10);
 function toRecord(row: Row, today = day(new Date())): TalentRecord {
   return {
     id: row.id,
+    avatar: parseAvatar(row.avatarUrl),
     username: row.username,
     fullName: row.fullName,
     headline: row.headline,

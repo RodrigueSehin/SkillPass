@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import Link from "next/link";
 import cityPhoto from "@/assets/profile/city.jpg";
 import {
@@ -60,6 +61,8 @@ const CERT_TONES = {
 
 interface PassportViewProps {
   profile: PublicProfileDTO;
+  /** Needed to address an uploaded photo. */
+  profileId: string;
   passport: Passport;
   tab: PassportTab;
   /** Path used by the tab links, e.g. "/dashboard/skillpass" or "/sehin-rodrigue". */
@@ -69,13 +72,15 @@ interface PassportViewProps {
   actions?: React.ReactNode;
 }
 
-export function PassportView({ profile, passport, tab, basePath, publicUrl, actions }: PassportViewProps) {
-  const initials = profile.fullName
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+export function PassportView({
+  profile,
+  profileId,
+  passport,
+  tab,
+  basePath,
+  publicUrl,
+  actions,
+}: PassportViewProps) {
   const { stats } = passport;
   const tabHref = (key: PassportTab) => (key === "overview" ? basePath : `${basePath}?tab=${key}`);
   const chips = passport.skills.slice(0, 4).map((s) => s.name);
@@ -104,12 +109,12 @@ export function PassportView({ profile, passport, tab, basePath, publicUrl, acti
         />
         <div className="relative flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex min-w-0 items-start gap-4 sm:gap-6">
-            <span
-              aria-hidden
-              className="flex size-20 shrink-0 items-center justify-center rounded-full border-4 border-white/80 bg-blue-600 text-2xl font-bold shadow-lg sm:size-32 sm:text-4xl"
-            >
-              {initials}
-            </span>
+            <ProfileAvatar
+              name={profile.fullName}
+              avatar={profile.avatar}
+              profileId={profileId}
+              className="size-20 border-4 border-white/80 bg-blue-600 text-2xl text-white shadow-lg sm:size-32 sm:text-4xl"
+            />
             <div className="min-w-0">
               <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl">
                 {profile.fullName}

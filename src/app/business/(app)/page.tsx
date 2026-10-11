@@ -251,7 +251,12 @@ export default async function BusinessDashboardPage() {
               <ul className="mt-4 divide-y divide-slate-100">
                 {suggestions.map(({ record: t }) => (
                   <li key={t.id} className="flex items-center gap-3 py-3">
-                    <TalentAvatar name={t.fullName} className="size-11 text-sm" />
+                    <TalentAvatar
+                      name={t.fullName}
+                      avatar={t.avatar}
+                      profileId={t.id}
+                      className="size-11 text-sm"
+                    />
                     <span className="min-w-0 flex-1">
                       <span className="text-navy block truncate font-semibold">{t.fullName}</span>
                       <span className="text-muted block truncate text-xs">{t.profession ?? t.headline}</span>

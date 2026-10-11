@@ -76,7 +76,12 @@ export function PublicProfileTab({ profile }: { profile: ProfileDTO }) {
           <h2 className="text-navy font-bold">Aperçu</h2>
           <p className="text-muted text-sm">Ce que voit un visiteur en haut de votre profil.</p>
           <div className="border-border/70 mt-4 flex items-center gap-4 rounded-2xl border p-4">
-            <TalentAvatar name={profile.fullName} className="size-16 text-xl" />
+            <TalentAvatar
+              name={profile.fullName}
+              avatar={profile.avatar}
+              profileId={profile.id}
+              className="size-16 text-xl"
+            />
             <div className="min-w-0">
               <p className="text-navy truncate font-bold">{profile.fullName}</p>
               <p className="text-navy/85 truncate text-sm">{profile.headline ?? profile.profession ?? "—"}</p>

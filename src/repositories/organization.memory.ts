@@ -156,7 +156,9 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
 
   /** Platform administration: every organization, newest first. */
   allOrganizations(): OrganizationDTO[] {
-    return [...this.orgs.values()].map((o) => this.orgView(o)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return [...this.orgs.values()]
+      .map((o) => this.orgView(o))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
   async setDeactivated(orgId: string, deactivated: boolean) {

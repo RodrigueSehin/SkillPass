@@ -1,9 +1,12 @@
+import type { AvatarRef } from "@/lib/avatars";
 import type { Availability } from "./profile";
 import type { SkillLevel } from "./skill";
 
 /** What a company may see about a talent: only profiles that opted into being public. No e-mail, no phone. */
 export interface TalentRecord {
   id: string;
+  /** The talent's picture, as they chose it. */
+  avatar: AvatarRef | null;
   username: string;
   fullName: string;
   headline: string | null;

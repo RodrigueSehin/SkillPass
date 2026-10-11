@@ -80,7 +80,7 @@ export function TalentPanel({
   return (
     <Panel className="p-5" aria-label={`Profil de ${t.fullName}`}>
       <div className="flex items-start gap-4">
-        <TalentAvatar name={t.fullName} className="size-24 text-3xl" />
+        <TalentAvatar name={t.fullName} avatar={t.avatar} profileId={t.id} className="size-24 text-3xl" />
         <div className="min-w-0 flex-1">
           <h2 className="text-navy flex items-center gap-1.5 text-xl font-bold">
             {t.fullName}

@@ -19,6 +19,7 @@ export default async function MySkillPassPage({ searchParams }: PageProps<"/dash
 
   return (
     <PassportView
+      profileId={profile.id}
       profile={profile}
       passport={passport}
       tab={parseTab((await searchParams).tab)}

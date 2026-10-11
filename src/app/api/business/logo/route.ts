@@ -32,7 +32,8 @@ export const POST = withUser(async (user, request: NextRequest) => {
   rateLimit(`org-logo:${user.id}`, 10, 60_000);
 
   const declared = Number(request.headers.get("content-length") ?? 0);
-  if (declared > Math.min(LOGO_MAX_BYTES, MAX_UPLOAD_BYTES) + 64 * 1024) throw new UploadError("Logo trop volumineux (2 Mo maximum)");
+  if (declared > Math.min(LOGO_MAX_BYTES, MAX_UPLOAD_BYTES) + 64 * 1024)
+    throw new UploadError("Logo trop volumineux (2 Mo maximum)");
   const raw = (await request.formData()).get("file");
   if (!(raw instanceof File) || raw.size === 0) throw new UploadError("Aucun fichier reçu");
   if (raw.size > LOGO_MAX_BYTES) throw new UploadError("Logo trop volumineux (2 Mo maximum)");

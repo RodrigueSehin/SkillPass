@@ -100,7 +100,12 @@ export async function SearchTab({ ctx, raw }: { ctx: BusinessContext; raw: Raw }
                       t.username === username && "border-brand ring-brand/20 ring-2",
                     )}
                   >
-                    <TalentAvatar name={t.fullName} className="size-16 text-xl" />
+                    <TalentAvatar
+                      name={t.fullName}
+                      avatar={t.avatar}
+                      profileId={t.id}
+                      className="size-16 text-xl"
+                    />
                     <div className="min-w-0 flex-1">
                       <h3 className="text-navy flex items-center gap-1.5 font-bold">
                         <span className="truncate">{t.fullName}</span>

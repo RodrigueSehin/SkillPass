@@ -1,4 +1,5 @@
 import { Bell, MessageSquare } from "lucide-react";
+import type { AvatarRef } from "@/lib/avatars";
 import { GlobalSearch } from "./global-search";
 import { HeaderMenu } from "./header-menu";
 import { Logo } from "./logo";
@@ -8,6 +9,8 @@ export interface TopbarUser {
   name: string;
   roleLabel: string;
   canReview: boolean;
+  avatar?: AvatarRef | null;
+  profileId?: string;
 }
 
 export function Topbar({ user }: { user: TopbarUser }) {
@@ -34,7 +37,13 @@ export function Topbar({ user }: { user: TopbarUser }) {
           <p className="text-muted px-3 py-4 text-sm">La messagerie arrive avec SkillPass Business.</p>
         </HeaderMenu>
         <span aria-hidden className="bg-border mx-1 hidden h-8 w-px sm:block" />
-        <UserMenu name={user.name} roleLabel={user.roleLabel} canReview={user.canReview} />
+        <UserMenu
+          name={user.name}
+          roleLabel={user.roleLabel}
+          canReview={user.canReview}
+          avatar={user.avatar}
+          profileId={user.profileId}
+        />
       </div>
     </header>
   );

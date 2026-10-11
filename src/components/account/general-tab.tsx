@@ -6,6 +6,7 @@ import { Panel } from "@/components/business/ui";
 import { ProfileSettingsForm } from "@/components/profile/profile-settings-form";
 import { setDirectoryAction, setPublicAction, setShowLocationAction } from "@/app/dashboard/settings/actions";
 import { ROLE_LABELS, type ProfileDTO } from "@/types/profile";
+import { AvatarPicker } from "./avatar-picker";
 import { ToggleSetting } from "./toggle-setting";
 
 const DATE = new Intl.DateTimeFormat("fr-FR", {
@@ -23,6 +24,10 @@ export function GeneralTab({ profile, email }: { profile: ProfileDTO; email: str
         <h2 className="text-navy text-xl font-bold">Informations personnelles</h2>
         <p className="text-muted text-sm">Mettez à jour votre profil professionnel.</p>
         <div className="mt-5">
+          <p className="text-sm font-semibold">Photo de profil</p>
+          <div className="mt-3 mb-6">
+            <AvatarPicker name={profile.fullName} profileId={profile.id} avatar={profile.avatar} />
+          </div>
           <ProfileSettingsForm profile={profile} />
         </div>
       </Panel>

@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { ensureProfile } from "@/services/profile.service";
 import type { UpdateProfileInput } from "@/schemas/profile";
 import type { AccountIdentity, ProfileDTO } from "@/types/profile";
+import { parseAvatar } from "@/lib/avatars";
 import { parseTalentPlan, type TalentPlanCode } from "@/lib/plans/entitlements";
 import { profileSettingsWithDefaults, type ProfileSettings } from "@/types/profile-settings";
 import type { ProfileRepository } from "./profile.repository";
@@ -23,6 +24,7 @@ const toDTO = (r: Row): ProfileDTO => ({
   isPublic: r.isPublic,
   settings: profileSettingsWithDefaults(r.settings),
   plan: parseTalentPlan(r.plan),
+  avatar: parseAvatar(r.avatarUrl),
   role: r.role,
   updatedAt: r.updatedAt.toISOString(),
 });
@@ -74,6 +76,18 @@ export class PrismaProfileRepository implements ProfileRepository {
       data: { settings: next as unknown as Prisma.InputJsonValue },
     });
     return toDTO(saved);
+  }
+
+  async getAvatarStored(id: string) {
+    const row = await prisma.profile.findUnique({ where: { id }, select: { avatarUrl: true } });
+    return row?.avatarUrl ?? null;
+  }
+
+  async setAvatarStored(id: string, stored: string | null) {
+    const row = await prisma.profile.findUnique({ where: { id }, select: { avatarUrl: true } });
+    if (!row) return undefined;
+    await prisma.profile.update({ where: { id }, data: { avatarUrl: stored } });
+    return { previous: row.avatarUrl };
   }
 
   async setPlan(id: string, plan: TalentPlanCode) {

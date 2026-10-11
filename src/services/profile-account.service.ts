@@ -63,6 +63,7 @@ export class ProfileAccountService {
       profession: found.profession,
       yearsOfExperience: found.yearsOfExperience,
       availability: found.availability,
+      avatar: found.avatar,
     };
     return { id: found.id, updatedAt: found.updatedAt, profile };
   }

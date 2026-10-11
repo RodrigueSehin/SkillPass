@@ -32,6 +32,7 @@ import { ExperienceDocumentService } from "./experience-document.service";
 import { OrgSkillService } from "./org-skill.service";
 import { MatchingService } from "./matching.service";
 import { PlatformAdminService } from "./platform-admin.service";
+import { ProfileAvatarService } from "./profile-avatar.service";
 import { OrganizationLifecycleService } from "./organization-lifecycle.service";
 import { EvaluationAttemptService } from "./evaluation-attempt.service";
 import { EvaluationService } from "./evaluation.service";
@@ -142,3 +143,4 @@ export const getPlatformAdminService = () =>
     getOrganizationService(),
     getJobOfferService(),
   );
+export const getProfileAvatarService = () => new ProfileAvatarService(getProfileRepository(), getStorage);

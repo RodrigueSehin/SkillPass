@@ -205,7 +205,12 @@ export async function RecommendationsTab({ ctx, raw }: { ctx: BusinessContext; r
               return (
                 <li key={t.id}>
                   <article className="border-border/70 shadow-soft flex flex-wrap items-start gap-4 rounded-2xl border bg-white p-4 sm:flex-nowrap">
-                    <TalentAvatar name={t.fullName} className="size-16 text-xl" />
+                    <TalentAvatar
+                      name={t.fullName}
+                      avatar={t.avatar}
+                      profileId={t.id}
+                      className="size-16 text-xl"
+                    />
                     <div className="min-w-0 sm:w-56">
                       <h3 className="text-navy flex items-center gap-1.5 font-bold">
                         <span className="truncate">{t.fullName}</span>
