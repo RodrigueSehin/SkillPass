@@ -48,7 +48,10 @@ export function StepProof({ values: v, errors, patch, onFiles, onRemoveFile, fil
             <Required />
           </Label>
           <div className="relative">
-            <TypeIcon className="text-brand pointer-events-none absolute top-3.5 left-3.5 size-4" aria-hidden />
+            <TypeIcon
+              className="text-brand pointer-events-none absolute top-3.5 left-3.5 size-4"
+              aria-hidden
+            />
             <select
               id="ev-type"
               value={v.type}
@@ -61,7 +64,10 @@ export function StepProof({ values: v, errors, patch, onFiles, onRemoveFile, fil
                 </option>
               ))}
             </select>
-            <ChevronDown className="text-muted pointer-events-none absolute top-3.5 right-3 size-4" aria-hidden />
+            <ChevronDown
+              className="text-muted pointer-events-none absolute top-3.5 right-3 size-4"
+              aria-hidden
+            />
           </div>
         </div>
         <div className="space-y-2">
@@ -99,7 +105,8 @@ export function StepProof({ values: v, errors, patch, onFiles, onRemoveFile, fil
 
       <div className="space-y-2">
         <p className="text-foreground text-sm font-medium">
-          Fichiers <span className="text-muted font-normal">(jusqu&apos;à {MAX_EVIDENCE_FILES} fichiers)</span>
+          Fichiers{" "}
+          <span className="text-muted font-normal">(jusqu&apos;à {MAX_EVIDENCE_FILES} fichiers)</span>
         </p>
         <div
           onDragOver={(e) => {
@@ -148,7 +155,10 @@ export function StepProof({ values: v, errors, patch, onFiles, onRemoveFile, fil
             <p className="text-navy text-xs font-semibold">Formats acceptés :</p>
             <ul className="mt-2 flex flex-wrap gap-1.5">
               {FORMATS.map((f) => (
-                <li key={f} className="text-brand rounded-md bg-blue-100/70 px-2.5 py-1 text-[11px] font-semibold">
+                <li
+                  key={f}
+                  className="text-brand rounded-md bg-blue-100/70 px-2.5 py-1 text-[11px] font-semibold"
+                >
                   {f}
                 </li>
               ))}
@@ -187,20 +197,23 @@ export function StepProof({ values: v, errors, patch, onFiles, onRemoveFile, fil
           </p>
           <ul className="flex flex-wrap gap-3">
             {v.files.map((f) => (
-              <li key={f.id} className="border-border relative w-44 overflow-hidden rounded-xl border bg-white">
+              <li
+                key={f.id}
+                className="border-border relative w-44 overflow-hidden rounded-xl border bg-white"
+              >
                 {f.preview ? (
                   // eslint-disable-next-line @next/next/no-img-element -- local blob preview, nothing to optimize
-                  <img src={f.preview} alt={f.file.name} className="h-24 w-full object-cover" />
+                  <img src={f.preview} alt={f.name} className="h-24 w-full object-cover" />
                 ) : (
                   <div className="flex h-24 w-full items-center justify-center bg-red-50 text-red-500">
                     <FileText className="size-8" aria-hidden />
                   </div>
                 )}
-                <p className="text-navy truncate px-2.5 pt-1.5 text-xs font-medium">{f.file.name}</p>
-                <p className="text-muted px-2.5 pb-1.5 text-[11px]">{formatSize(f.file.size)}</p>
+                <p className="text-navy truncate px-2.5 pt-1.5 text-xs font-medium">{f.name}</p>
+                <p className="text-muted px-2.5 pb-1.5 text-[11px]">{formatSize(f.size)}</p>
                 <button
                   type="button"
-                  aria-label={`Retirer ${f.file.name}`}
+                  aria-label={`Retirer ${f.name}`}
                   onClick={() => onRemoveFile(f.id)}
                   className="text-brand absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-md bg-white/95 shadow"
                 >

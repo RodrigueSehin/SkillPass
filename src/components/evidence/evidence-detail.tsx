@@ -8,6 +8,7 @@ import {
   Globe,
   Layers,
   Link2,
+  Pencil,
   Tag,
   UserRound,
 } from "lucide-react";
@@ -16,7 +17,15 @@ import { EVIDENCE_VISIBILITY_LABELS, type EvidenceDTO, type EvidenceFileDTO } fr
 import { EvidenceActions } from "./evidence-actions";
 import { Chip, EvidenceCover, StatusBadge, TypeBadge } from "./evidence-bits";
 
-function Row({ icon: Icon, label, children }: { icon: typeof Globe; label: string; children: React.ReactNode }) {
+function Row({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: typeof Globe;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="grid grid-cols-[110px_1fr] items-start gap-2 text-sm">
       <dt className="text-muted flex items-center gap-2">
@@ -27,7 +36,15 @@ function Row({ icon: Icon, label, children }: { icon: typeof Globe; label: strin
   );
 }
 
-function FileGroup({ title, evidenceId, files }: { title: string; evidenceId: string; files: EvidenceFileDTO[] }) {
+function FileGroup({
+  title,
+  evidenceId,
+  files,
+}: {
+  title: string;
+  evidenceId: string;
+  files: EvidenceFileDTO[];
+}) {
   if (files.length === 0) return null;
   return (
     <section className="border-border/70 rounded-xl border p-3">
@@ -41,7 +58,7 @@ function FileGroup({ title, evidenceId, files }: { title: string; evidenceId: st
               href={fileUrl(evidenceId, f.id)}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:bg-blue-50/60 flex items-center gap-3 rounded-lg"
+              className="flex items-center gap-3 rounded-lg hover:bg-blue-50/60"
             >
               {f.isImage ? (
                 // eslint-disable-next-line @next/next/no-img-element -- private, authenticated file served by our API
@@ -87,7 +104,15 @@ export function EvidenceDetail({ evidence: e }: { evidence: EvidenceDTO }) {
         </div>
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-navy text-xl leading-tight font-extrabold">{e.title}</h2>
-          <EvidenceActions id={e.id} title={e.title} published={e.published} />
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href={`/dashboard/evidence/${e.id}/edit`}
+              className="border-brand/40 text-brand inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-semibold hover:bg-blue-50"
+            >
+              <Pencil className="size-4" aria-hidden /> Modifier
+            </Link>
+            <EvidenceActions id={e.id} title={e.title} published={e.published} />
+          </div>
         </div>
         {e.description && <p className="text-muted text-sm whitespace-pre-line">{e.description}</p>}
 
@@ -165,7 +190,10 @@ export function EvidenceDetail({ evidence: e }: { evidence: EvidenceDTO }) {
             </h3>
             <ul className="mt-2 flex flex-wrap gap-1.5">
               {e.tags.map((t) => (
-                <li key={t} className="text-muted rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-medium">
+                <li
+                  key={t}
+                  className="text-muted rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-medium"
+                >
                   {t}
                 </li>
               ))}

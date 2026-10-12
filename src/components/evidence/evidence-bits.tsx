@@ -113,10 +113,17 @@ export function EvidenceCover({ evidence, className }: { evidence: EvidenceDTO; 
   const image = evidence.files.find((f) => f.isImage);
   const Icon = TYPE_ICONS[evidence.type];
   return (
-    <div className={cn("relative overflow-hidden bg-gradient-to-br", TYPE_GRADIENTS[evidence.type], className)}>
+    <div
+      className={cn("relative overflow-hidden bg-gradient-to-br", TYPE_GRADIENTS[evidence.type], className)}
+    >
       {image ? (
         // eslint-disable-next-line @next/next/no-img-element -- private, authenticated file served by our API
-        <img src={fileUrl(evidence.id, image.id)} alt="" loading="lazy" className="h-full w-full object-cover" />
+        <img
+          src={fileUrl(evidence.id, image.id)}
+          alt=""
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-white/90">
           <Icon className="size-12" aria-hidden />

@@ -33,43 +33,52 @@ export const ALLOWED_UPLOADS = {
   "image/webp": { ext: "webp", magic: [0x52, 0x49, 0x46, 0x46] },
 } as const;
 
-export const createEvidenceSchema = z
-  .object({
-    /** The first one is the main skill (the one counted in skill statistics). */
-    talentSkillIds: z.array(z.string().trim().min(1)).min(1, "Choisissez au moins une compétence").max(10),
-    projectId: z.preprocess(blankToUndefined, z.string().trim().min(1).optional()),
-    type: z.enum(USER_EVIDENCE_TYPES),
-    title: z.string().trim().min(2, "Titre trop court").max(100, "100 caractères maximum"),
-    description: optionalText(500),
-    url: z.preprocess(blankToUndefined, z.string().trim().url("URL invalide").max(300).optional()),
-    organization: optionalText(120),
-    role: optionalText(120),
-    startDate: month,
-    endDate: month,
-    technologies: labels(30),
-    tags: labels(15),
-    category: optionalText(80),
-    visibility: z.enum(EVIDENCE_VISIBILITIES).default("PUBLIC"),
-    allowContact: z.boolean().default(true),
-    allowRecommendations: z.boolean().default(false),
-    /** false saves a draft: only the title, type and a skill are then required. */
-    publish: z.boolean().default(true),
-  })
-  .superRefine((v, ctx) => {
-    const need = (path: string, ok: unknown, message: string) =>
-      ok || ctx.addIssue({ code: "custom", path: [path], message });
-    if (v.startDate && v.endDate && v.endDate < v.startDate) {
-      ctx.addIssue({ code: "custom", path: ["endDate"], message: "La fin précède le début" });
-    }
-    if (!v.publish) return;
-    need("description", v.description, "Décrivez votre preuve");
-    need("technologies", v.technologies.length > 0, "Ajoutez au moins une technologie");
-    if (v.type === "PROJECT") need("role", v.role, "Indiquez votre rôle");
-  });
+const evidenceFields = z.object({
+  /** The first one is the main skill (the one counted in skill statistics). */
+  talentSkillIds: z.array(z.string().trim().min(1)).min(1, "Choisissez au moins une compétence").max(10),
+  projectId: z.preprocess(blankToUndefined, z.string().trim().min(1).optional()),
+  type: z.enum(USER_EVIDENCE_TYPES),
+  title: z.string().trim().min(2, "Titre trop court").max(100, "100 caractères maximum"),
+  description: optionalText(500),
+  url: z.preprocess(blankToUndefined, z.string().trim().url("URL invalide").max(300).optional()),
+  organization: optionalText(120),
+  role: optionalText(120),
+  startDate: month,
+  endDate: month,
+  technologies: labels(30),
+  tags: labels(15),
+  category: optionalText(80),
+  visibility: z.enum(EVIDENCE_VISIBILITIES).default("PUBLIC"),
+  allowContact: z.boolean().default(true),
+  allowRecommendations: z.boolean().default(false),
+  /** false saves a draft: only the title, type and a skill are then required. */
+  publish: z.boolean().default(true),
+});
+
+type EvidenceFields = z.infer<typeof evidenceFields>;
+
+function checkRules(v: EvidenceFields, ctx: z.RefinementCtx) {
+  const need = (path: string, ok: unknown, message: string) =>
+    ok || ctx.addIssue({ code: "custom", path: [path], message });
+  if (v.startDate && v.endDate && v.endDate < v.startDate) {
+    ctx.addIssue({ code: "custom", path: ["endDate"], message: "La fin précède le début" });
+  }
+  if (!v.publish) return;
+  need("description", v.description, "Décrivez votre preuve");
+  need("technologies", v.technologies.length > 0, "Ajoutez au moins une technologie");
+  if (v.type === "PROJECT") need("role", v.role, "Indiquez votre rôle");
+}
+
+export const createEvidenceSchema = evidenceFields.superRefine(checkRules);
+/** Editing: same fields, plus the ids of the stored files to keep (the others are removed). */
+export const updateEvidenceSchema = evidenceFields
+  .extend({ keepFileIds: z.array(z.string().trim().min(1)).max(5).default([]) })
+  .superRefine(checkRules);
 
 export type CreateEvidenceInput = z.infer<typeof createEvidenceSchema>;
-/** What the wizard sends (before defaults are applied). */
-export type CreateEvidenceValues = z.input<typeof createEvidenceSchema>;
+export type UpdateEvidenceInput = z.infer<typeof updateEvidenceSchema>;
+/** What the wizard sends (before defaults are applied); `keepFileIds` only matters when editing. */
+export type CreateEvidenceValues = z.input<typeof updateEvidenceSchema>;
 
 export const listEvidenceQuerySchema = z.object({
   skillId: z.preprocess(blankToUndefined, z.string().trim().optional()),

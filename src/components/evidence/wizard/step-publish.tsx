@@ -32,7 +32,7 @@ function Check({
         onChange={(e) => onChange(e.target.checked)}
         className="accent-brand mt-1 size-4 shrink-0"
       />
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-brand">
+      <span className="text-brand flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-50">
         <Icon className="size-4" aria-hidden />
       </span>
       <span>
@@ -73,7 +73,9 @@ export function StepPublish({ values: v, patch }: { values: WizardState; patch: 
         <Label htmlFor="ev-tag">
           Tags <span className="text-muted font-normal">(optionnel)</span>
         </Label>
-        <p className="text-muted text-xs">Ajoutez des mots-clés pour améliorer la découverte de votre preuve.</p>
+        <p className="text-muted text-xs">
+          Ajoutez des mots-clés pour améliorer la découverte de votre preuve.
+        </p>
         <div className="relative">
           <Search className="text-muted pointer-events-none absolute top-3.5 left-3.5 size-4" aria-hidden />
           <input
@@ -93,9 +95,16 @@ export function StepPublish({ values: v, patch }: { values: WizardState; patch: 
         {v.tags.length > 0 && (
           <ul aria-label="Tags" className="flex flex-wrap gap-2">
             {v.tags.map((t) => (
-              <li key={t} className="text-brand border-brand/40 flex items-center gap-2 rounded-full border bg-blue-50/50 px-3.5 py-1.5 text-xs font-medium">
+              <li
+                key={t}
+                className="text-brand border-brand/40 flex items-center gap-2 rounded-full border bg-blue-50/50 px-3.5 py-1.5 text-xs font-medium"
+              >
                 {t}
-                <button type="button" aria-label={`Retirer ${t}`} onClick={() => patch({ tags: v.tags.filter((x) => x !== t) })}>
+                <button
+                  type="button"
+                  aria-label={`Retirer ${t}`}
+                  onClick={() => patch({ tags: v.tags.filter((x) => x !== t) })}
+                >
                   <X className="size-3.5" />
                 </button>
               </li>
@@ -137,13 +146,17 @@ export function StepPublish({ values: v, patch }: { values: WizardState; patch: 
               </option>
             ))}
           </select>
-          <ChevronDown className="text-muted pointer-events-none absolute top-3.5 right-3 size-4" aria-hidden />
+          <ChevronDown
+            className="text-muted pointer-events-none absolute top-3.5 right-3 size-4"
+            aria-hidden
+          />
         </div>
       </div>
 
       <div>
         <p className="text-navy text-sm font-bold">
-          Autoriser l&apos;utilisation de cette preuve <span className="text-muted font-normal">(optionnel)</span>
+          Autoriser l&apos;utilisation de cette preuve{" "}
+          <span className="text-muted font-normal">(optionnel)</span>
         </p>
         <div className="border-border mt-2 divide-y rounded-xl border px-4">
           <Check

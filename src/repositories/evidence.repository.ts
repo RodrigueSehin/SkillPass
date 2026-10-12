@@ -17,6 +17,17 @@ export interface EvidenceRepository {
   findById(profileId: string, id: string): Promise<StoredEvidence | null>;
   /** `skills` are the ownership-checked skills the evidence demonstrates; the first is the main one. */
   create(profileId: string, input: NewEvidence, skills: { id: string; name: string }[]): Promise<EvidenceDTO>;
+  /**
+   * Replaces the fields and skills of an evidence, removes the stored files not in `keepFileIds` and adds `input.files`.
+   * Returns the storage keys of the removed files, or undefined if the evidence does not exist.
+   */
+  update(
+    profileId: string,
+    id: string,
+    input: NewEvidence,
+    skills: { id: string; name: string }[],
+    keepFileIds: string[],
+  ): Promise<{ evidence: EvidenceDTO; removedPaths: string[] } | undefined>;
   /** Turns a draft into a published evidence. False when it does not exist. */
   publish(profileId: string, id: string): Promise<boolean>;
   /** Returns the removed row's storage keys, or undefined if not found. */
@@ -28,7 +39,13 @@ export interface EvidenceRepository {
 export function toPublicEvidence(row: StoredEvidence): EvidenceDTO {
   return {
     ...row,
-    files: row.files.map((f) => ({ id: f.id, name: f.name, mimeType: f.mimeType, sizeBytes: f.sizeBytes, isImage: f.isImage })),
+    files: row.files.map((f) => ({
+      id: f.id,
+      name: f.name,
+      mimeType: f.mimeType,
+      sizeBytes: f.sizeBytes,
+      isImage: f.isImage,
+    })),
   };
 }
 

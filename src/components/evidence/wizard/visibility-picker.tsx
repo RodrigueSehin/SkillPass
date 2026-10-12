@@ -36,7 +36,9 @@ export function VisibilityPicker({
             />
             {withIcons && <Icon className="text-navy mt-0.5 size-5 shrink-0" aria-hidden />}
             <span>
-              <span className="text-navy block text-sm font-semibold">{EVIDENCE_VISIBILITY_LABELS[v].title}</span>
+              <span className="text-navy block text-sm font-semibold">
+                {EVIDENCE_VISIBILITY_LABELS[v].title}
+              </span>
               <span className="text-muted block text-xs">{EVIDENCE_VISIBILITY_LABELS[v].hint}</span>
             </span>
           </label>

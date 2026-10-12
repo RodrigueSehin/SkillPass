@@ -26,7 +26,10 @@ export function StepTech({ values: v, errors, patch, skills }: Props) {
     (t) => (group === "ALL" || t.group === group) && (!q || t.name.toLowerCase().includes(q)),
   );
   const custom = v.technologies.filter((t) => !TECH_CATALOG.some((c) => same(c.name, t)));
-  const canAddCustom = q.length > 0 && !v.technologies.some((t) => same(t, query.trim())) && !tiles.some((t) => same(t.name, query.trim()));
+  const canAddCustom =
+    q.length > 0 &&
+    !v.technologies.some((t) => same(t, query.trim())) &&
+    !tiles.some((t) => same(t.name, query.trim()));
 
   const toggleTech = (name: string) =>
     patch({
@@ -55,7 +58,9 @@ export function StepTech({ values: v, errors, patch, skills }: Props) {
     <section aria-label="Technologies et compétences" className={cn(cardClass, "space-y-6")}>
       <div>
         <h2 className="text-navy text-xl font-extrabold">Technologies et compétences</h2>
-        <p className="text-muted text-sm">Sélectionnez les technologies et compétences utilisées dans ce projet.</p>
+        <p className="text-muted text-sm">
+          Sélectionnez les technologies et compétences utilisées dans ce projet.
+        </p>
       </div>
 
       <div className="space-y-3">
@@ -87,7 +92,9 @@ export function StepTech({ values: v, errors, patch, skills }: Props) {
               onClick={() => setGroup(g)}
               className={cn(
                 "rounded-lg border px-3.5 py-1.5 text-xs font-medium",
-                group === g ? "border-brand bg-brand text-white" : "border-border text-navy bg-white hover:bg-slate-50",
+                group === g
+                  ? "border-brand bg-brand text-white"
+                  : "border-border text-navy bg-white hover:bg-slate-50",
               )}
             >
               {g === "ALL" ? "Toutes" : g}
@@ -121,7 +128,10 @@ export function StepTech({ values: v, errors, patch, skills }: Props) {
                   <span
                     aria-hidden
                     className="flex size-9 items-center justify-center rounded-lg text-[11px] font-extrabold text-white"
-                    style={{ backgroundColor: t.color, color: t.color === "#f7df1e" || t.color === "#f2c811" ? "#111" : "#fff" }}
+                    style={{
+                      backgroundColor: t.color,
+                      color: t.color === "#f7df1e" || t.color === "#f2c811" ? "#111" : "#fff",
+                    }}
                   >
                     {t.mark}
                   </span>
@@ -131,7 +141,9 @@ export function StepTech({ values: v, errors, patch, skills }: Props) {
             );
           })}
         </ul>
-        {tiles.length === 0 && !canAddCustom && <p className="text-muted text-sm">Aucune technologie trouvée.</p>}
+        {tiles.length === 0 && !canAddCustom && (
+          <p className="text-muted text-sm">Aucune technologie trouvée.</p>
+        )}
         {canAddCustom && (
           <button
             type="button"
@@ -144,7 +156,10 @@ export function StepTech({ values: v, errors, patch, skills }: Props) {
         {custom.length > 0 && (
           <ul aria-label="Autres technologies" className="flex flex-wrap gap-2">
             {custom.map((t) => (
-              <li key={t} className="text-brand flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium">
+              <li
+                key={t}
+                className="text-brand flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-medium"
+              >
                 {t}
                 <button type="button" aria-label={`Retirer ${t}`} onClick={() => toggleTech(t)}>
                   <X className="size-3.5" />
@@ -165,13 +180,16 @@ export function StepTech({ values: v, errors, patch, skills }: Props) {
         </div>
         {skills.length === 0 ? (
           <p className="text-muted text-sm">
-            Vous n&apos;avez pas encore de compétence : ajoutez-en une depuis la page Compétences pour pouvoir y
-            rattacher cette preuve.
+            Vous n&apos;avez pas encore de compétence : ajoutez-en une depuis la page Compétences pour pouvoir
+            y rattacher cette preuve.
           </p>
         ) : (
           <>
             <div className="relative">
-              <Search className="text-muted pointer-events-none absolute top-3.5 left-3.5 size-4" aria-hidden />
+              <Search
+                className="text-muted pointer-events-none absolute top-3.5 left-3.5 size-4"
+                aria-hidden
+              />
               <input
                 aria-label="Rechercher une compétence"
                 value={skillQuery}
@@ -192,14 +210,19 @@ export function StepTech({ values: v, errors, patch, skills }: Props) {
                       </button>
                     </li>
                   ))}
-                  {skillMatches.length === 0 && <li className="text-muted px-4 py-2">Aucune compétence trouvée</li>}
+                  {skillMatches.length === 0 && (
+                    <li className="text-muted px-4 py-2">Aucune compétence trouvée</li>
+                  )}
                 </ul>
               )}
             </div>
             {selected.length > 0 && (
               <ul aria-label="Compétences sélectionnées" className="flex flex-wrap gap-2">
                 {selected.map((s) => (
-                  <li key={s.id} className="text-brand border-brand/40 flex items-center gap-2 rounded-full border bg-blue-50/50 px-3.5 py-1.5 text-xs font-medium">
+                  <li
+                    key={s.id}
+                    className="text-brand border-brand/40 flex items-center gap-2 rounded-full border bg-blue-50/50 px-3.5 py-1.5 text-xs font-medium"
+                  >
                     {s.name}
                     <button
                       type="button"

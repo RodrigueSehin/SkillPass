@@ -101,7 +101,10 @@ export function EvidenceFilters({ skills }: { skills: { id: string; name: string
               </option>
             ))}
           </select>
-          <ChevronDown className="text-muted pointer-events-none absolute top-3.5 right-3 size-4" aria-hidden />
+          <ChevronDown
+            className="text-muted pointer-events-none absolute top-3.5 right-3 size-4"
+            aria-hidden
+          />
         </div>
       )}
     </div>

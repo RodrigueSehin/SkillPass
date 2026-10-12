@@ -20,7 +20,10 @@ export function FieldError({ message }: { message?: string }) {
 
 export function Stepper({ current }: { current: number }) {
   return (
-    <ol aria-label="Étapes" className="border-border/60 shadow-soft grid gap-3 rounded-2xl border bg-white p-4 sm:grid-cols-4">
+    <ol
+      aria-label="Étapes"
+      className="border-border/60 shadow-soft grid gap-3 rounded-2xl border bg-white p-4 sm:grid-cols-4"
+    >
       {STEPS.map((s, i) => {
         const done = i < current;
         const active = i === current;

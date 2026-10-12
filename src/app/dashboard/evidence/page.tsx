@@ -46,7 +46,9 @@ export default async function EvidencePage({ searchParams }: PageProps<"/dashboa
     const text = qs.toString();
     return text ? `/dashboard/evidence?${text}` : "/dashboard/evidence";
   };
-  const addHref = filters.skill ? `/dashboard/evidence/new?skill=${filters.skill}` : "/dashboard/evidence/new";
+  const addHref = filters.skill
+    ? `/dashboard/evidence/new?skill=${filters.skill}`
+    : "/dashboard/evidence/new";
   const add = (
     <Link href={addHref} className={buttonVariants()}>
       <Plus /> Ajouter une preuve
@@ -139,8 +141,10 @@ export default async function EvidencePage({ searchParams }: PageProps<"/dashboa
                   <li key={e.id} className="relative">
                     <article
                       className={cn(
-                        "bg-white h-full rounded-2xl border p-3 transition-shadow",
-                        active ? "border-brand shadow-lift" : "border-border/60 shadow-soft hover:shadow-lift",
+                        "h-full rounded-2xl border bg-white p-3 transition-shadow",
+                        active
+                          ? "border-brand shadow-lift"
+                          : "border-border/60 shadow-soft hover:shadow-lift",
                       )}
                     >
                       <Link

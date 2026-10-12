@@ -54,7 +54,9 @@ export function StepGeneral({ values: v, errors, patch }: Props) {
                   key={t}
                   className={cn(
                     "focus-within:ring-brand/40 flex h-10 cursor-pointer items-center gap-2 rounded-lg border px-4 text-sm font-medium focus-within:ring-2",
-                    on ? "border-brand bg-brand text-white" : "border-border text-navy bg-white hover:bg-slate-50",
+                    on
+                      ? "border-brand bg-brand text-white"
+                      : "border-border text-navy bg-white hover:bg-slate-50",
                   )}
                 >
                   <input
@@ -117,7 +119,10 @@ export function StepGeneral({ values: v, errors, patch }: Props) {
             </span>
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
               <div className="relative">
-                <CalendarDays className="text-muted pointer-events-none absolute top-3.5 left-3.5 size-4" aria-hidden />
+                <CalendarDays
+                  className="text-muted pointer-events-none absolute top-3.5 left-3.5 size-4"
+                  aria-hidden
+                />
                 <input
                   type="month"
                   aria-label="Début"
@@ -160,7 +165,10 @@ export function StepGeneral({ values: v, errors, patch }: Props) {
               <Optional />
             </Label>
             <div className="relative">
-              <Link2 className="text-muted pointer-events-none absolute top-3.5 left-3.5 size-4" aria-hidden />
+              <Link2
+                className="text-muted pointer-events-none absolute top-3.5 left-3.5 size-4"
+                aria-hidden
+              />
               <input
                 id="ev-url"
                 type="url"

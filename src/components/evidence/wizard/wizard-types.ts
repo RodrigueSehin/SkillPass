@@ -3,9 +3,13 @@ import type { EvidenceVisibility, UserEvidenceType } from "@/types/evidence";
 
 export interface WizardFile {
   id: string;
-  file: File;
-  /** Object URL for image previews, null for documents. */
+  name: string;
+  size: number;
+  mimeType: string;
+  /** Image URL for previews (blob or stored file), null for documents. */
   preview: string | null;
+  /** A file picked in this session; absent for files already stored on the evidence being edited. */
+  file?: File;
 }
 
 export interface WizardState {
@@ -47,7 +51,8 @@ const isUrl = (value: string) => {
 };
 
 export function validateFile(file: File): string | undefined {
-  if (!(file.type in ALLOWED_UPLOADS)) return `« ${file.name} » : format non accepté (PNG, JPG, PDF ou WebP).`;
+  if (!(file.type in ALLOWED_UPLOADS))
+    return `« ${file.name} » : format non accepté (PNG, JPG, PDF ou WebP).`;
   if (file.size > MAX_UPLOAD_BYTES) return `« ${file.name} » : fichier trop volumineux (5 Mo maximum).`;
   if (file.size === 0) return `« ${file.name} » : le fichier est vide.`;
   return undefined;
@@ -71,7 +76,7 @@ export function validateStep(step: number, v: WizardState): StepErrors {
     if (v.files.length > MAX_EVIDENCE_FILES) errors.files = `${MAX_EVIDENCE_FILES} fichiers maximum`;
     else if (requiresFile(v.type) && v.files.length === 0) {
       errors.files = "Ajoutez au moins un fichier pour ce type de preuve";
-    } else if (v.type === "SCREENSHOT" && v.files.some((f) => !f.file.type.startsWith("image/"))) {
+    } else if (v.type === "SCREENSHOT" && v.files.some((f) => !f.mimeType.startsWith("image/"))) {
       errors.files = "Une capture d'écran doit être une image";
     }
   }
@@ -80,7 +85,8 @@ export function validateStep(step: number, v: WizardState): StepErrors {
 
 /** What a draft needs: nothing more than the schema's hard requirements. */
 export function validateDraft(v: WizardState): { step: number; errors: StepErrors } | null {
-  if (v.title.trim().length < 2) return { step: 0, errors: { title: "Donnez au moins un titre pour enregistrer un brouillon" } };
+  if (v.title.trim().length < 2)
+    return { step: 0, errors: { title: "Donnez au moins un titre pour enregistrer un brouillon" } };
   if (v.skillIds.length === 0) return { step: 1, errors: { skills: "Choisissez au moins une compétence" } };
   return null;
 }

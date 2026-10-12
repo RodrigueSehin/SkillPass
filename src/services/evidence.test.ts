@@ -9,7 +9,7 @@ import { explainVerification } from "@/lib/verification-explainer";
 import { InMemoryEvidenceRepository } from "@/repositories/evidence.memory";
 import { createMemoryProjects } from "@/repositories/portfolio.memory";
 import { InMemoryTalentSkillRepository } from "@/repositories/talent-skill.memory";
-import { createEvidenceSchema } from "@/schemas/evidence";
+import { createEvidenceSchema, updateEvidenceSchema } from "@/schemas/evidence";
 import { EvidenceService } from "./evidence.service";
 import { SkillService } from "./skill.service";
 
@@ -170,6 +170,43 @@ describe("EvidenceService", () => {
 
     await service.remove(ME, created.id);
     expect(storage.objects.size).toBe(0);
+  });
+
+  it("edits an evidence: fields, skills, kept files removed or added, owner only", async () => {
+    const skillId = await skillIdFor("UI/UX");
+    const created = await service.add(ME, input({ talentSkillIds: [skillId] }), [file(), file()]);
+    const [keep, drop] = created.files;
+    const edit = (over: Record<string, unknown> = {}) =>
+      updateEvidenceSchema.parse({
+        talentSkillIds: [skillId],
+        type: "DOCUMENT",
+        title: "Titre modifié",
+        description: "Nouvelle description",
+        technologies: ["Figma"],
+        keepFileIds: [keep.id],
+        ...over,
+      });
+
+    const updated = await service.update(ME, created.id, edit(), [file({ name: "new.pdf" })]);
+    expect(updated.id).toBe(created.id);
+    expect(updated.title).toBe("Titre modifié");
+    expect(updated.files.map((f) => f.name)).toEqual([keep.name, "new.pdf"]);
+    expect(updated.files.some((f) => f.id === drop.id)).toBe(false);
+    expect(storage.objects.size).toBe(2); // the dropped object is gone, the new one stored
+
+    await expect(service.update(OTHER, created.id, edit())).rejects.toBeInstanceOf(NotFoundError);
+    // A published document must keep at least one file.
+    await expect(service.update(ME, created.id, edit({ keepFileIds: [] }))).rejects.toBeInstanceOf(UploadError);
+    // At most five files in total, kept ones included.
+    await expect(
+      service.update(ME, created.id, edit({ keepFileIds: updated.files.map((f) => f.id) }), [
+        file(),
+        file(),
+        file(),
+        file(),
+      ]),
+    ).rejects.toBeInstanceOf(UploadError);
+    expect(storage.objects.size).toBe(2);
   });
 
   it("publishes a draft only once it is complete", async () => {

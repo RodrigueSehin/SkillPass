@@ -73,8 +73,8 @@ export function Example() {
         </div>
         <p className="text-navy mt-3 font-bold">Application de gestion des cotations</p>
         <p className="text-muted mt-1 text-xs">
-          Application de gestion des cotations pour le transport et la logistique. Permet de gérer les demandes,
-          générer des devis et suivre les dossiers clients.
+          Application de gestion des cotations pour le transport et la logistique. Permet de gérer les
+          demandes, générer des devis et suivre les dossiers clients.
         </p>
         <dl className="mt-3 space-y-1.5 text-xs">
           <div className="grid grid-cols-[90px_1fr] gap-2">
@@ -165,7 +165,9 @@ export function Recap({ step, values, skillNames, onEdit }: RecapProps) {
           Récapitulatif
         </h2>
         {step === 1 ? (
-          <span className="text-brand rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold">Étape 2 sur 4</span>
+          <span className="text-brand rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold">
+            Étape 2 sur 4
+          </span>
         ) : (
           <button
             type="button"
@@ -188,7 +190,9 @@ export function Recap({ step, values, skillNames, onEdit }: RecapProps) {
         <div className="min-w-0">
           <p className="text-navy font-bold break-words">{values.title || "Titre de la preuve"}</p>
           {!withCover && (
-            <p className="text-muted line-clamp-3 text-xs">{values.description || "Votre description apparaîtra ici."}</p>
+            <p className="text-muted line-clamp-3 text-xs">
+              {values.description || "Votre description apparaîtra ici."}
+            </p>
           )}
         </div>
       </div>
@@ -220,9 +224,13 @@ export function Recap({ step, values, skillNames, onEdit }: RecapProps) {
       {step === 1 && (
         <>
           <div>
-            <h3 className="text-navy text-sm font-bold">Technologies sélectionnées ({values.technologies.length})</h3>
+            <h3 className="text-navy text-sm font-bold">
+              Technologies sélectionnées ({values.technologies.length})
+            </h3>
             <ul className="mt-2 flex flex-wrap gap-1.5">
-              {values.technologies.length === 0 && <li className="text-muted text-xs">Aucune pour l&apos;instant.</li>}
+              {values.technologies.length === 0 && (
+                <li className="text-muted text-xs">Aucune pour l&apos;instant.</li>
+              )}
               {values.technologies.map((t) => (
                 <li key={t}>
                   <Chip>{t}</Chip>
@@ -262,8 +270,8 @@ export function ProofSideNotes() {
       <section className="flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4">
         <ShieldCheck className="text-success size-8 shrink-0" aria-hidden />
         <p className="text-navy text-sm">
-          La vérification de vos preuves par notre équipe arrive bientôt. En attendant, votre preuve est publiée
-          comme « non vérifiée ».
+          La vérification de vos preuves par notre équipe arrive bientôt. En attendant, votre preuve est
+          publiée comme « non vérifiée ».
         </p>
       </section>
     </>
@@ -344,7 +352,7 @@ export function PublishPreview({
                     <FileText className="size-5" aria-hidden />
                   </span>
                 )}
-                <span className="text-muted mt-1 block truncate text-[10px]">{f.file.name}</span>
+                <span className="text-muted mt-1 block truncate text-[10px]">{f.name}</span>
               </li>
             ))}
           </ul>
@@ -362,4 +370,3 @@ export function PublishPreview({
     </section>
   );
 }
-

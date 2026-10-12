@@ -64,7 +64,9 @@ export class PrismaEvidenceRepository implements EvidenceRepository {
     const rows = await prisma.skillEvidence.findMany({
       where: {
         profileId,
-        ...(skillId ? { OR: [{ talentSkillId: skillId }, { skills: { some: { talentSkillId: skillId } } }] } : {}),
+        ...(skillId
+          ? { OR: [{ talentSkillId: skillId }, { skills: { some: { talentSkillId: skillId } } }] }
+          : {}),
       },
       include,
       orderBy: { createdAt: "desc" },
@@ -111,6 +113,58 @@ export class PrismaEvidenceRepository implements EvidenceRepository {
       include,
     });
     return toPublicEvidence(toStored(row));
+  }
+
+  async update(
+    profileId: string,
+    id: string,
+    input: NewEvidence,
+    _skills: { id: string; name: string }[],
+    keepFileIds: string[],
+  ) {
+    const current = await prisma.skillEvidence.findFirst({
+      where: { id, profileId },
+      select: { files: { select: { id: true, filePath: true } } },
+    });
+    if (!current) return undefined;
+    const removed = current.files.filter((f) => !keepFileIds.includes(f.id));
+    const row = await prisma.$transaction(async (tx) => {
+      await tx.evidenceFile.deleteMany({ where: { evidenceId: id, id: { in: removed.map((f) => f.id) } } });
+      await tx.evidenceSkill.deleteMany({ where: { evidenceId: id } });
+      return tx.skillEvidence.update({
+        where: { id },
+        data: {
+          talentSkillId: input.talentSkillId,
+          projectId: input.projectId ?? null,
+          type: input.type,
+          title: input.title,
+          description: input.description ?? null,
+          url: input.url ?? null,
+          organization: input.organization ?? null,
+          role: input.role ?? null,
+          startDate: monthToDate(input.startDate),
+          endDate: monthToDate(input.endDate),
+          technologies: input.technologies,
+          tags: input.tags,
+          category: input.category ?? null,
+          visibility: input.visibility,
+          published: input.published,
+          allowContact: input.allowContact,
+          allowRecommendations: input.allowRecommendations,
+          skills: { create: input.skillIds.map((talentSkillId) => ({ talentSkillId })) },
+          files: {
+            create: input.files.map((f) => ({
+              filePath: f.path,
+              fileName: f.name,
+              mimeType: f.mimeType,
+              sizeBytes: f.sizeBytes,
+            })),
+          },
+        },
+        include,
+      });
+    });
+    return { evidence: toPublicEvidence(toStored(row)), removedPaths: removed.map((f) => f.filePath) };
   }
 
   async publish(profileId: string, id: string) {

@@ -102,6 +102,51 @@ export class InMemoryEvidenceRepository implements EvidenceRepository {
     return toPublicEvidence(row);
   }
 
+  async update(
+    profileId: string,
+    id: string,
+    input: NewEvidence,
+    skills: { id: string; name: string }[],
+    keepFileIds: string[],
+  ) {
+    const row = this.forProfile(profileId).find((e) => e.id === id);
+    if (!row) return undefined;
+    const removedPaths = row.files.filter((f) => !keepFileIds.includes(f.id)).map((f) => f.filePath);
+    Object.assign(row, {
+      talentSkillId: input.talentSkillId,
+      skillName: skills[0]?.name ?? "",
+      skills,
+      projectId: input.projectId ?? null,
+      type: input.type,
+      title: input.title,
+      description: input.description ?? null,
+      url: input.url ?? null,
+      organization: input.organization ?? null,
+      role: input.role ?? null,
+      startDate: input.startDate ?? null,
+      endDate: input.endDate ?? null,
+      technologies: input.technologies,
+      tags: input.tags,
+      category: input.category ?? null,
+      visibility: input.visibility,
+      published: input.published,
+      allowContact: input.allowContact,
+      allowRecommendations: input.allowRecommendations,
+      files: [
+        ...row.files.filter((f) => keepFileIds.includes(f.id)),
+        ...input.files.map((f) => ({
+          id: randomUUID(),
+          name: f.name,
+          mimeType: f.mimeType,
+          sizeBytes: f.sizeBytes,
+          isImage: isImageMime(f.mimeType),
+          filePath: f.path,
+        })),
+      ],
+    });
+    return { evidence: toPublicEvidence(row), removedPaths };
+  }
+
   async publish(profileId: string, id: string) {
     const row = this.forProfile(profileId).find((e) => e.id === id);
     if (!row) return false;

@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, FilePlus2, Save, Send } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { fileUrl } from "@/lib/evidence-view";
 import { MAX_EVIDENCE_FILES, type CreateEvidenceValues } from "@/schemas/evidence";
+import { USER_EVIDENCE_TYPES, type EvidenceDTO, type UserEvidenceType } from "@/types/evidence";
 import { StepGeneral } from "./step-general";
 import { StepProof } from "./step-proof";
 import { StepPublish } from "./step-publish";
@@ -26,31 +28,68 @@ interface Props {
   skills: { id: string; name: string }[];
   /** Skill pre-selected when the wizard is opened from a skill's page. */
   initialSkillId?: string;
+  /** Edit mode: the evidence to modify. */
+  evidence?: EvidenceDTO;
 }
 
 const LIST_HREF = "/dashboard/evidence";
 
-export function EvidenceWizard({ skills, initialSkillId }: Props) {
+/** Wizard state of an existing evidence (its stored files are listed next to the ones added now). */
+function stateFrom(e: EvidenceDTO): WizardState {
+  return {
+    type: (USER_EVIDENCE_TYPES as readonly string[]).includes(e.type)
+      ? (e.type as UserEvidenceType)
+      : "OTHER",
+    title: e.title,
+    description: e.description ?? "",
+    organization: e.organization ?? "",
+    startDate: e.startDate ?? "",
+    endDate: e.endDate ?? "",
+    role: e.role ?? "",
+    url: e.url ?? "",
+    visibility: e.visibility,
+    technologies: e.technologies,
+    skillIds: e.skills.map((s) => s.id),
+    files: e.files.map((f) => ({
+      id: f.id,
+      name: f.name,
+      size: f.sizeBytes,
+      mimeType: f.mimeType,
+      preview: f.isImage ? fileUrl(e.id, f.id) : null,
+    })),
+    tags: e.tags,
+    category: e.category ?? "",
+    allowContact: e.allowContact,
+    allowRecommendations: e.allowRecommendations,
+  };
+}
+
+export function EvidenceWizard({ skills, initialSkillId, evidence }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [values, setValues] = useState<WizardState>({
-    type: "PROJECT",
-    title: "",
-    description: "",
-    organization: "",
-    startDate: "",
-    endDate: "",
-    role: "",
-    url: "",
-    visibility: "PUBLIC",
-    technologies: [],
-    skillIds: initialSkillId && skills.some((s) => s.id === initialSkillId) ? [initialSkillId] : [],
-    files: [],
-    tags: [],
-    category: "",
-    allowContact: true,
-    allowRecommendations: false,
-  });
+  const editing = Boolean(evidence);
+  const [values, setValues] = useState<WizardState>(() =>
+    evidence
+      ? stateFrom(evidence)
+      : {
+          type: "PROJECT",
+          title: "",
+          description: "",
+          organization: "",
+          startDate: "",
+          endDate: "",
+          role: "",
+          url: "",
+          visibility: "PUBLIC",
+          technologies: [],
+          skillIds: initialSkillId && skills.some((s) => s.id === initialSkillId) ? [initialSkillId] : [],
+          files: [],
+          tags: [],
+          category: "",
+          allowContact: true,
+          allowRecommendations: false,
+        },
+  );
   const [errors, setErrors] = useState<StepErrors>({});
   const [fileError, setFileError] = useState<string>();
   const [serverError, setServerError] = useState<string>();
@@ -87,7 +126,14 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
       }
       const preview = file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
       if (preview) previews.current.add(preview);
-      accepted.push({ id: crypto.randomUUID(), file, preview });
+      accepted.push({
+        id: crypto.randomUUID(),
+        file,
+        name: file.name,
+        size: file.size,
+        mimeType: file.type,
+        preview,
+      });
     }
     setFileError(problems[0]);
     if (accepted.length) patch({ files: [...values.files, ...accepted] });
@@ -95,7 +141,7 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
 
   function removeFile(id: string) {
     const target = values.files.find((f) => f.id === id);
-    if (target?.preview) {
+    if (target?.file && target.preview) {
       URL.revokeObjectURL(target.preview);
       previews.current.delete(target.preview);
     }
@@ -136,6 +182,8 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
 
     const data: CreateEvidenceValues = {
       talentSkillIds: values.skillIds,
+      projectId: evidence?.projectId ?? undefined,
+      keepFileIds: values.files.filter((f) => !f.file).map((f) => f.id),
       type: values.type,
       title: values.title,
       description: values.description,
@@ -154,11 +202,14 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
     };
     const body = new FormData();
     body.append("data", JSON.stringify(data));
-    for (const f of values.files) body.append("files", f.file);
+    for (const f of values.files) if (f.file) body.append("files", f.file);
 
     startTransition(async () => {
       try {
-        const res = await fetch("/api/evidence", { method: "POST", body });
+        const res = await fetch(evidence ? `/api/evidence/${evidence.id}` : "/api/evidence", {
+          method: evidence ? "PUT" : "POST",
+          body,
+        });
         if (!res.ok) {
           const json = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
           setServerError(json?.error?.message ?? "L'envoi a échoué. Veuillez réessayer.");
@@ -175,6 +226,8 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
 
   const skillNames = skills.filter((s) => values.skillIds.includes(s.id)).map((s) => s.name);
   const last = step === STEPS.length - 1;
+  /** A published evidence cannot go back to draft: only drafts get the draft button. */
+  const canDraft = !evidence?.published;
 
   if (skills.length === 0) {
     return (
@@ -199,7 +252,9 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
               Preuves
             </Link>
             <span aria-hidden>›</span>
-            <span className={last ? "text-brand" : "text-navy font-semibold"}>Ajouter une preuve</span>
+            <span className={last ? "text-brand" : "text-navy font-semibold"}>
+              {editing ? "Modifier la preuve" : "Ajouter une preuve"}
+            </span>
             {last && (
               <>
                 <span aria-hidden>›</span>
@@ -214,7 +269,9 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
               <FilePlus2 className="size-7" aria-hidden />
             </span>
             <div>
-              <h1 className="text-navy text-2xl font-extrabold tracking-tight sm:text-3xl">Ajouter une preuve</h1>
+              <h1 className="text-navy text-2xl font-extrabold tracking-tight sm:text-3xl">
+                {editing ? "Modifier la preuve" : "Ajouter une preuve"}
+              </h1>
               <p className="text-muted mt-1">
                 Présentez une preuve concrète de vos compétences à travers un projet, une réalisation, une
                 certification, etc.
@@ -222,7 +279,7 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
             </div>
           </div>
         </div>
-        {step < 2 && (
+        {step < 2 && canDraft && (
           <Button type="button" variant="outline" disabled={pending} onClick={() => submit(false)}>
             <Save /> Enregistrer comme brouillon
           </Button>
@@ -268,7 +325,10 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             {step === 0 ? (
-              <Link href={LIST_HREF} className={buttonVariants({ variant: "outline" })}>
+              <Link
+                href={evidence ? `${LIST_HREF}?sel=${evidence.id}` : LIST_HREF}
+                className={buttonVariants({ variant: "outline" })}
+              >
                 Annuler
               </Link>
             ) : (
@@ -277,14 +337,21 @@ export function EvidenceWizard({ skills, initialSkillId }: Props) {
               </Button>
             )}
             <div className="flex flex-wrap items-center gap-3">
-              {last && (
+              {last && canDraft && (
                 <Button type="button" variant="outline" disabled={pending} onClick={() => submit(false)}>
                   <Save /> Enregistrer comme brouillon
                 </Button>
               )}
               {last ? (
                 <Button type="submit" disabled={pending}>
-                  {pending ? "Publication…" : "Publier ma preuve"} <Send />
+                  {pending
+                    ? editing
+                      ? "Enregistrement…"
+                      : "Publication…"
+                    : editing && evidence?.published
+                      ? "Enregistrer les modifications"
+                      : "Publier ma preuve"}{" "}
+                  <Send />
                 </Button>
               ) : (
                 <Button type="submit" disabled={pending}>
