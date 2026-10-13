@@ -15,6 +15,9 @@ function setup() {
     async remove(key) {
       files.delete(key);
     },
+    async removePrefix(prefix) {
+      for (const key of files.keys()) if (key.startsWith(`${prefix}/`)) files.delete(key);
+    },
     async read(key) {
       const bytes = files.get(key);
       if (!bytes) throw new Error("missing");

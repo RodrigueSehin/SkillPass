@@ -90,6 +90,11 @@ export class PrismaProfileRepository implements ProfileRepository {
     return { previous: row.avatarUrl };
   }
 
+  async delete(id: string) {
+    const { count } = await prisma.profile.deleteMany({ where: { id } });
+    return count > 0;
+  }
+
   async setPlan(id: string, plan: TalentPlanCode) {
     try {
       return toDTO(await prisma.profile.update({ where: { id }, data: { plan } }));

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import type { Prisma } from "@/generated/prisma/client";
-import type { EvidenceVisibility, NewEvidence } from "@/types/evidence";
+import type { EvidenceStatus, EvidenceVisibility, NewEvidence } from "@/types/evidence";
 import {
   dateToMonth,
   isImageMime,
@@ -54,6 +54,8 @@ const toStored = (r: Row): StoredEvidence => {
       filePath: f.filePath,
     })),
     status: r.status,
+    verificationNote: r.verificationNote,
+    verificationRequestedAt: r.verificationRequestedAt?.toISOString() ?? null,
     createdAt: r.createdAt.toISOString(),
   };
 };
@@ -151,6 +153,10 @@ export class PrismaEvidenceRepository implements EvidenceRepository {
           published: input.published,
           allowContact: input.allowContact,
           allowRecommendations: input.allowRecommendations,
+          // A modified evidence is no longer the one the team looked at.
+          status: "UNVERIFIED",
+          verificationNote: null,
+          verificationRequestedAt: null,
           skills: { create: input.skillIds.map((talentSkillId) => ({ talentSkillId })) },
           files: {
             create: input.files.map((f) => ({
@@ -165,6 +171,36 @@ export class PrismaEvidenceRepository implements EvidenceRepository {
       });
     });
     return { evidence: toPublicEvidence(toStored(row)), removedPaths: removed.map((f) => f.filePath) };
+  }
+
+  async requestVerification(profileId: string, id: string) {
+    const { count } = await prisma.skillEvidence.updateMany({
+      where: { id, profileId, published: true, status: "UNVERIFIED" },
+      data: { status: "PENDING", verificationNote: null, verificationRequestedAt: new Date() },
+    });
+    return count > 0;
+  }
+
+  async listByStatus(status: EvidenceStatus) {
+    const rows = await prisma.skillEvidence.findMany({
+      where: { status, published: true },
+      include,
+      orderBy: { verificationRequestedAt: "asc" },
+    });
+    return rows.map((r) => ({ ...toPublicEvidence(toStored(r)), profileId: r.profileId }));
+  }
+
+  async findAny(id: string) {
+    const row = await prisma.skillEvidence.findUnique({ where: { id }, include });
+    return row ? { ...toStored(row), profileId: row.profileId } : null;
+  }
+
+  async review(id: string, status: "VERIFIED" | "UNVERIFIED", note: string | null) {
+    const { count } = await prisma.skillEvidence.updateMany({
+      where: { id },
+      data: { status, verificationNote: note, verificationRequestedAt: null },
+    });
+    return count > 0;
   }
 
   async publish(profileId: string, id: string) {

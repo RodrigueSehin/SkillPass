@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { DEMO_EVIDENCE, demoSkillId } from "@/config/demo-data";
-import type { NewEvidence } from "@/types/evidence";
+import type { EvidenceStatus, NewEvidence } from "@/types/evidence";
 import {
   isImageMime,
   toPublicEvidence,
@@ -44,6 +44,8 @@ export class InMemoryEvidenceRepository implements EvidenceRepository {
                 allowRecommendations: false,
                 files: [],
                 status: e.status,
+                verificationNote: null,
+                verificationRequestedAt: null,
                 createdAt: new Date().toISOString(),
               };
             })
@@ -96,6 +98,8 @@ export class InMemoryEvidenceRepository implements EvidenceRepository {
         filePath: f.path,
       })),
       status: "UNVERIFIED",
+      verificationNote: null,
+      verificationRequestedAt: null,
       createdAt: new Date().toISOString(),
     };
     this.forProfile(profileId).push(row);
@@ -132,6 +136,9 @@ export class InMemoryEvidenceRepository implements EvidenceRepository {
       published: input.published,
       allowContact: input.allowContact,
       allowRecommendations: input.allowRecommendations,
+      status: "UNVERIFIED",
+      verificationNote: null,
+      verificationRequestedAt: null,
       files: [
         ...row.files.filter((f) => keepFileIds.includes(f.id)),
         ...input.files.map((f) => ({
@@ -145,6 +152,42 @@ export class InMemoryEvidenceRepository implements EvidenceRepository {
       ],
     });
     return { evidence: toPublicEvidence(row), removedPaths };
+  }
+
+  async requestVerification(profileId: string, id: string) {
+    const row = this.forProfile(profileId).find((e) => e.id === id);
+    if (!row) return false;
+    if (row.published && row.status === "UNVERIFIED") {
+      row.status = "PENDING";
+      row.verificationNote = null;
+      row.verificationRequestedAt = new Date().toISOString();
+    }
+    return true;
+  }
+
+  private all() {
+    return [...this.rows.entries()].flatMap(([profileId, list]) => list.map((e) => ({ ...e, profileId })));
+  }
+
+  async listByStatus(status: EvidenceStatus) {
+    return this.all()
+      .filter((e) => e.published && e.status === status)
+      .map((e) => ({ ...toPublicEvidence(e), profileId: e.profileId }));
+  }
+
+  async findAny(id: string) {
+    return this.all().find((e) => e.id === id) ?? null;
+  }
+
+  async review(id: string, status: "VERIFIED" | "UNVERIFIED", note: string | null) {
+    for (const list of this.rows.values()) {
+      const row = list.find((e) => e.id === id);
+      if (row) {
+        Object.assign(row, { status, verificationNote: note, verificationRequestedAt: null });
+        return true;
+      }
+    }
+    return false;
   }
 
   async publish(profileId: string, id: string) {

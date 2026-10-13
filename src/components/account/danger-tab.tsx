@@ -1,11 +1,19 @@
 import { CloudDownload, Trash2, EyeOff } from "lucide-react";
 import { Panel } from "@/components/business/ui";
-import { SoonBadge } from "@/components/business/settings/rows";
 import { setPublicAction } from "@/app/dashboard/settings/actions";
 import type { ProfileDTO } from "@/types/profile";
+import { DeleteAccount } from "./delete-account";
 import { ToggleSetting } from "./toggle-setting";
 
-export function DangerTab({ profile }: { profile: ProfileDTO }) {
+export function DangerTab({
+  profile,
+  email,
+  needsPassword,
+}: {
+  profile: ProfileDTO;
+  email: string;
+  needsPassword: boolean;
+}) {
   return (
     <div className="space-y-6">
       <Panel className="flex flex-wrap items-center gap-5 p-6">
@@ -58,22 +66,14 @@ export function DangerTab({ profile }: { profile: ProfileDTO }) {
           <Trash2 className="size-7" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-navy flex items-center gap-2 text-lg font-bold">
-            Supprimer mon compte <SoonBadge />
-          </h2>
+          <h2 className="text-navy text-lg font-bold">Supprimer mon compte</h2>
           <p className="text-muted text-sm">
-            Supprime définitivement votre compte et toutes vos données. Cette action est irréversible. Elle
-            n&apos;est pas encore disponible : en attendant, exportez vos données et mettez votre profil en
-            pause.
+            Supprime définitivement votre compte et toutes vos données : profil, compétences, projets,
+            expériences, certifications, preuves et leurs fichiers. Cette action est irréversible : pensez à
+            exporter vos données avant.
           </p>
         </div>
-        <button
-          type="button"
-          disabled
-          className="border-danger text-danger flex h-11 items-center gap-2 rounded-xl border bg-white px-5 text-sm font-semibold opacity-50"
-        >
-          <Trash2 className="size-4" aria-hidden /> Supprimer mon compte
-        </button>
+        <DeleteAccount email={email} needsPassword={needsPassword} />
       </Panel>
     </div>
   );

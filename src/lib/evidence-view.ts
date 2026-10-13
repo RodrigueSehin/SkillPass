@@ -68,7 +68,9 @@ export function filterEvidence(items: EvidenceDTO[], f: EvidenceFilters) {
 export function formatMonth(value: string | null) {
   if (!value) return null;
   const date = new Date(`${value}-01T00:00:00Z`);
-  const text = new Intl.DateTimeFormat("fr-FR", { month: "short", year: "numeric", timeZone: "UTC" }).format(date);
+  const text = new Intl.DateTimeFormat("fr-FR", { month: "short", year: "numeric", timeZone: "UTC" }).format(
+    date,
+  );
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
@@ -81,6 +83,12 @@ export function formatPeriod(e: Pick<EvidenceDTO, "startDate" | "endDate">) {
 }
 
 export const formatSize = (bytes: number) =>
-  bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} Ko` : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
+  bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))} Ko`
+    : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
 
 export const fileUrl = (evidenceId: string, fileId: string) => `/api/evidence/${evidenceId}/files/${fileId}`;
+
+/** A published evidence the team has not looked at yet, with something to look at. */
+export const canRequestVerification = (e: Pick<EvidenceDTO, "published" | "status" | "files" | "url">) =>
+  e.published && e.status === "UNVERIFIED" && (e.files.length > 0 || Boolean(e.url));

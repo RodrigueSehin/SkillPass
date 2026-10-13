@@ -100,6 +100,10 @@ export interface EvidenceDTO {
   allowRecommendations: boolean;
   files: EvidenceFileDTO[];
   status: EvidenceStatus;
+  /** Why the team refused the last verification request (null otherwise). */
+  verificationNote: string | null;
+  /** When the pending verification was requested. */
+  verificationRequestedAt: string | null;
   createdAt: string;
 }
 

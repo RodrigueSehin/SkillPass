@@ -1,7 +1,9 @@
 import Link from "next/link";
 import {
+  BadgeCheck,
   Building2,
   CalendarDays,
+  Clock,
   ExternalLink,
   FileText,
   FolderOpen,
@@ -11,10 +13,11 @@ import {
   Pencil,
   Tag,
   UserRound,
+  XCircle,
 } from "lucide-react";
-import { fileUrl, formatPeriod, formatSize } from "@/lib/evidence-view";
+import { canRequestVerification, fileUrl, formatPeriod, formatSize } from "@/lib/evidence-view";
 import { EVIDENCE_VISIBILITY_LABELS, type EvidenceDTO, type EvidenceFileDTO } from "@/types/evidence";
-import { EvidenceActions } from "./evidence-actions";
+import { EvidenceActions, RequestVerificationButton } from "./evidence-actions";
 import { Chip, EvidenceCover, StatusBadge, TypeBadge } from "./evidence-bits";
 
 function Row({
@@ -111,9 +114,16 @@ export function EvidenceDetail({ evidence: e }: { evidence: EvidenceDTO }) {
             >
               <Pencil className="size-4" aria-hidden /> Modifier
             </Link>
-            <EvidenceActions id={e.id} title={e.title} published={e.published} />
+            <EvidenceActions
+              id={e.id}
+              title={e.title}
+              published={e.published}
+              canVerify={canRequestVerification(e)}
+            />
           </div>
         </div>
+        <VerificationBlock evidence={e} />
+
         {e.description && <p className="text-muted text-sm whitespace-pre-line">{e.description}</p>}
 
         <dl className="space-y-2.5">
@@ -228,3 +238,53 @@ const EVIDENCE_VISIBILITIES_TITLE = {
   RECRUITERS: EVIDENCE_VISIBILITY_LABELS.RECRUITERS.title,
   PRIVATE: EVIDENCE_VISIBILITY_LABELS.PRIVATE.title,
 } as const;
+
+/** Where the evidence stands with the SkillPass team, and what the talent can do about it. */
+function VerificationBlock({ evidence: e }: { evidence: EvidenceDTO }) {
+  if (!e.published) return null;
+  if (e.status === "VERIFIED") {
+    return (
+      <p className="text-success flex items-start gap-2 rounded-xl bg-green-50 p-3 text-sm font-medium">
+        <BadgeCheck className="mt-0.5 size-4 shrink-0" aria-hidden /> Preuve vérifiée par l&apos;équipe
+        SkillPass.
+      </p>
+    );
+  }
+  if (e.status === "PENDING") {
+    const since = e.verificationRequestedAt
+      ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(e.verificationRequestedAt))
+      : null;
+    return (
+      <p className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+        <Clock className="mt-0.5 size-4 shrink-0" aria-hidden />
+        <span>
+          <span className="font-semibold">Vérification en cours</span>
+          {since && ` (demandée le ${since})`} : l&apos;équipe SkillPass examine votre preuve.
+        </span>
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-3 rounded-xl bg-blue-50 p-3 text-sm">
+      {e.verificationNote && (
+        <p role="status" className="text-danger flex items-start gap-2">
+          <XCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            <span className="font-semibold">Vérification refusée :</span> {e.verificationNote}
+          </span>
+        </p>
+      )}
+      {canRequestVerification(e) ? (
+        <>
+          <p className="text-navy">
+            Faites vérifier cette preuve par l&apos;équipe SkillPass : elle sera marquée « Vérifiée » et
+            pèsera plus dans vos compétences.
+          </p>
+          <RequestVerificationButton id={e.id} />
+        </>
+      ) : (
+        <p className="text-navy">Ajoutez un fichier ou un lien pour pouvoir demander la vérification.</p>
+      )}
+    </div>
+  );
+}

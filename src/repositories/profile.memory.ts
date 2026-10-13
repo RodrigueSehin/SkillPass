@@ -120,6 +120,11 @@ export class InMemoryProfileRepository implements ProfileRepository {
     return { previous };
   }
 
+  async delete(id: string) {
+    this.avatars.delete(id);
+    return this.profiles.delete(id);
+  }
+
   async setPlan(id: string, plan: TalentPlanCode) {
     const profile = this.profiles.get(id);
     if (!profile) return null;

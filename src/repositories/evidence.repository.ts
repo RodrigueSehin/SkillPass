@@ -1,4 +1,4 @@
-import type { EvidenceDTO, EvidenceFileDTO, NewEvidence } from "@/types/evidence";
+import type { EvidenceDTO, EvidenceFileDTO, EvidenceStatus, NewEvidence } from "@/types/evidence";
 
 /** Internal shape: storage keys never leave the server. */
 export type StoredEvidence = Omit<EvidenceDTO, "files"> & {
@@ -28,6 +28,14 @@ export interface EvidenceRepository {
     skills: { id: string; name: string }[],
     keepFileIds: string[],
   ): Promise<{ evidence: EvidenceDTO; removedPaths: string[] } | undefined>;
+  /** Asks the team to verify a published evidence: UNVERIFIED becomes PENDING. False when it does not exist. */
+  requestVerification(profileId: string, id: string): Promise<boolean>;
+  /** Review queue, for the platform administrator: every evidence in this status, whoever owns it. */
+  listByStatus(status: EvidenceStatus): Promise<(EvidenceDTO & { profileId: string })[]>;
+  /** Any profile's evidence, with its storage keys: for the administrator only. */
+  findAny(id: string): Promise<(StoredEvidence & { profileId: string }) | null>;
+  /** Records the team's decision on a pending evidence. False when it does not exist. */
+  review(id: string, status: "VERIFIED" | "UNVERIFIED", note: string | null): Promise<boolean>;
   /** Turns a draft into a published evidence. False when it does not exist. */
   publish(profileId: string, id: string): Promise<boolean>;
   /** Returns the removed row's storage keys, or undefined if not found. */

@@ -317,6 +317,9 @@ model SkillEvidence {
   published            Boolean                    @default(true)
   allowContact         Boolean                    @default(true) @map("allow_contact")
   allowRecommendations Boolean                    @default(false) @map("allow_recommendations")
+  // Team verification: why the last request was refused, and when the current one was made.
+  verificationNote        String?                    @map("verification_note")
+  verificationRequestedAt DateTime?                  @map("verification_requested_at")
 
   profile     Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
   talentSkill TalentSkill    @relation(fields: [talentSkillId], references: [id], onDelete: Cascade)

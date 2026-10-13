@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { MoreVertical, Send, Trash2 } from "lucide-react";
+import { BadgeCheck, MoreVertical, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 
@@ -10,10 +10,12 @@ interface Props {
   id: string;
   title: string;
   published: boolean;
+  /** The evidence can be sent to the team for verification. */
+  canVerify?: boolean;
 }
 
 /** The "⋮" menu of an evidence: publish a draft, delete. */
-export function EvidenceActions({ id, title, published }: Props) {
+export function EvidenceActions({ id, title, published, canVerify = false }: Props) {
   const router = useRouter();
   const [menu, setMenu] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -33,8 +35,13 @@ export function EvidenceActions({ id, title, published }: Props) {
     };
   }, [menu]);
 
-  async function call(method: "DELETE" | "PATCH") {
-    const res = await fetch(`/api/evidence/${id}`, { method }).catch(() => null);
+  async function call(method: "DELETE" | "PATCH" | "VERIFY") {
+    const res = await fetch(
+      method === "VERIFY" ? `/api/evidence/${id}/verification` : `/api/evidence/${id}`,
+      {
+        method: method === "VERIFY" ? "POST" : method,
+      },
+    ).catch(() => null);
     if (res?.ok) return true;
     const json = (await res?.json().catch(() => null)) as { error?: { message?: string } } | null;
     setError(json?.error?.message ?? "L'opération a échoué. Veuillez réessayer.");
@@ -45,6 +52,12 @@ export function EvidenceActions({ id, title, published }: Props) {
     startTransition(async () => {
       setMenu(false);
       if (await call("PATCH")) router.refresh();
+    });
+  const verify = () =>
+    startTransition(async () => {
+      setMenu(false);
+      setError(undefined);
+      if (await call("VERIFY")) router.refresh();
     });
   const remove = () =>
     startTransition(async () => {
@@ -70,8 +83,18 @@ export function EvidenceActions({ id, title, published }: Props) {
       {menu && (
         <div
           role="menu"
-          className="border-border shadow-lift absolute right-0 bottom-full z-20 mb-1 w-44 overflow-hidden rounded-xl border bg-white text-sm"
+          className="border-border shadow-lift absolute right-0 bottom-full z-20 mb-1 w-60 overflow-hidden rounded-xl border bg-white text-sm"
         >
+          {canVerify && (
+            <button
+              role="menuitem"
+              type="button"
+              onClick={verify}
+              className="text-navy flex w-full items-center gap-2 px-4 py-2.5 text-left hover:bg-blue-50"
+            >
+              <BadgeCheck className="size-4" aria-hidden /> Demander la vérification
+            </button>
+          )}
           {!published && (
             <button
               role="menuitem"
@@ -120,6 +143,35 @@ export function EvidenceActions({ id, title, published }: Props) {
           </Button>
         </div>
       </Modal>
+    </div>
+  );
+}
+
+/** The detail panel's own button: same request as the menu entry, with its error shown next to it. */
+export function RequestVerificationButton({ id }: { id: string }) {
+  const router = useRouter();
+  const [error, setError] = useState<string>();
+  const [pending, startTransition] = useTransition();
+
+  const request = () =>
+    startTransition(async () => {
+      setError(undefined);
+      const res = await fetch(`/api/evidence/${id}/verification`, { method: "POST" }).catch(() => null);
+      if (res?.ok) return router.refresh();
+      const json = (await res?.json().catch(() => null)) as { error?: { message?: string } } | null;
+      setError(json?.error?.message ?? "La demande a échoué. Veuillez réessayer.");
+    });
+
+  return (
+    <div className="space-y-2">
+      <Button type="button" onClick={request} disabled={pending}>
+        <BadgeCheck /> {pending ? "Envoi…" : "Demander la vérification"}
+      </Button>
+      {error && (
+        <p role="alert" className="text-danger rounded-lg bg-red-50 px-3 py-2 text-xs">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

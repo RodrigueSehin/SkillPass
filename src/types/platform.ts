@@ -56,6 +56,8 @@ export const AUDIT_ACTIONS = [
   "MEMBER_ACCESS",
   "ROLE_CHANGED",
   "TALENT_PLAN",
+  "EVIDENCE_VERIFIED",
+  "EVIDENCE_REJECTED",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -70,6 +72,8 @@ export const AUDIT_LABELS: Record<AuditAction, string> = {
   MEMBER_ACCESS: "Accès d'un membre modifié",
   ROLE_CHANGED: "Rôle modifié",
   TALENT_PLAN: "Plan d'un talent modifié",
+  EVIDENCE_VERIFIED: "Preuve vérifiée",
+  EVIDENCE_REJECTED: "Preuve refusée",
 };
 
 export interface AuditEntryDTO {

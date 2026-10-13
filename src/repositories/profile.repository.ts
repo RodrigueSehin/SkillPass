@@ -14,6 +14,8 @@ export interface ProfileRepository {
   saveSettings(id: string, patch: Partial<ProfileSettings>): Promise<ProfileDTO | null>;
   setPublic(id: string, isPublic: boolean): Promise<ProfileDTO | null>;
   setPlan(id: string, plan: TalentPlanCode): Promise<ProfileDTO | null>;
+  /** Deletes the profile; everything attached to it (skills, projects, evidence...) goes with it. */
+  delete(id: string): Promise<boolean>;
   /** What the avatar column holds ("preset:key" or a storage path), null when none. */
   getAvatarStored(id: string): Promise<string | null>;
   /** Replaces the avatar column. Returns the previous value, or undefined when the profile is missing. */

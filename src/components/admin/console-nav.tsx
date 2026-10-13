@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, ClipboardCheck, History, LayoutDashboard, UserCog, type LucideIcon } from "lucide-react";
+import {
+  Building2,
+  ClipboardCheck,
+  FileCheck2,
+  History,
+  LayoutDashboard,
+  UserCog,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const ITEMS: { href: string; label: string; icon: LucideIcon; exact?: boolean }[] = [
@@ -10,10 +18,11 @@ const ITEMS: { href: string; label: string; icon: LucideIcon; exact?: boolean }[
   { href: "/admin/entreprises", label: "Entreprises", icon: Building2 },
   { href: "/admin/utilisateurs", label: "Utilisateurs et rôles", icon: UserCog },
   { href: "/admin/journal", label: "Journal d'audit", icon: History },
+  { href: "/admin/preuves", label: "Vérification des preuves", icon: FileCheck2 },
   { href: "/admin/verifications", label: "Validations d'évaluations", icon: ClipboardCheck },
 ];
 
-export function ConsoleNav({ pending }: { pending: number }) {
+export function ConsoleNav({ pending, pendingEvidence = 0 }: { pending: number; pendingEvidence?: number }) {
   const pathname = usePathname();
   return (
     <nav
@@ -38,6 +47,11 @@ export function ConsoleNav({ pending }: { pending: number }) {
                 {href === "/admin/entreprises" && pending > 0 && (
                   <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white">
                     {pending}
+                  </span>
+                )}
+                {href === "/admin/preuves" && pendingEvidence > 0 && (
+                  <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white">
+                    {pendingEvidence}
                   </span>
                 )}
               </Link>

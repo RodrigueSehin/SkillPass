@@ -2,14 +2,18 @@ import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
 import { ConsoleNav } from "@/components/admin/console-nav";
 import { requirePlatformAdmin } from "@/lib/auth/platform-admin";
-import { getPlatformAdminService } from "@/services/container";
+import { getEvidenceReviewService, getPlatformAdminService } from "@/services/container";
 
 export const dynamic = "force-dynamic";
 
 /** Shell of the SkillPass administration console. Only the general administrator gets past this point. */
 export default async function AdminConsoleLayout({ children }: LayoutProps<"/admin">) {
   const { user, profile } = await requirePlatformAdmin();
-  const pending = (await getPlatformAdminService().listOrganizations(user.id, "PENDING")).length;
+  const [orgs, pendingEvidence] = await Promise.all([
+    getPlatformAdminService().listOrganizations(user.id, "PENDING"),
+    getEvidenceReviewService().countPending(user.id),
+  ]);
+  const pending = orgs.length;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -33,7 +37,7 @@ export default async function AdminConsoleLayout({ children }: LayoutProps<"/adm
         </div>
       </header>
       <div className="mx-auto grid max-w-7xl items-start gap-6 px-4 py-6 lg:grid-cols-[250px_minmax(0,1fr)]">
-        <ConsoleNav pending={pending} />
+        <ConsoleNav pending={pending} pendingEvidence={pendingEvidence} />
         <main className="min-w-0">{children}</main>
       </div>
     </div>

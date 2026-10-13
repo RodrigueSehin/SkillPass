@@ -1,18 +1,25 @@
 import { createClient } from "@supabase/supabase-js";
 import { supabaseUrl } from "@/lib/auth/env";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 /** Private file storage. Objects are only ever served after an application-level authorization check. */
 export interface StorageService {
   put(key: string, bytes: Uint8Array, contentType: string): Promise<void>;
   remove(key: string): Promise<void>;
+  /** Removes every object whose key starts with `<prefix>/` (all of one person's files). */
+  removePrefix(prefix: string): Promise<void>;
   /** Either a short-lived signed URL to redirect to, or the bytes to stream. */
   read(key: string): Promise<{ redirectUrl: string } | { bytes: Uint8Array }>;
 }
 
 const BUCKET = "evidence";
+
+/** A prefix is one person's folder: never empty, never a path, so it cannot reach another folder. */
+function assertPrefix(prefix: string) {
+  if (!/^[0-9a-zA-Z_-]+$/.test(prefix)) throw new Error("invalid storage prefix");
+}
 
 class SupabaseStorage implements StorageService {
   private client = createClient(supabaseUrl(), process.env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -29,6 +36,21 @@ class SupabaseStorage implements StorageService {
   async remove(key: string) {
     const { error } = await this.client.storage.from(BUCKET).remove([key]);
     if (error) throw new Error(`storage remove failed: ${error.message}`);
+  }
+
+  async removePrefix(prefix: string) {
+    assertPrefix(prefix);
+    // Objects sit directly under the prefix; list and remove page by page until none is left.
+    for (;;) {
+      const { data, error } = await this.client.storage.from(BUCKET).list(prefix, { limit: 100 });
+      if (error) throw new Error(`storage list failed: ${error.message}`);
+      const files = (data ?? []).filter((o) => o.id !== null);
+      if (files.length === 0) return;
+      const { error: removeError } = await this.client.storage
+        .from(BUCKET)
+        .remove(files.map((o) => `${prefix}/${o.name}`));
+      if (removeError) throw new Error(`storage remove failed: ${removeError.message}`);
+    }
   }
 
   async read(key: string) {
@@ -57,6 +79,13 @@ class LocalStorage implements StorageService {
 
   async remove(key: string) {
     await unlink(this.resolve(key)).catch(() => undefined);
+  }
+
+  async removePrefix(prefix: string) {
+    assertPrefix(prefix);
+    const dir = path.resolve(this.root, prefix);
+    if (!dir.startsWith(this.root + path.sep)) throw new Error("invalid storage prefix");
+    await rm(dir, { recursive: true, force: true });
   }
 
   async read(key: string) {

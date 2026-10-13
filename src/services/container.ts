@@ -26,6 +26,9 @@ import {
 } from "@/repositories";
 import { SkillService } from "./skill.service";
 import { getStorage } from "@/lib/storage/storage";
+import { getAccountRemover } from "@/lib/auth/account-remover";
+import { AccountDeletionService } from "./account-deletion.service";
+import { EvidenceReviewService } from "./evidence-review.service";
 import { EvidenceService } from "./evidence.service";
 import { CertificationDocumentService } from "./certification-document.service";
 import { ExperienceDocumentService } from "./experience-document.service";
@@ -106,6 +109,9 @@ export const getPassportService = () =>
 export const getEvidenceService = () =>
   new EvidenceService(getEvidenceRepository(), getSkillService(), getProjectService(), getStorage);
 
+export const getEvidenceReviewService = () =>
+  new EvidenceReviewService(getEvidenceRepository(), getProfileRepository(), getPlatformRepository(), getStorage);
+
 export const getContactService = () => new CrudService(getContactRepository(), "Contact");
 export const getOpportunityService = () =>
   new OpportunityService(
@@ -143,4 +149,7 @@ export const getPlatformAdminService = () =>
     getOrganizationService(),
     getJobOfferService(),
   );
+export const getAccountDeletionService = () =>
+  new AccountDeletionService(getProfileRepository(), getOrganizationService(), getStorage, getAccountRemover);
+
 export const getProfileAvatarService = () => new ProfileAvatarService(getProfileRepository(), getStorage);

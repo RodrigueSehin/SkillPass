@@ -8,7 +8,7 @@ import { EvidenceFilters } from "@/components/evidence/evidence-filters";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireUser } from "@/lib/auth/current-user";
-import { EVIDENCE_TABS, filterEvidence, tabOf } from "@/lib/evidence-view";
+import { canRequestVerification, EVIDENCE_TABS, filterEvidence, tabOf } from "@/lib/evidence-view";
 import { cn } from "@/lib/utils/cn";
 import { getEvidenceService, getSkillService } from "@/services/container";
 
@@ -194,7 +194,12 @@ export default async function EvidencePage({ searchParams }: PageProps<"/dashboa
                         </span>
                       </div>
                       <div className="absolute right-3 bottom-3">
-                        <EvidenceActions id={e.id} title={e.title} published={e.published} />
+                        <EvidenceActions
+                          id={e.id}
+                          title={e.title}
+                          published={e.published}
+                          canVerify={canRequestVerification(e)}
+                        />
                       </div>
                     </article>
                   </li>

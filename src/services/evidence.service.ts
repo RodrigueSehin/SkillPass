@@ -1,4 +1,4 @@
-import { NotFoundError } from "@/lib/errors";
+import { ConflictError, NotFoundError } from "@/lib/errors";
 import { newStorageKey, type StorageService } from "@/lib/storage/storage";
 import { sanitizeFileName, UploadError, validateUpload, type UploadedFile } from "@/lib/storage/uploads";
 import type { EvidenceRepository } from "@/repositories/evidence.repository";
@@ -134,6 +134,19 @@ export class EvidenceService {
       throw new UploadError("Ajoutez un fichier pour ce type de preuve");
     }
     await this.repo.publish(profileId, id);
+  }
+
+  /** Asks the SkillPass team to verify a published evidence that has something to look at. */
+  async requestVerification(profileId: string, id: string) {
+    const evidence = await this.repo.findById(profileId, id);
+    if (!evidence) throw new NotFoundError("Preuve introuvable");
+    if (!evidence.published) throw new ConflictError("Publiez la preuve avant de demander sa vérification.");
+    if (evidence.status === "VERIFIED") throw new ConflictError("Cette preuve est déjà vérifiée.");
+    if (evidence.status === "PENDING") throw new ConflictError("La vérification de cette preuve est déjà en cours.");
+    if (evidence.files.length === 0 && !evidence.url) {
+      throw new ConflictError("Ajoutez un fichier ou un lien : l'équipe a besoin d'un élément à examiner.");
+    }
+    await this.repo.requestVerification(profileId, id);
   }
 
   async remove(profileId: string, id: string) {

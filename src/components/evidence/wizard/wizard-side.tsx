@@ -270,8 +270,8 @@ export function ProofSideNotes() {
       <section className="flex items-start gap-3 rounded-2xl border border-green-200 bg-green-50 p-4">
         <ShieldCheck className="text-success size-8 shrink-0" aria-hidden />
         <p className="text-navy text-sm">
-          La vérification de vos preuves par notre équipe arrive bientôt. En attendant, votre preuve est
-          publiée comme « non vérifiée ».
+          Une fois publiée, vous pourrez demander à l&apos;équipe SkillPass de vérifier votre preuve. Elle
+          sera d&apos;abord publiée comme « non vérifiée ».
         </p>
       </section>
     </>

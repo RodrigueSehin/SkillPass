@@ -32,6 +32,9 @@ class FakeStorage implements StorageService {
   async remove(key: string) {
     this.objects.delete(key);
   }
+  async removePrefix(prefix: string) {
+    for (const key of this.objects.keys()) if (key.startsWith(`${prefix}/`)) this.objects.delete(key);
+  }
   async read(key: string) {
     const bytes = this.objects.get(key);
     if (!bytes) throw new Error("missing");
@@ -131,10 +134,17 @@ describe("EvidenceService", () => {
   it("stores nothing when one of the files is invalid, and caps the number of files", async () => {
     const skillId = await skillIdFor("UI/UX");
     await expect(
-      service.add(ME, input({ talentSkillIds: [skillId] }), [file(), file({ bytes: [0x4d, 0x5a, 0x90, 0x00] })]),
+      service.add(ME, input({ talentSkillIds: [skillId] }), [
+        file(),
+        file({ bytes: [0x4d, 0x5a, 0x90, 0x00] }),
+      ]),
     ).rejects.toBeInstanceOf(UploadError);
     await expect(
-      service.add(ME, input({ talentSkillIds: [skillId] }), Array.from({ length: 6 }, () => file())),
+      service.add(
+        ME,
+        input({ talentSkillIds: [skillId] }),
+        Array.from({ length: 6 }, () => file()),
+      ),
     ).rejects.toBeInstanceOf(UploadError);
     expect(storage.objects.size).toBe(0);
   });
@@ -150,7 +160,10 @@ describe("EvidenceService", () => {
   });
 
   it("keeps the first skill as the main one and lists evidence under every skill it demonstrates", async () => {
-    const [uiux, other] = [await skillIdFor("UI/UX"), (await skills.list(ME)).items.find((s) => s.name !== "UI/UX")!.id];
+    const [uiux, other] = [
+      await skillIdFor("UI/UX"),
+      (await skills.list(ME)).items.find((s) => s.name !== "UI/UX")!.id,
+    ];
     const created = await service.add(ME, input({ talentSkillIds: [other, uiux], type: "OTHER" }));
     expect(created.talentSkillId).toBe(other);
     expect(created.skills.map((s) => s.id)).toEqual([other, uiux]);
@@ -196,7 +209,9 @@ describe("EvidenceService", () => {
 
     await expect(service.update(OTHER, created.id, edit())).rejects.toBeInstanceOf(NotFoundError);
     // A published document must keep at least one file.
-    await expect(service.update(ME, created.id, edit({ keepFileIds: [] }))).rejects.toBeInstanceOf(UploadError);
+    await expect(service.update(ME, created.id, edit({ keepFileIds: [] }))).rejects.toBeInstanceOf(
+      UploadError,
+    );
     // At most five files in total, kept ones included.
     await expect(
       service.update(ME, created.id, edit({ keepFileIds: updated.files.map((f) => f.id) }), [
@@ -257,9 +272,12 @@ describe("createEvidenceSchema", () => {
       endDate: "2024-06",
     });
     expect(ok.technologies).toEqual(["react", "Azure"]);
-    expect(createEvidenceSchema.safeParse({ ...base, publish: false, startDate: "2024-13" }).success).toBe(false);
+    expect(createEvidenceSchema.safeParse({ ...base, publish: false, startDate: "2024-13" }).success).toBe(
+      false,
+    );
     expect(
-      createEvidenceSchema.safeParse({ ...base, publish: false, startDate: "2024-06", endDate: "2024-01" }).success,
+      createEvidenceSchema.safeParse({ ...base, publish: false, startDate: "2024-06", endDate: "2024-01" })
+        .success,
     ).toBe(false);
   });
 

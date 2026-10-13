@@ -11,7 +11,7 @@ import { createSupabaseServerClient } from "@/lib/auth/supabase-server";
 import { rateLimit } from "@/lib/rate-limit";
 import { updateProfileSchema } from "@/schemas/profile";
 import { passwordChangeSchema, talentNotificationsSchema } from "@/schemas/profile-settings";
-import { getProfileAccountService } from "@/services/container";
+import { getAccountDeletionService, getProfileAccountService } from "@/services/container";
 
 export async function updateProfileAction(values: unknown) {
   const result = await runAction((userId) =>
@@ -73,6 +73,52 @@ export async function changePasswordAction(values: unknown): Promise<ActionResul
   const { error } = await supabase.auth.updateUser({ password: parsed.data.next });
   if (error) return { error: "Impossible de changer le mot de passe. Réessayez." };
   return {};
+}
+
+/**
+ * Permanently deletes the account and all its data. The person must retype their e-mail address and, when
+ * accounts have passwords, the password: a stolen session alone cannot erase an account.
+ */
+export async function deleteAccountAction(values: {
+  confirmation?: string;
+  password?: string;
+}): Promise<ActionResult> {
+  const user = await requireUser();
+  if (
+    String(values?.confirmation ?? "")
+      .trim()
+      .toLowerCase() !== user.email.toLowerCase()
+  ) {
+    return { error: "L'adresse saisie ne correspond pas à celle de votre compte." };
+  }
+  try {
+    rateLimit(`account-delete:${user.id}`, 5, 15 * 60_000);
+  } catch (err) {
+    if (err instanceof AppError) return { error: err.message };
+    throw err;
+  }
+
+  const supabase = isSupabaseConfigured() ? await createSupabaseServerClient() : null;
+  if (supabase) {
+    const check = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: String(values?.password ?? ""),
+    });
+    if (check.error) return { error: "Le mot de passe est incorrect." };
+  }
+
+  try {
+    await getAccountDeletionService().deleteAccount(user.id);
+  } catch (err) {
+    if (err instanceof AppError) return { error: err.message };
+    console.error("account deletion failed", err);
+    return {
+      error:
+        "La suppression a échoué. Vos données n'ont pas été modifiées ou l'ont été en partie : réessayez.",
+    };
+  }
+  await supabase?.auth.signOut().catch(() => undefined);
+  redirect("/");
 }
 
 /** Ends every session of the account, on every device, then asks to sign in again. */

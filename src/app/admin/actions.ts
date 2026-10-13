@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { runAction, type ActionResult } from "@/lib/actions/run";
 import { PLANS } from "@/lib/business/plans";
 import { ORG_ROLES, type OrgRole, type PlanCode } from "@/types/business";
-import { getPlatformAdminService } from "@/services/container";
+import { getEvidenceReviewService, getPlatformAdminService } from "@/services/container";
 import { sanitizePermissions } from "@/lib/business/permissions";
 import { ForbiddenError } from "@/lib/errors";
 
@@ -75,4 +75,14 @@ export async function setProfilePlanAction(profileId: string, plan: string): Pro
 
 export async function setProfileRoleAction(profileId: string, role: string): Promise<ActionResult> {
   return act((userId) => getPlatformAdminService().setRole(userId, String(profileId), String(role)));
+}
+
+export async function verifyEvidenceAction(id: string): Promise<ActionResult> {
+  return act((userId) => getEvidenceReviewService().decide(userId, String(id), "VERIFIED"));
+}
+
+export async function rejectEvidenceAction(id: string, note: string): Promise<ActionResult> {
+  return act((userId) =>
+    getEvidenceReviewService().decide(userId, String(id), "REJECTED", String(note ?? "")),
+  );
 }

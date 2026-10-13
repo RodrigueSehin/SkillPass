@@ -50,7 +50,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/dashboa
       {tab === "integrations" && <IntegrationsTab />}
       {tab === "public" && <PublicProfileTab profile={profile} />}
       {tab === "privacy" && <PrivacyTab profile={profile} />}
-      {tab === "danger" && <DangerTab profile={profile} />}
+      {tab === "danger" && <DangerTab profile={profile} email={user.email} needsPassword={isSupabaseConfigured()} />}
     </AccountSettingsLayout>
   );
 }
