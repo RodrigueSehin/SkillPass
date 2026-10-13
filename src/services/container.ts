@@ -26,6 +26,8 @@ import {
 } from "@/repositories";
 import { SkillService } from "./skill.service";
 import { getStorage } from "@/lib/storage/storage";
+import { getAIClient } from "@/lib/ai/anthropic-client";
+import { AIService } from "./ai.service";
 import { getAccountRemover } from "@/lib/auth/account-remover";
 import { AccountDeletionService } from "./account-deletion.service";
 import { EvidenceReviewService } from "./evidence-review.service";
@@ -110,7 +112,12 @@ export const getEvidenceService = () =>
   new EvidenceService(getEvidenceRepository(), getSkillService(), getProjectService(), getStorage);
 
 export const getEvidenceReviewService = () =>
-  new EvidenceReviewService(getEvidenceRepository(), getProfileRepository(), getPlatformRepository(), getStorage);
+  new EvidenceReviewService(
+    getEvidenceRepository(),
+    getProfileRepository(),
+    getPlatformRepository(),
+    getStorage,
+  );
 
 export const getContactService = () => new CrudService(getContactRepository(), "Contact");
 export const getOpportunityService = () =>
@@ -153,3 +160,7 @@ export const getAccountDeletionService = () =>
   new AccountDeletionService(getProfileRepository(), getOrganizationService(), getStorage, getAccountRemover);
 
 export const getProfileAvatarService = () => new ProfileAvatarService(getProfileRepository(), getStorage);
+
+/** One instance for the whole server process, so its answer cache lives as long as the process does. */
+let aiService: AIService | undefined;
+export const getAIService = () => (aiService ??= new AIService(getAIClient()));

@@ -6,6 +6,8 @@ import { SKILL_LEVEL_LABELS } from "@/types/skill";
 import type { TalentDetail } from "@/types/talent";
 import { AVAILABILITY_SHORT, TalentAvatar } from "../talent-cards";
 import { Panel } from "../ui";
+import { getAIService } from "@/services/container";
+import { AiSynthesis } from "./ai-synthesis";
 import { MatchRing } from "./ring";
 import { SaveButton } from "./save-button";
 
@@ -150,6 +152,10 @@ export function MatchProfilePanel({
               <p className="text-navy/85 mt-1 text-sm">{synthesis(t, wanted)}</p>
             </div>
           </section>
+
+          {getAIService().enabled && (
+            <AiSynthesis username={t.username} wanted={wanted} jobOfferId={jobOfferId} />
+          )}
 
           {points.length > 0 && (
             <section>

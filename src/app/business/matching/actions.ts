@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { businessAction } from "@/lib/business/action";
+import { businessAction, type BizResult } from "@/lib/business/action";
 import type { BusinessContext } from "@/lib/business/context";
 import { matchTalents } from "@/lib/business/matching";
 import {
@@ -18,7 +18,9 @@ import {
 import { planHasMatching } from "@/lib/business/plans";
 import { ForbiddenError, NotFoundError } from "@/lib/errors";
 import { getTalentDirectoryRepository } from "@/repositories";
-import { getJobOfferService, getMatchingService } from "@/services/container";
+import { rateLimit } from "@/lib/rate-limit";
+import type { MatchExplanation } from "@/services/ai.service";
+import { getAIService, getJobOfferService, getMatchingService } from "@/services/container";
 
 const DIRECTORY_LIMIT = 500;
 
@@ -124,4 +126,29 @@ export async function removeSavedAction(form: FormData) {
   });
   revalidatePath("/business/matching");
   redirect("/business/matching?tab=sauvegardes");
+}
+
+/**
+ * Asks the assistant why a public talent profile fits what the company looks for. Only the public data the
+ * company can already see goes to the model. Never called on page load: one click, one request.
+ */
+export async function explainMatchAction(
+  username: string,
+  wanted: string[],
+  jobOfferId: string | null,
+): Promise<BizResult<MatchExplanation>> {
+  return businessAction("talents.view", async (ctx) => {
+    requirePlan(ctx);
+    rateLimit(`ai:${ctx.organization.id}`, 30, 60_000);
+    const detail = await getTalentDirectoryRepository().detail(String(username));
+    if (!detail) throw new NotFoundError("Profil introuvable");
+    const offer = jobOfferId
+      ? (await getJobOfferService().list(ctx.organization.id)).find((o) => o.id === jobOfferId)
+      : undefined;
+    return getAIService().explainMatch({
+      talent: detail.record,
+      wanted: offer?.skills ?? (Array.isArray(wanted) ? wanted.filter((w) => typeof w === "string") : []),
+      offerTitle: offer?.title,
+    });
+  });
 }
