@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { AIUnavailableError, type AIClient } from "@/lib/ai/ai-client";
+import { cleanCv, CV_SYSTEM, CV_USER, cvSchema, type CleanCv } from "@/lib/ai/cv";
 import { AVAILABILITY_LABELS } from "@/types/profile";
 import { SKILL_LEVEL_LABELS } from "@/types/skill";
 import type { TalentRecord } from "@/types/talent";
@@ -82,6 +83,22 @@ export class AIService {
   /** False without an API key: the interface then hides the AI actions instead of failing on click. */
   get enabled() {
     return this.client !== null;
+  }
+
+  /**
+   * Reads a CV (PDF bytes, never stored) and returns what could be extracted, bounded and checked.
+   * Nothing is saved from here: the caller shows it for review.
+   */
+  async extractCv(pdf: Uint8Array): Promise<CleanCv> {
+    if (!this.client) throw new AIUnavailableError("L'assistant IA n'est pas configuré.");
+    const raw = await this.client.complete({
+      system: CV_SYSTEM,
+      user: CV_USER,
+      schema: cvSchema,
+      pdf,
+      maxTokens: 8000,
+    });
+    return cleanCv(raw);
   }
 
   async explainMatch(input: MatchExplanationInput): Promise<MatchExplanation> {

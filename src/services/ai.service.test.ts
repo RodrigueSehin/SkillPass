@@ -126,6 +126,18 @@ describe("AnthropicAIClient", () => {
     );
   });
 
+  it("sends a PDF as a base64 document block before the instruction", async () => {
+    const parse = vi.fn(async () => ({ stop_reason: "end_turn", parsed_output: { ok: true } }));
+    await clientWith(parse).complete({ ...request, pdf: new Uint8Array([0x25, 0x50, 0x44, 0x46]) });
+    const [{ messages }] = parse.mock.calls[0] as unknown as [
+      { messages: { content: { type: string }[] }[] },
+    ];
+    expect(messages[0].content.map((b) => b.type)).toEqual(["document", "text"]);
+    expect(messages[0].content[0]).toMatchObject({
+      source: { type: "base64", media_type: "application/pdf", data: "JVBERg==" },
+    });
+  });
+
   it("degrades to AIUnavailableError on refusal, truncation, unparsable answers and API failures", async () => {
     const quiet = vi.spyOn(console, "error").mockImplementation(() => undefined);
     for (const result of [

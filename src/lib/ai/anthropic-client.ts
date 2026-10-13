@@ -15,13 +15,30 @@ export class AnthropicAIClient implements AIClient {
     this.client = client ?? new Anthropic({ maxRetries: 2, timeout: 60_000 });
   }
 
-  async complete<T>({ system, user, schema, maxTokens = 2000 }: AICompletion<T>): Promise<T> {
+  async complete<T>({ system, user, schema, maxTokens = 2000, pdf }: AICompletion<T>): Promise<T> {
     try {
       const response = await this.client.beta.messages.parse({
         model: this.model,
         max_tokens: maxTokens,
         system,
-        messages: [{ role: "user", content: user }],
+        messages: [
+          {
+            role: "user",
+            content: pdf
+              ? [
+                  {
+                    type: "document",
+                    source: {
+                      type: "base64",
+                      media_type: "application/pdf",
+                      data: Buffer.from(pdf).toString("base64"),
+                    },
+                  },
+                  { type: "text", text: user },
+                ]
+              : user,
+          },
+        ],
         // Short, factual answers: low effort is enough and keeps the latency of a click acceptable.
         output_config: { effort: "low", format: zodOutputFormat(schema) },
         // If the safety classifiers decline, the server retries on its default fallback model.

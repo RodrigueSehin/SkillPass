@@ -28,6 +28,7 @@ import { SkillService } from "./skill.service";
 import { getStorage } from "@/lib/storage/storage";
 import { getAIClient } from "@/lib/ai/anthropic-client";
 import { AIService } from "./ai.service";
+import { CvImportService } from "./cv-import.service";
 import { getAccountRemover } from "@/lib/auth/account-remover";
 import { AccountDeletionService } from "./account-deletion.service";
 import { EvidenceReviewService } from "./evidence-review.service";
@@ -164,3 +165,6 @@ export const getProfileAvatarService = () => new ProfileAvatarService(getProfile
 /** One instance for the whole server process, so its answer cache lives as long as the process does. */
 let aiService: AIService | undefined;
 export const getAIService = () => (aiService ??= new AIService(getAIClient()));
+
+export const getCvImportService = () =>
+  new CvImportService(getAIService(), getSkillService(), getExperienceService(), getCertificationService());

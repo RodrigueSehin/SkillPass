@@ -16,6 +16,8 @@ export interface AICompletion<T> {
   /** The answer must match this schema: the client validates it and never returns anything else. */
   schema: ZodType<T>;
   maxTokens?: number;
+  /** A PDF the model reads along with `user` (never stored by SkillPass or sent anywhere else). */
+  pdf?: Uint8Array;
 }
 
 /**

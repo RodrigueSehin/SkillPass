@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { ChevronRight, FileUp, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AddSkillButton } from "@/components/skills/add-skill-button";
 import { LevelOverview } from "@/components/skills/level-overview";
@@ -9,7 +9,7 @@ import { SkillsHero } from "@/components/skills/skills-hero";
 import { CategoryTabs, SkillsFilters, SkillsSortBar } from "@/components/skills/skills-controls";
 import { requireUser } from "@/lib/auth/current-user";
 import { listTalentSkillsQuerySchema } from "@/schemas/skill";
-import { getSkillService } from "@/services/container";
+import { getAIService, getSkillService } from "@/services/container";
 
 export const metadata: Metadata = { title: "Compétences" };
 
@@ -31,12 +31,22 @@ export default async function SkillsPage({ searchParams }: PageProps<"/dashboard
             Explorez, développez et valorisez vos compétences pour construire votre avenir.
           </p>
         </div>
-        <nav aria-label="Fil d'Ariane" className="text-muted flex items-center gap-1.5 text-xs">
-          <Link href="/dashboard" className="hover:text-brand">
-            Accueil
-          </Link>
-          <ChevronRight className="size-3" aria-hidden /> <span aria-current="page">Compétences</span>
-        </nav>
+        <div className="flex flex-wrap items-center gap-4">
+          {getAIService().enabled && (
+            <Link
+              href="/dashboard/import-cv"
+              className="text-brand flex items-center gap-1.5 text-sm font-semibold hover:underline"
+            >
+              <FileUp className="size-4" aria-hidden /> Importer mon CV
+            </Link>
+          )}
+          <nav aria-label="Fil d'Ariane" className="text-muted flex items-center gap-1.5 text-xs">
+            <Link href="/dashboard" className="hover:text-brand">
+              Accueil
+            </Link>
+            <ChevronRight className="size-3" aria-hidden /> <span aria-current="page">Compétences</span>
+          </nav>
+        </div>
       </div>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
